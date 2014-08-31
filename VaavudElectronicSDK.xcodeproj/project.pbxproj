@@ -1,0 +1,420 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D7D9996D19B3AD3B0099FB8F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D9996C19B3AD3B0099FB8F /* Foundation.framework */; };
+		D7D9997219B3AD3B0099FB8F /* VaavudElectronicSDK.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = D7D9997119B3AD3B0099FB8F /* VaavudElectronicSDK.h */; };
+		D7D9997419B3AD3B0099FB8F /* VaavudElectronicSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D9997319B3AD3B0099FB8F /* VaavudElectronicSDK.m */; };
+		D7D9997B19B3AD3B0099FB8F /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D9997A19B3AD3B0099FB8F /* XCTest.framework */; };
+		D7D9997C19B3AD3B0099FB8F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D9996C19B3AD3B0099FB8F /* Foundation.framework */; };
+		D7D9997E19B3AD3B0099FB8F /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D9997D19B3AD3B0099FB8F /* UIKit.framework */; };
+		D7D9998119B3AD3B0099FB8F /* libVaavudElectronicSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D9996919B3AD3B0099FB8F /* libVaavudElectronicSDK.a */; };
+		D7D9998719B3AD3B0099FB8F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D7D9998519B3AD3B0099FB8F /* InfoPlist.strings */; };
+		D7D9998919B3AD3B0099FB8F /* VaavudElectronicSDKTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D9998819B3AD3B0099FB8F /* VaavudElectronicSDKTests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D7D9997F19B3AD3B0099FB8F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D7D9996119B3AD3B0099FB8F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D7D9996819B3AD3B0099FB8F;
+			remoteInfo = VaavudElectronicSDK;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D7D9996719B3AD3B0099FB8F /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+				D7D9997219B3AD3B0099FB8F /* VaavudElectronicSDK.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		D7D9996919B3AD3B0099FB8F /* libVaavudElectronicSDK.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libVaavudElectronicSDK.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		D7D9996C19B3AD3B0099FB8F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		D7D9997019B3AD3B0099FB8F /* VaavudElectronicSDK-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "VaavudElectronicSDK-Prefix.pch"; sourceTree = "<group>"; };
+		D7D9997119B3AD3B0099FB8F /* VaavudElectronicSDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VaavudElectronicSDK.h; sourceTree = "<group>"; };
+		D7D9997319B3AD3B0099FB8F /* VaavudElectronicSDK.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VaavudElectronicSDK.m; sourceTree = "<group>"; };
+		D7D9997919B3AD3B0099FB8F /* VaavudElectronicSDKTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VaavudElectronicSDKTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D7D9997A19B3AD3B0099FB8F /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		D7D9997D19B3AD3B0099FB8F /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
+		D7D9998419B3AD3B0099FB8F /* VaavudElectronicSDKTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "VaavudElectronicSDKTests-Info.plist"; sourceTree = "<group>"; };
+		D7D9998619B3AD3B0099FB8F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		D7D9998819B3AD3B0099FB8F /* VaavudElectronicSDKTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VaavudElectronicSDKTests.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D7D9996619B3AD3B0099FB8F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D7D9996D19B3AD3B0099FB8F /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D7D9997619B3AD3B0099FB8F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D7D9997B19B3AD3B0099FB8F /* XCTest.framework in Frameworks */,
+				D7D9997E19B3AD3B0099FB8F /* UIKit.framework in Frameworks */,
+				D7D9997C19B3AD3B0099FB8F /* Foundation.framework in Frameworks */,
+				D7D9998119B3AD3B0099FB8F /* libVaavudElectronicSDK.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D7D9996019B3AD3B0099FB8F = {
+			isa = PBXGroup;
+			children = (
+				D7D9996E19B3AD3B0099FB8F /* VaavudElectronicSDK */,
+				D7D9998219B3AD3B0099FB8F /* VaavudElectronicSDKTests */,
+				D7D9996B19B3AD3B0099FB8F /* Frameworks */,
+				D7D9996A19B3AD3B0099FB8F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D7D9996A19B3AD3B0099FB8F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D7D9996919B3AD3B0099FB8F /* libVaavudElectronicSDK.a */,
+				D7D9997919B3AD3B0099FB8F /* VaavudElectronicSDKTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D7D9996B19B3AD3B0099FB8F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D7D9996C19B3AD3B0099FB8F /* Foundation.framework */,
+				D7D9997A19B3AD3B0099FB8F /* XCTest.framework */,
+				D7D9997D19B3AD3B0099FB8F /* UIKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D7D9996E19B3AD3B0099FB8F /* VaavudElectronicSDK */ = {
+			isa = PBXGroup;
+			children = (
+				D7D9997119B3AD3B0099FB8F /* VaavudElectronicSDK.h */,
+				D7D9997319B3AD3B0099FB8F /* VaavudElectronicSDK.m */,
+				D7D9996F19B3AD3B0099FB8F /* Supporting Files */,
+			);
+			path = VaavudElectronicSDK;
+			sourceTree = "<group>";
+		};
+		D7D9996F19B3AD3B0099FB8F /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				D7D9997019B3AD3B0099FB8F /* VaavudElectronicSDK-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		D7D9998219B3AD3B0099FB8F /* VaavudElectronicSDKTests */ = {
+			isa = PBXGroup;
+			children = (
+				D7D9998819B3AD3B0099FB8F /* VaavudElectronicSDKTests.m */,
+				D7D9998319B3AD3B0099FB8F /* Supporting Files */,
+			);
+			path = VaavudElectronicSDKTests;
+			sourceTree = "<group>";
+		};
+		D7D9998319B3AD3B0099FB8F /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				D7D9998419B3AD3B0099FB8F /* VaavudElectronicSDKTests-Info.plist */,
+				D7D9998519B3AD3B0099FB8F /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D7D9996819B3AD3B0099FB8F /* VaavudElectronicSDK */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D7D9998C19B3AD3B0099FB8F /* Build configuration list for PBXNativeTarget "VaavudElectronicSDK" */;
+			buildPhases = (
+				D7D9996519B3AD3B0099FB8F /* Sources */,
+				D7D9996619B3AD3B0099FB8F /* Frameworks */,
+				D7D9996719B3AD3B0099FB8F /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VaavudElectronicSDK;
+			productName = VaavudElectronicSDK;
+			productReference = D7D9996919B3AD3B0099FB8F /* libVaavudElectronicSDK.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		D7D9997819B3AD3B0099FB8F /* VaavudElectronicSDKTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D7D9998F19B3AD3B0099FB8F /* Build configuration list for PBXNativeTarget "VaavudElectronicSDKTests" */;
+			buildPhases = (
+				D7D9997519B3AD3B0099FB8F /* Sources */,
+				D7D9997619B3AD3B0099FB8F /* Frameworks */,
+				D7D9997719B3AD3B0099FB8F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D7D9998019B3AD3B0099FB8F /* PBXTargetDependency */,
+			);
+			name = VaavudElectronicSDKTests;
+			productName = VaavudElectronicSDKTests;
+			productReference = D7D9997919B3AD3B0099FB8F /* VaavudElectronicSDKTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D7D9996119B3AD3B0099FB8F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0510;
+				ORGANIZATIONNAME = Vaavud;
+			};
+			buildConfigurationList = D7D9996419B3AD3B0099FB8F /* Build configuration list for PBXProject "VaavudElectronicSDK" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = D7D9996019B3AD3B0099FB8F;
+			productRefGroup = D7D9996A19B3AD3B0099FB8F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D7D9996819B3AD3B0099FB8F /* VaavudElectronicSDK */,
+				D7D9997819B3AD3B0099FB8F /* VaavudElectronicSDKTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D7D9997719B3AD3B0099FB8F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D7D9998719B3AD3B0099FB8F /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D7D9996519B3AD3B0099FB8F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D7D9997419B3AD3B0099FB8F /* VaavudElectronicSDK.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D7D9997519B3AD3B0099FB8F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D7D9998919B3AD3B0099FB8F /* VaavudElectronicSDKTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D7D9998019B3AD3B0099FB8F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D7D9996819B3AD3B0099FB8F /* VaavudElectronicSDK */;
+			targetProxy = D7D9997F19B3AD3B0099FB8F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		D7D9998519B3AD3B0099FB8F /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D7D9998619B3AD3B0099FB8F /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		D7D9998A19B3AD3B0099FB8F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		D7D9998B19B3AD3B0099FB8F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D7D9998D19B3AD3B0099FB8F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DSTROOT = /tmp/VaavudElectronicSDK.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "VaavudElectronicSDK/VaavudElectronicSDK-Prefix.pch";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		D7D9998E19B3AD3B0099FB8F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DSTROOT = /tmp/VaavudElectronicSDK.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "VaavudElectronicSDK/VaavudElectronicSDK-Prefix.pch";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		D7D9999019B3AD3B0099FB8F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "VaavudElectronicSDK/VaavudElectronicSDK-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "VaavudElectronicSDKTests/VaavudElectronicSDKTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		D7D9999119B3AD3B0099FB8F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "VaavudElectronicSDK/VaavudElectronicSDK-Prefix.pch";
+				INFOPLIST_FILE = "VaavudElectronicSDKTests/VaavudElectronicSDKTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D7D9996419B3AD3B0099FB8F /* Build configuration list for PBXProject "VaavudElectronicSDK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D7D9998A19B3AD3B0099FB8F /* Debug */,
+				D7D9998B19B3AD3B0099FB8F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D7D9998C19B3AD3B0099FB8F /* Build configuration list for PBXNativeTarget "VaavudElectronicSDK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D7D9998D19B3AD3B0099FB8F /* Debug */,
+				D7D9998E19B3AD3B0099FB8F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		D7D9998F19B3AD3B0099FB8F /* Build configuration list for PBXNativeTarget "VaavudElectronicSDKTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D7D9999019B3AD3B0099FB8F /* Debug */,
+				D7D9999119B3AD3B0099FB8F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D7D9996119B3AD3B0099FB8F /* Project object */;
+}
