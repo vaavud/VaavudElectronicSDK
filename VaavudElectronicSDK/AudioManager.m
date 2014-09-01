@@ -25,7 +25,7 @@
 /** The recorder component */
 @property (nonatomic,strong) EZRecorder *recorder;
 
-@property (nonatomic, weak) VaavudElectronic <AudioManagerDelegate> *delegate;
+@property (nonatomic, weak) VaavudElectronicSDK <AudioManagerDelegate> *delegate;
 
 
 @end
@@ -49,7 +49,7 @@
 }
 
 
-- (id)initWithDelegate:(VaavudElectronic <AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>*) delegate {
+- (id)initWithDelegate:(VaavudElectronicSDK <AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>*) delegate {
     
     self = [super init];
     

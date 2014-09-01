@@ -13,7 +13,7 @@
 #import "LocationManager.h"
 #import "AudioVaavudElectronicDetection.h"
 
-@interface VaavudElectronic() <SoundProcessingDelegate, DirectionDetectionDelegate, AudioManagerDelegate, locationManagerDelegate, AudioVaavudElectronicDetectionDelegate>
+@interface VaavudElectronicSDK() <SoundProcessingDelegate, DirectionDetectionDelegate, AudioManagerDelegate, locationManagerDelegate, AudioVaavudElectronicDetectionDelegate>
 
 @property (strong, atomic) NSMutableArray *VaaElecWindDelegates;
 @property (strong, atomic) NSMutableArray *VaaElecAnalysisDelegates;
@@ -25,12 +25,12 @@
 
 @end
 
-@implementation VaavudElectronic
+@implementation VaavudElectronicSDK
 
 // initialize sharedObject as nil (first call only)
-static VaavudElectronic *sharedInstance = nil;
+static VaavudElectronicSDK *sharedInstance = nil;
 
-+ (VaavudElectronic *) sharedVaavudElec {
++ (VaavudElectronicSDK *) sharedVaavudElectronic {
     // structure used to test whether the block has completed or not
     static dispatch_once_t p = 0;
     
@@ -56,7 +56,7 @@ static VaavudElectronic *sharedInstance = nil;
 + (id) allocWithZone:(NSZone *)zone {
     //If coder misunderstands this is a singleton, behave properly with
     // ref count +1 on alloc anyway, and still return singleton!
-    return [VaavudElectronic sharedVaavudElec];
+    return [VaavudElectronicSDK sharedVaavudElectronic];
 }
 
 

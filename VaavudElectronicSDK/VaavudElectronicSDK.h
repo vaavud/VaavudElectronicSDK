@@ -41,9 +41,9 @@ typedef NS_ENUM(NSUInteger, VaavudElectronicConnectionStatus) {
     VaavudElectronicConnectionStatusNotConnected
 };
 
-@interface VaavudElectronic : NSObject
+@interface VaavudElectronicSDK : NSObject
 
-+ (VaavudElectronic *) sharedVaavudElec;
++ (VaavudElectronicSDK *) sharedVaavudElectronic;
 
 /* What is the current Vaavud Electronic connection status ? Initialize class as soon as possible to start detection*/
 - (VaavudElectronicConnectionStatus) isVaavudElectronicConnected;

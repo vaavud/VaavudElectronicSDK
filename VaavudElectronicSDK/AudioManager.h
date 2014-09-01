@@ -28,7 +28,7 @@
 @interface AudioManager : NSObject
 
 // Initializer
-- (id) initWithDelegate:( VaavudElectronic <AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>*) delegate;
+- (id) initWithDelegate:( VaavudElectronicSDK <AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>*) delegate;
 
 
 // Starts Playback and Recording when Vaavud becomes available

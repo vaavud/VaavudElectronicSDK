@@ -14,7 +14,7 @@
 @property (nonatomic, strong) NSNumber *angle;
 @property (nonatomic, strong) NSNumber *heading;
 @property (nonatomic, strong) NSArray *anglularVelocties;
-@property (nonatomic, weak) VaavudElectronic *vaavudElectronic;
+@property (nonatomic, weak) VaavudElectronicSDK *vaavudElectronic;
 
 
 @end
@@ -58,7 +58,7 @@
 // Starts the recieving updates
 - (void) startRecording {
     if (!self.vaavudElectronic) {
-        self.vaavudElectronic = [VaavudElectronic sharedVaavudElec];
+        self.vaavudElectronic = [VaavudElectronicSDK sharedVaavudElectronic];
     }
     
     [self.vaavudElectronic addListener:self];
@@ -73,7 +73,7 @@
 - (void) endRecording {
     
     if (!self.vaavudElectronic) {
-        self.vaavudElectronic = [VaavudElectronic sharedVaavudElec];
+        self.vaavudElectronic = [VaavudElectronicSDK sharedVaavudElectronic];
     }
     
     [self.vaavudElectronic removeListener:self];
