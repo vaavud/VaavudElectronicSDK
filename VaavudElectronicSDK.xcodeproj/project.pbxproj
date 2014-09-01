@@ -6,6 +6,21 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		D7D9999519B3AE480099FB8F /* Framework */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = D7D9999619B3AE480099FB8F /* Build configuration list for PBXAggregateTarget "Framework" */;
+			buildPhases = (
+				D7D9999B19B3AE5C0099FB8F /* ShellScript */,
+			);
+			dependencies = (
+				D7D9999A19B3AE4E0099FB8F /* PBXTargetDependency */,
+			);
+			name = Framework;
+			productName = Framework;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		D7D9996D19B3AD3B0099FB8F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D9996C19B3AD3B0099FB8F /* Foundation.framework */; };
 		D7D9997219B3AD3B0099FB8F /* VaavudElectronicSDK.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = D7D9997119B3AD3B0099FB8F /* VaavudElectronicSDK.h */; };
@@ -16,10 +31,30 @@
 		D7D9998119B3AD3B0099FB8F /* libVaavudElectronicSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D9996919B3AD3B0099FB8F /* libVaavudElectronicSDK.a */; };
 		D7D9998719B3AD3B0099FB8F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D7D9998519B3AD3B0099FB8F /* InfoPlist.strings */; };
 		D7D9998919B3AD3B0099FB8F /* VaavudElectronicSDKTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D9998819B3AD3B0099FB8F /* VaavudElectronicSDKTests.m */; };
+		D7D9999319B3AD8A0099FB8F /* VaavudElectronicSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D9997119B3AD3B0099FB8F /* VaavudElectronicSDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D7D9999E19B3AF290099FB8F /* DirectionDetectionAlgo.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D9999C19B3AF290099FB8F /* DirectionDetectionAlgo.h */; };
+		D7D9999F19B3AF290099FB8F /* DirectionDetectionAlgo.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D9999D19B3AF290099FB8F /* DirectionDetectionAlgo.m */; };
+		D7D999A219B3AF350099FB8F /* SoundProcessingAlgo.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D999A019B3AF350099FB8F /* SoundProcessingAlgo.h */; };
+		D7D999A319B3AF350099FB8F /* SoundProcessingAlgo.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999A119B3AF350099FB8F /* SoundProcessingAlgo.m */; };
+		D7D999AC19B3AF450099FB8F /* AudioManager.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D999A419B3AF450099FB8F /* AudioManager.h */; };
+		D7D999AD19B3AF450099FB8F /* AudioManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999A519B3AF450099FB8F /* AudioManager.m */; };
+		D7D999AE19B3AF450099FB8F /* SummeryGenerator.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D999A619B3AF450099FB8F /* SummeryGenerator.h */; };
+		D7D999AF19B3AF450099FB8F /* SummeryGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999A719B3AF450099FB8F /* SummeryGenerator.m */; };
+		D7D999B019B3AF450099FB8F /* LocationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D999A819B3AF450099FB8F /* LocationManager.h */; };
+		D7D999B119B3AF450099FB8F /* LocationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999A919B3AF450099FB8F /* LocationManager.m */; };
+		D7D999B219B3AF450099FB8F /* AudioVaavudElectronicDetection.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D999AA19B3AF450099FB8F /* AudioVaavudElectronicDetection.h */; };
+		D7D999B319B3AF450099FB8F /* AudioVaavudElectronicDetection.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999AB19B3AF450099FB8F /* AudioVaavudElectronicDetection.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		D7D9997F19B3AD3B0099FB8F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D7D9996119B3AD3B0099FB8F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D7D9996819B3AD3B0099FB8F;
+			remoteInfo = VaavudElectronicSDK;
+		};
+		D7D9999919B3AE4E0099FB8F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D7D9996119B3AD3B0099FB8F /* Project object */;
 			proxyType = 1;
@@ -42,6 +77,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D706293219B3BEBE00E6879A /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		D706293419B3BEC400E6879A /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		D7D9996919B3AD3B0099FB8F /* libVaavudElectronicSDK.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libVaavudElectronicSDK.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		D7D9996C19B3AD3B0099FB8F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		D7D9997019B3AD3B0099FB8F /* VaavudElectronicSDK-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "VaavudElectronicSDK-Prefix.pch"; sourceTree = "<group>"; };
@@ -53,6 +90,18 @@
 		D7D9998419B3AD3B0099FB8F /* VaavudElectronicSDKTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "VaavudElectronicSDKTests-Info.plist"; sourceTree = "<group>"; };
 		D7D9998619B3AD3B0099FB8F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		D7D9998819B3AD3B0099FB8F /* VaavudElectronicSDKTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VaavudElectronicSDKTests.m; sourceTree = "<group>"; };
+		D7D9999C19B3AF290099FB8F /* DirectionDetectionAlgo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DirectionDetectionAlgo.h; sourceTree = "<group>"; };
+		D7D9999D19B3AF290099FB8F /* DirectionDetectionAlgo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DirectionDetectionAlgo.m; sourceTree = "<group>"; };
+		D7D999A019B3AF350099FB8F /* SoundProcessingAlgo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SoundProcessingAlgo.h; sourceTree = "<group>"; };
+		D7D999A119B3AF350099FB8F /* SoundProcessingAlgo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SoundProcessingAlgo.m; sourceTree = "<group>"; };
+		D7D999A419B3AF450099FB8F /* AudioManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioManager.h; sourceTree = "<group>"; };
+		D7D999A519B3AF450099FB8F /* AudioManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioManager.m; sourceTree = "<group>"; };
+		D7D999A619B3AF450099FB8F /* SummeryGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SummeryGenerator.h; sourceTree = "<group>"; };
+		D7D999A719B3AF450099FB8F /* SummeryGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SummeryGenerator.m; sourceTree = "<group>"; };
+		D7D999A819B3AF450099FB8F /* LocationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationManager.h; sourceTree = "<group>"; };
+		D7D999A919B3AF450099FB8F /* LocationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocationManager.m; sourceTree = "<group>"; };
+		D7D999AA19B3AF450099FB8F /* AudioVaavudElectronicDetection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioVaavudElectronicDetection.h; sourceTree = "<group>"; };
+		D7D999AB19B3AF450099FB8F /* AudioVaavudElectronicDetection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioVaavudElectronicDetection.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,6 +149,8 @@
 		D7D9996B19B3AD3B0099FB8F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D706293419B3BEC400E6879A /* AVFoundation.framework */,
+				D706293219B3BEBE00E6879A /* CoreLocation.framework */,
 				D7D9996C19B3AD3B0099FB8F /* Foundation.framework */,
 				D7D9997A19B3AD3B0099FB8F /* XCTest.framework */,
 				D7D9997D19B3AD3B0099FB8F /* UIKit.framework */,
@@ -110,6 +161,18 @@
 		D7D9996E19B3AD3B0099FB8F /* VaavudElectronicSDK */ = {
 			isa = PBXGroup;
 			children = (
+				D7D999A419B3AF450099FB8F /* AudioManager.h */,
+				D7D999A519B3AF450099FB8F /* AudioManager.m */,
+				D7D999A619B3AF450099FB8F /* SummeryGenerator.h */,
+				D7D999A719B3AF450099FB8F /* SummeryGenerator.m */,
+				D7D999A819B3AF450099FB8F /* LocationManager.h */,
+				D7D999A919B3AF450099FB8F /* LocationManager.m */,
+				D7D999AA19B3AF450099FB8F /* AudioVaavudElectronicDetection.h */,
+				D7D999AB19B3AF450099FB8F /* AudioVaavudElectronicDetection.m */,
+				D7D999A019B3AF350099FB8F /* SoundProcessingAlgo.h */,
+				D7D999A119B3AF350099FB8F /* SoundProcessingAlgo.m */,
+				D7D9999C19B3AF290099FB8F /* DirectionDetectionAlgo.h */,
+				D7D9999D19B3AF290099FB8F /* DirectionDetectionAlgo.m */,
 				D7D9997119B3AD3B0099FB8F /* VaavudElectronicSDK.h */,
 				D7D9997319B3AD3B0099FB8F /* VaavudElectronicSDK.m */,
 				D7D9996F19B3AD3B0099FB8F /* Supporting Files */,
@@ -145,6 +208,23 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		D7D9999219B3AD830099FB8F /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D7D999A219B3AF350099FB8F /* SoundProcessingAlgo.h in Headers */,
+				D7D999AC19B3AF450099FB8F /* AudioManager.h in Headers */,
+				D7D999AE19B3AF450099FB8F /* SummeryGenerator.h in Headers */,
+				D7D999B219B3AF450099FB8F /* AudioVaavudElectronicDetection.h in Headers */,
+				D7D999B019B3AF450099FB8F /* LocationManager.h in Headers */,
+				D7D9999319B3AD8A0099FB8F /* VaavudElectronicSDK.h in Headers */,
+				D7D9999E19B3AF290099FB8F /* DirectionDetectionAlgo.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		D7D9996819B3AD3B0099FB8F /* VaavudElectronicSDK */ = {
 			isa = PBXNativeTarget;
@@ -153,6 +233,8 @@
 				D7D9996519B3AD3B0099FB8F /* Sources */,
 				D7D9996619B3AD3B0099FB8F /* Frameworks */,
 				D7D9996719B3AD3B0099FB8F /* CopyFiles */,
+				D7D9999219B3AD830099FB8F /* Headers */,
+				D7D9999419B3AE070099FB8F /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -204,6 +286,7 @@
 			targets = (
 				D7D9996819B3AD3B0099FB8F /* VaavudElectronicSDK */,
 				D7D9997819B3AD3B0099FB8F /* VaavudElectronicSDKTests */,
+				D7D9999519B3AE480099FB8F /* Framework */,
 			);
 		};
 /* End PBXProject section */
@@ -219,12 +302,47 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		D7D9999419B3AE070099FB8F /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\n\nmkdir -p \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.framework/Versions/A/Headers\"\n\n# Link the \"Current\" version to \"A\"\n/bin/ln -sfh A \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.framework/Versions/Current\"\n/bin/ln -sfh Versions/Current/Headers \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.framework/Headers\"\n/bin/ln -sfh \"Versions/Current/${PRODUCT_NAME}\" \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.framework/${PRODUCT_NAME}\"\n\n# The -a ensures that the headers maintain the source modification date so that we don't constantly\n# cause propagating rebuilds of files that import these headers.\n/bin/cp -a \"${TARGET_BUILD_DIR}/${PUBLIC_HEADERS_FOLDER_PATH}/\" \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.framework/Versions/A/Headers\"\n";
+		};
+		D7D9999B19B3AE5C0099FB8F /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nset +u\n# Avoid recursively calling this script.\nif [[ $SF_MASTER_SCRIPT_RUNNING ]]\nthen\nexit 0\nfi\nset -u\nexport SF_MASTER_SCRIPT_RUNNING=1\n\nSF_TARGET_NAME=${PROJECT_NAME}\nSF_EXECUTABLE_PATH=\"lib${SF_TARGET_NAME}.a\"\nSF_WRAPPER_NAME=\"${SF_TARGET_NAME}.framework\"\n\n# The following conditionals come from\n# https://github.com/kstenerud/iOS-Universal-Framework\n\nif [[ \"$SDK_NAME\" =~ ([A-Za-z]+) ]]\nthen\nSF_SDK_PLATFORM=${BASH_REMATCH[1]}\nelse\necho \"Could not find platform name from SDK_NAME: $SDK_NAME\"\nexit 1\nfi\n\nif [[ \"$SDK_NAME\" =~ ([0-9]+.*$) ]]\nthen\nSF_SDK_VERSION=${BASH_REMATCH[1]}\nelse\necho \"Could not find sdk version from SDK_NAME: $SDK_NAME\"\nexit 1\nfi\n\nif [[ \"$SF_SDK_PLATFORM\" = \"iphoneos\" ]]\nthen\nSF_OTHER_PLATFORM=iphonesimulator\nelse\nSF_OTHER_PLATFORM=iphoneos\nfi\n\nif [[ \"$BUILT_PRODUCTS_DIR\" =~ (.*)$SF_SDK_PLATFORM$ ]]\nthen\nSF_OTHER_BUILT_PRODUCTS_DIR=\"${BASH_REMATCH[1]}${SF_OTHER_PLATFORM}\"\nelse\necho \"Could not find platform name from build products directory: $BUILT_PRODUCTS_DIR\"\nexit 1\nfi\n\n# Build the other platform.\nxcrun xcodebuild -project \"${PROJECT_FILE_PATH}\" -target \"${TARGET_NAME}\" -configuration \"${CONFIGURATION}\" -sdk ${SF_OTHER_PLATFORM}${SF_SDK_VERSION} BUILD_DIR=\"${BUILD_DIR}\" OBJROOT=\"${OBJROOT}\" BUILD_ROOT=\"${BUILD_ROOT}\" SYMROOT=\"${SYMROOT}\" $ACTION\n\n# Smash the two static libraries into one fat binary and store it in the .framework\nxcrun lipo -create \"${BUILT_PRODUCTS_DIR}/${SF_EXECUTABLE_PATH}\" \"${SF_OTHER_BUILT_PRODUCTS_DIR}/${SF_EXECUTABLE_PATH}\" -output \"${BUILT_PRODUCTS_DIR}/${SF_WRAPPER_NAME}/Versions/A/${SF_TARGET_NAME}\"\n\n# Copy the binary to the other architecture folder to have a complete framework in both.\ncp -a \"${BUILT_PRODUCTS_DIR}/${SF_WRAPPER_NAME}/Versions/A/${SF_TARGET_NAME}\" \"${SF_OTHER_BUILT_PRODUCTS_DIR}/${SF_WRAPPER_NAME}/Versions/A/${SF_TARGET_NAME}\"";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		D7D9996519B3AD3B0099FB8F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D7D999B119B3AF450099FB8F /* LocationManager.m in Sources */,
+				D7D999A319B3AF350099FB8F /* SoundProcessingAlgo.m in Sources */,
+				D7D9999F19B3AF290099FB8F /* DirectionDetectionAlgo.m in Sources */,
+				D7D999AF19B3AF450099FB8F /* SummeryGenerator.m in Sources */,
+				D7D999AD19B3AF450099FB8F /* AudioManager.m in Sources */,
 				D7D9997419B3AD3B0099FB8F /* VaavudElectronicSDK.m in Sources */,
+				D7D999B319B3AF450099FB8F /* AudioVaavudElectronicDetection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -243,6 +361,11 @@
 			isa = PBXTargetDependency;
 			target = D7D9996819B3AD3B0099FB8F /* VaavudElectronicSDK */;
 			targetProxy = D7D9997F19B3AD3B0099FB8F /* PBXContainerItemProxy */;
+		};
+		D7D9999A19B3AE4E0099FB8F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D7D9996819B3AD3B0099FB8F /* VaavudElectronicSDK */;
+			targetProxy = D7D9999919B3AE4E0099FB8F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -292,6 +415,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				USER_HEADER_SEARCH_PATHS = ../EZAudio/EZAudio;
 			};
 			name = Debug;
 		};
@@ -322,6 +446,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				SDKROOT = iphoneos;
+				USER_HEADER_SEARCH_PATHS = ../EZAudio/EZAudio;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -329,24 +454,32 @@
 		D7D9998D19B3AD3B0099FB8F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = NO;
 				DSTROOT = /tmp/VaavudElectronicSDK.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "VaavudElectronicSDK/VaavudElectronicSDK-Prefix.pch";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "$(PROJECT_NAME)Headers";
 				SKIP_INSTALL = YES;
+				STRIP_STYLE = "non-global";
 			};
 			name = Debug;
 		};
 		D7D9998E19B3AD3B0099FB8F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = NO;
 				DSTROOT = /tmp/VaavudElectronicSDK.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "VaavudElectronicSDK/VaavudElectronicSDK-Prefix.pch";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "$(PROJECT_NAME)Headers";
 				SKIP_INSTALL = YES;
+				STRIP_STYLE = "non-global";
 			};
 			name = Release;
 		};
@@ -386,6 +519,20 @@
 			};
 			name = Release;
 		};
+		D7D9999719B3AE480099FB8F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		D7D9999819B3AE480099FB8F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -405,6 +552,7 @@
 				D7D9998E19B3AD3B0099FB8F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		D7D9998F19B3AD3B0099FB8F /* Build configuration list for PBXNativeTarget "VaavudElectronicSDKTests" */ = {
 			isa = XCConfigurationList;
@@ -413,6 +561,16 @@
 				D7D9999119B3AD3B0099FB8F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D7D9999619B3AE480099FB8F /* Build configuration list for PBXAggregateTarget "Framework" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D7D9999719B3AE480099FB8F /* Debug */,
+				D7D9999819B3AE480099FB8F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

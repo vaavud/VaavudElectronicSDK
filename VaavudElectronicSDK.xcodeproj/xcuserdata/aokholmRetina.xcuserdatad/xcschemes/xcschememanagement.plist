@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>Framework.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 		<key>VaavudElectronicSDK.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -18,6 +23,11 @@
 			<true/>
 		</dict>
 		<key>D7D9997819B3AD3B0099FB8F</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>D7D9999519B3AE480099FB8F</key>
 		<dict>
 			<key>primary</key>
 			<true/>
