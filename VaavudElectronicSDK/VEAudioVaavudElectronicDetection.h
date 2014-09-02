@@ -6,7 +6,6 @@
 //  Copyright (c) 2014 Vaavud. All rights reserved.
 //
 #import <AVFoundation/AVFoundation.h>
-#import <MediaPlayer/MediaPlayer.h>
 #import <Foundation/Foundation.h>
 
 @protocol AudioVaavudElectronicDetectionDelegate <NSObject>
@@ -19,7 +18,7 @@
 @end
 
 
-@interface AudioVaavudElectronicDetection : NSObject
+@interface VEAudioVaavudElectronicDetection : NSObject
 
 // Initializer
 - (id) initWithDelegate:(id<AudioVaavudElectronicDetectionDelegate>)delegate;

@@ -11,9 +11,9 @@
 #define sampleFrequency 44100
 #define signalFrequency 14700
 
-#import "AudioManager.h"
+#import "VEAudioManager.h"
 
-@interface AudioManager() <EZMicrophoneDelegate, EZOutputDataSource>
+@interface VEAudioManager() <EZMicrophoneDelegate, EZOutputDataSource>
 
 @property (atomic) BOOL askedToMeasure;
 @property (atomic) BOOL recordingActive;
@@ -26,13 +26,13 @@
 /** The recorder component */
 @property (nonatomic,strong) EZRecorder *recorder;
 
-@property (nonatomic, weak) VaavudElectronicSDK <AudioManagerDelegate> *delegate;
+@property (nonatomic, weak) VEVaavudElectronicSDK <AudioManagerDelegate> *delegate;
 
 
 @end
 
 
-@implementation AudioManager {
+@implementation VEAudioManager {
     double theta;
     double theta_increment;
     double amplitude;
@@ -50,20 +50,20 @@
 }
 
 
-- (id)initWithDelegate:(VaavudElectronicSDK <AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>*) delegate {
+- (id)initWithDelegate:(VEVaavudElectronicSDK <AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>*) delegate {
     
     self = [super init];
     
     self.delegate = delegate;
     
     // create sound processor (locates ticks)
-    self.soundProcessor = [[SoundProcessingAlgo alloc] initWithDelegate:delegate];
+    self.soundProcessor = [[VESoundProcessingAlgo alloc] initWithDelegate:delegate];
     
     // Create an instance of the microphone and tell it to use this object as the delegate
     self.microphone = [EZMicrophone microphoneWithDelegate:self];
-    [self.microphone setAudioStreamBasicDescription: [self getBasicAudioOutStreamingFormatMicrophone]];
+    [self.microphone setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionMicrophone]];
     // CHECK MICROPHONE INPUT FORMAT
-    [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
+//    [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
     
     
     
@@ -74,8 +74,8 @@
     [EZOutput sharedOutput].outputDataSource = self;
     
     // set the output format from the audioOutput stream.
-    [[EZOutput sharedOutput] setAudioStreamBasicDescription: [self getBasicAudioOutStreamingFormat]];
-    [EZAudio printASBD: [[EZOutput sharedOutput] audioStreamBasicDescription]];
+    [[EZOutput sharedOutput] setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionOutput]];
+//    [EZAudio printASBD: [[EZOutput sharedOutput] audioStreamBasicDescription]];
     
     
     
@@ -357,7 +357,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 
 
 
-- (AudioStreamBasicDescription) getBasicAudioOutStreamingFormat {
+- (AudioStreamBasicDescription) getAudioStreamBasicDiscriptionOutput {
     
     size_t bytesPerSample = sizeof (AudioUnitSampleType);
     AudioStreamBasicDescription stereoStreamFormat = {0};
@@ -378,7 +378,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 }
 
 
-- (AudioStreamBasicDescription) getBasicAudioOutStreamingFormatMicrophone {
+- (AudioStreamBasicDescription) getAudioStreamBasicDiscriptionMicrophone {
     
     size_t bytesPerSample = sizeof (AudioUnitSampleType);
     AudioStreamBasicDescription stereoStreamFormat = {0};

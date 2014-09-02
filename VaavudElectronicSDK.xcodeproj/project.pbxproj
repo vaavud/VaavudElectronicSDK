@@ -22,30 +22,30 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		D70629C719B597B500E6879A /* VaavudElectronicSDK+Analysis.h in Headers */ = {isa = PBXBuildFile; fileRef = D70629C519B597B500E6879A /* VaavudElectronicSDK+Analysis.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		D70629C819B597B500E6879A /* VaavudElectronicSDK+Analysis.m in Sources */ = {isa = PBXBuildFile; fileRef = D70629C619B597B500E6879A /* VaavudElectronicSDK+Analysis.m */; };
+		D70629C719B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h in Headers */ = {isa = PBXBuildFile; fileRef = D70629C519B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D70629C819B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m in Sources */ = {isa = PBXBuildFile; fileRef = D70629C619B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m */; };
 		D7D9996D19B3AD3B0099FB8F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D9996C19B3AD3B0099FB8F /* Foundation.framework */; };
-		D7D9997219B3AD3B0099FB8F /* VaavudElectronicSDK.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = D7D9997119B3AD3B0099FB8F /* VaavudElectronicSDK.h */; };
-		D7D9997419B3AD3B0099FB8F /* VaavudElectronicSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D9997319B3AD3B0099FB8F /* VaavudElectronicSDK.m */; };
+		D7D9997219B3AD3B0099FB8F /* VEVaavudElectronicSDK.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = D7D9997119B3AD3B0099FB8F /* VEVaavudElectronicSDK.h */; };
+		D7D9997419B3AD3B0099FB8F /* VEVaavudElectronicSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D9997319B3AD3B0099FB8F /* VEVaavudElectronicSDK.m */; };
 		D7D9997B19B3AD3B0099FB8F /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D9997A19B3AD3B0099FB8F /* XCTest.framework */; };
 		D7D9997C19B3AD3B0099FB8F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D9996C19B3AD3B0099FB8F /* Foundation.framework */; };
 		D7D9997E19B3AD3B0099FB8F /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D9997D19B3AD3B0099FB8F /* UIKit.framework */; };
 		D7D9998119B3AD3B0099FB8F /* libVaavudElectronicSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D9996919B3AD3B0099FB8F /* libVaavudElectronicSDK.a */; };
 		D7D9998719B3AD3B0099FB8F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D7D9998519B3AD3B0099FB8F /* InfoPlist.strings */; };
 		D7D9998919B3AD3B0099FB8F /* VaavudElectronicSDKTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D9998819B3AD3B0099FB8F /* VaavudElectronicSDKTests.m */; };
-		D7D9999319B3AD8A0099FB8F /* VaavudElectronicSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D9997119B3AD3B0099FB8F /* VaavudElectronicSDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		D7D9999E19B3AF290099FB8F /* DirectionDetectionAlgo.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D9999C19B3AF290099FB8F /* DirectionDetectionAlgo.h */; };
-		D7D9999F19B3AF290099FB8F /* DirectionDetectionAlgo.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D9999D19B3AF290099FB8F /* DirectionDetectionAlgo.m */; };
-		D7D999A219B3AF350099FB8F /* SoundProcessingAlgo.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D999A019B3AF350099FB8F /* SoundProcessingAlgo.h */; };
-		D7D999A319B3AF350099FB8F /* SoundProcessingAlgo.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999A119B3AF350099FB8F /* SoundProcessingAlgo.m */; };
-		D7D999AC19B3AF450099FB8F /* AudioManager.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D999A419B3AF450099FB8F /* AudioManager.h */; };
-		D7D999AD19B3AF450099FB8F /* AudioManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999A519B3AF450099FB8F /* AudioManager.m */; };
-		D7D999AE19B3AF450099FB8F /* SummeryGenerator.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D999A619B3AF450099FB8F /* SummeryGenerator.h */; };
-		D7D999AF19B3AF450099FB8F /* SummeryGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999A719B3AF450099FB8F /* SummeryGenerator.m */; };
-		D7D999B019B3AF450099FB8F /* LocationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D999A819B3AF450099FB8F /* LocationManager.h */; };
-		D7D999B119B3AF450099FB8F /* LocationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999A919B3AF450099FB8F /* LocationManager.m */; };
-		D7D999B219B3AF450099FB8F /* AudioVaavudElectronicDetection.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D999AA19B3AF450099FB8F /* AudioVaavudElectronicDetection.h */; };
-		D7D999B319B3AF450099FB8F /* AudioVaavudElectronicDetection.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999AB19B3AF450099FB8F /* AudioVaavudElectronicDetection.m */; };
+		D7D9999319B3AD8A0099FB8F /* VEVaavudElectronicSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D9997119B3AD3B0099FB8F /* VEVaavudElectronicSDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D7D9999E19B3AF290099FB8F /* VEDirectionDetectionAlgo.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D9999C19B3AF290099FB8F /* VEDirectionDetectionAlgo.h */; };
+		D7D9999F19B3AF290099FB8F /* VEDirectionDetectionAlgo.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D9999D19B3AF290099FB8F /* VEDirectionDetectionAlgo.m */; };
+		D7D999A219B3AF350099FB8F /* VESoundProcessingAlgo.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D999A019B3AF350099FB8F /* VESoundProcessingAlgo.h */; };
+		D7D999A319B3AF350099FB8F /* VESoundProcessingAlgo.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999A119B3AF350099FB8F /* VESoundProcessingAlgo.m */; };
+		D7D999AC19B3AF450099FB8F /* VEAudioManager.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D999A419B3AF450099FB8F /* VEAudioManager.h */; };
+		D7D999AD19B3AF450099FB8F /* VEAudioManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999A519B3AF450099FB8F /* VEAudioManager.m */; };
+		D7D999AE19B3AF450099FB8F /* VESummeryGenerator.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D999A619B3AF450099FB8F /* VESummeryGenerator.h */; };
+		D7D999AF19B3AF450099FB8F /* VESummeryGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999A719B3AF450099FB8F /* VESummeryGenerator.m */; };
+		D7D999B019B3AF450099FB8F /* VELocationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D999A819B3AF450099FB8F /* VELocationManager.h */; };
+		D7D999B119B3AF450099FB8F /* VELocationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999A919B3AF450099FB8F /* VELocationManager.m */; };
+		D7D999B219B3AF450099FB8F /* VEAudioVaavudElectronicDetection.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D999AA19B3AF450099FB8F /* VEAudioVaavudElectronicDetection.h */; };
+		D7D999B319B3AF450099FB8F /* VEAudioVaavudElectronicDetection.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999AB19B3AF450099FB8F /* VEAudioVaavudElectronicDetection.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,7 +72,7 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
-				D7D9997219B3AD3B0099FB8F /* VaavudElectronicSDK.h in CopyFiles */,
+				D7D9997219B3AD3B0099FB8F /* VEVaavudElectronicSDK.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,31 +81,31 @@
 /* Begin PBXFileReference section */
 		D706293219B3BEBE00E6879A /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		D706293419B3BEC400E6879A /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
-		D70629C519B597B500E6879A /* VaavudElectronicSDK+Analysis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "VaavudElectronicSDK+Analysis.h"; sourceTree = "<group>"; };
-		D70629C619B597B500E6879A /* VaavudElectronicSDK+Analysis.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "VaavudElectronicSDK+Analysis.m"; sourceTree = "<group>"; };
+		D70629C519B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "VEVaavudElectronicSDK+Analysis.h"; sourceTree = "<group>"; };
+		D70629C619B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "VEVaavudElectronicSDK+Analysis.m"; sourceTree = "<group>"; };
 		D7D9996919B3AD3B0099FB8F /* libVaavudElectronicSDK.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libVaavudElectronicSDK.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		D7D9996C19B3AD3B0099FB8F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		D7D9997019B3AD3B0099FB8F /* VaavudElectronicSDK-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "VaavudElectronicSDK-Prefix.pch"; sourceTree = "<group>"; };
-		D7D9997119B3AD3B0099FB8F /* VaavudElectronicSDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VaavudElectronicSDK.h; sourceTree = "<group>"; };
-		D7D9997319B3AD3B0099FB8F /* VaavudElectronicSDK.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VaavudElectronicSDK.m; sourceTree = "<group>"; };
+		D7D9997119B3AD3B0099FB8F /* VEVaavudElectronicSDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VEVaavudElectronicSDK.h; sourceTree = "<group>"; };
+		D7D9997319B3AD3B0099FB8F /* VEVaavudElectronicSDK.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VEVaavudElectronicSDK.m; sourceTree = "<group>"; };
 		D7D9997919B3AD3B0099FB8F /* VaavudElectronicSDKTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VaavudElectronicSDKTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D7D9997A19B3AD3B0099FB8F /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		D7D9997D19B3AD3B0099FB8F /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
 		D7D9998419B3AD3B0099FB8F /* VaavudElectronicSDKTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "VaavudElectronicSDKTests-Info.plist"; sourceTree = "<group>"; };
 		D7D9998619B3AD3B0099FB8F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		D7D9998819B3AD3B0099FB8F /* VaavudElectronicSDKTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VaavudElectronicSDKTests.m; sourceTree = "<group>"; };
-		D7D9999C19B3AF290099FB8F /* DirectionDetectionAlgo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DirectionDetectionAlgo.h; sourceTree = "<group>"; };
-		D7D9999D19B3AF290099FB8F /* DirectionDetectionAlgo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DirectionDetectionAlgo.m; sourceTree = "<group>"; };
-		D7D999A019B3AF350099FB8F /* SoundProcessingAlgo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SoundProcessingAlgo.h; sourceTree = "<group>"; };
-		D7D999A119B3AF350099FB8F /* SoundProcessingAlgo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SoundProcessingAlgo.m; sourceTree = "<group>"; };
-		D7D999A419B3AF450099FB8F /* AudioManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioManager.h; sourceTree = "<group>"; };
-		D7D999A519B3AF450099FB8F /* AudioManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioManager.m; sourceTree = "<group>"; };
-		D7D999A619B3AF450099FB8F /* SummeryGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SummeryGenerator.h; sourceTree = "<group>"; };
-		D7D999A719B3AF450099FB8F /* SummeryGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SummeryGenerator.m; sourceTree = "<group>"; };
-		D7D999A819B3AF450099FB8F /* LocationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationManager.h; sourceTree = "<group>"; };
-		D7D999A919B3AF450099FB8F /* LocationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocationManager.m; sourceTree = "<group>"; };
-		D7D999AA19B3AF450099FB8F /* AudioVaavudElectronicDetection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioVaavudElectronicDetection.h; sourceTree = "<group>"; };
-		D7D999AB19B3AF450099FB8F /* AudioVaavudElectronicDetection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioVaavudElectronicDetection.m; sourceTree = "<group>"; };
+		D7D9999C19B3AF290099FB8F /* VEDirectionDetectionAlgo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VEDirectionDetectionAlgo.h; sourceTree = "<group>"; };
+		D7D9999D19B3AF290099FB8F /* VEDirectionDetectionAlgo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VEDirectionDetectionAlgo.m; sourceTree = "<group>"; };
+		D7D999A019B3AF350099FB8F /* VESoundProcessingAlgo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VESoundProcessingAlgo.h; sourceTree = "<group>"; };
+		D7D999A119B3AF350099FB8F /* VESoundProcessingAlgo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VESoundProcessingAlgo.m; sourceTree = "<group>"; };
+		D7D999A419B3AF450099FB8F /* VEAudioManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VEAudioManager.h; sourceTree = "<group>"; };
+		D7D999A519B3AF450099FB8F /* VEAudioManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VEAudioManager.m; sourceTree = "<group>"; };
+		D7D999A619B3AF450099FB8F /* VESummeryGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VESummeryGenerator.h; sourceTree = "<group>"; };
+		D7D999A719B3AF450099FB8F /* VESummeryGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VESummeryGenerator.m; sourceTree = "<group>"; };
+		D7D999A819B3AF450099FB8F /* VELocationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VELocationManager.h; sourceTree = "<group>"; };
+		D7D999A919B3AF450099FB8F /* VELocationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VELocationManager.m; sourceTree = "<group>"; };
+		D7D999AA19B3AF450099FB8F /* VEAudioVaavudElectronicDetection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VEAudioVaavudElectronicDetection.h; sourceTree = "<group>"; };
+		D7D999AB19B3AF450099FB8F /* VEAudioVaavudElectronicDetection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VEAudioVaavudElectronicDetection.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -165,23 +165,23 @@
 		D7D9996E19B3AD3B0099FB8F /* VaavudElectronicSDK */ = {
 			isa = PBXGroup;
 			children = (
-				D7D999A419B3AF450099FB8F /* AudioManager.h */,
-				D7D999A519B3AF450099FB8F /* AudioManager.m */,
-				D7D999A619B3AF450099FB8F /* SummeryGenerator.h */,
-				D7D999A719B3AF450099FB8F /* SummeryGenerator.m */,
-				D7D999A819B3AF450099FB8F /* LocationManager.h */,
-				D7D999A919B3AF450099FB8F /* LocationManager.m */,
-				D7D999AA19B3AF450099FB8F /* AudioVaavudElectronicDetection.h */,
-				D7D999AB19B3AF450099FB8F /* AudioVaavudElectronicDetection.m */,
-				D7D999A019B3AF350099FB8F /* SoundProcessingAlgo.h */,
-				D7D999A119B3AF350099FB8F /* SoundProcessingAlgo.m */,
-				D7D9999C19B3AF290099FB8F /* DirectionDetectionAlgo.h */,
-				D7D9999D19B3AF290099FB8F /* DirectionDetectionAlgo.m */,
-				D7D9997119B3AD3B0099FB8F /* VaavudElectronicSDK.h */,
-				D7D9997319B3AD3B0099FB8F /* VaavudElectronicSDK.m */,
+				D7D999A419B3AF450099FB8F /* VEAudioManager.h */,
+				D7D999A519B3AF450099FB8F /* VEAudioManager.m */,
+				D7D999A619B3AF450099FB8F /* VESummeryGenerator.h */,
+				D7D999A719B3AF450099FB8F /* VESummeryGenerator.m */,
+				D7D999A819B3AF450099FB8F /* VELocationManager.h */,
+				D7D999A919B3AF450099FB8F /* VELocationManager.m */,
+				D7D999AA19B3AF450099FB8F /* VEAudioVaavudElectronicDetection.h */,
+				D7D999AB19B3AF450099FB8F /* VEAudioVaavudElectronicDetection.m */,
+				D7D999A019B3AF350099FB8F /* VESoundProcessingAlgo.h */,
+				D7D999A119B3AF350099FB8F /* VESoundProcessingAlgo.m */,
+				D7D9999C19B3AF290099FB8F /* VEDirectionDetectionAlgo.h */,
+				D7D9999D19B3AF290099FB8F /* VEDirectionDetectionAlgo.m */,
+				D7D9997119B3AD3B0099FB8F /* VEVaavudElectronicSDK.h */,
+				D7D9997319B3AD3B0099FB8F /* VEVaavudElectronicSDK.m */,
 				D7D9996F19B3AD3B0099FB8F /* Supporting Files */,
-				D70629C519B597B500E6879A /* VaavudElectronicSDK+Analysis.h */,
-				D70629C619B597B500E6879A /* VaavudElectronicSDK+Analysis.m */,
+				D70629C519B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h */,
+				D70629C619B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m */,
 			);
 			path = VaavudElectronicSDK;
 			sourceTree = "<group>";
@@ -219,14 +219,14 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D7D999A219B3AF350099FB8F /* SoundProcessingAlgo.h in Headers */,
-				D70629C719B597B500E6879A /* VaavudElectronicSDK+Analysis.h in Headers */,
-				D7D999AC19B3AF450099FB8F /* AudioManager.h in Headers */,
-				D7D999AE19B3AF450099FB8F /* SummeryGenerator.h in Headers */,
-				D7D999B219B3AF450099FB8F /* AudioVaavudElectronicDetection.h in Headers */,
-				D7D999B019B3AF450099FB8F /* LocationManager.h in Headers */,
-				D7D9999319B3AD8A0099FB8F /* VaavudElectronicSDK.h in Headers */,
-				D7D9999E19B3AF290099FB8F /* DirectionDetectionAlgo.h in Headers */,
+				D7D999A219B3AF350099FB8F /* VESoundProcessingAlgo.h in Headers */,
+				D70629C719B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h in Headers */,
+				D7D999AC19B3AF450099FB8F /* VEAudioManager.h in Headers */,
+				D7D999AE19B3AF450099FB8F /* VESummeryGenerator.h in Headers */,
+				D7D999B219B3AF450099FB8F /* VEAudioVaavudElectronicDetection.h in Headers */,
+				D7D999B019B3AF450099FB8F /* VELocationManager.h in Headers */,
+				D7D9999319B3AD8A0099FB8F /* VEVaavudElectronicSDK.h in Headers */,
+				D7D9999E19B3AF290099FB8F /* VEDirectionDetectionAlgo.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -343,14 +343,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D7D999B119B3AF450099FB8F /* LocationManager.m in Sources */,
-				D7D999A319B3AF350099FB8F /* SoundProcessingAlgo.m in Sources */,
-				D7D9999F19B3AF290099FB8F /* DirectionDetectionAlgo.m in Sources */,
-				D7D999AF19B3AF450099FB8F /* SummeryGenerator.m in Sources */,
-				D7D999AD19B3AF450099FB8F /* AudioManager.m in Sources */,
-				D70629C819B597B500E6879A /* VaavudElectronicSDK+Analysis.m in Sources */,
-				D7D9997419B3AD3B0099FB8F /* VaavudElectronicSDK.m in Sources */,
-				D7D999B319B3AF450099FB8F /* AudioVaavudElectronicDetection.m in Sources */,
+				D7D999B119B3AF450099FB8F /* VELocationManager.m in Sources */,
+				D7D999A319B3AF350099FB8F /* VESoundProcessingAlgo.m in Sources */,
+				D7D9999F19B3AF290099FB8F /* VEDirectionDetectionAlgo.m in Sources */,
+				D7D999AF19B3AF450099FB8F /* VESummeryGenerator.m in Sources */,
+				D7D999AD19B3AF450099FB8F /* VEAudioManager.m in Sources */,
+				D70629C819B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m in Sources */,
+				D7D9997419B3AD3B0099FB8F /* VEVaavudElectronicSDK.m in Sources */,
+				D7D999B319B3AF450099FB8F /* VEAudioVaavudElectronicDetection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

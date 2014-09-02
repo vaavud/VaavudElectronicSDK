@@ -8,13 +8,13 @@
 #import <AVFoundation/AVFoundation.h>
 #import <Foundation/Foundation.h>
 #import <MediaPlayer/MediaPlayer.h>
-#import "VaavudElectronicSDK.h"
+#import "VEVaavudElectronicSDK.h"
 
 // Import EZAudio header
 #import "EZAudio.h"
 
-#import "SoundProcessingAlgo.h"
-#import "AudioVaavudElectronicDetection.h"
+#import "VESoundProcessingAlgo.h"
+#import "VEAudioVaavudElectronicDetection.h"
 
 
 @protocol AudioManagerDelegate <NSObject>
@@ -25,10 +25,10 @@
 @end
 
 
-@interface AudioManager : NSObject
+@interface VEAudioManager : NSObject
 
 // Initializer
-- (id) initWithDelegate:( VaavudElectronicSDK <AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>*) delegate;
+- (id) initWithDelegate:( VEVaavudElectronicSDK <AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>*) delegate;
 
 
 // Starts Playback and Recording when Vaavud becomes available
@@ -58,7 +58,7 @@
 - (void) returnVolumeToInitialState;
 
 
-@property (strong, nonatomic) SoundProcessingAlgo *soundProcessor;
+@property (strong, nonatomic) VESoundProcessingAlgo *soundProcessor;
 @property (weak, nonatomic) EZAudioPlotGL *audioPlot;
 
 @end

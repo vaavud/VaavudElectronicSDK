@@ -6,10 +6,9 @@
 //  Copyright (c) 2014 Vaavud. All rights reserved.
 //
 
-#import "VaavudElectronicSDK+Analysis.h"
-#import "VaavudElectronicSDK.m"
+#import "VEVaavudElectronicSDK.m"
 
-@implementation VaavudElectronicSDK (Analysis)
+@implementation VEVaavudElectronicSDK (Analysis)
 
 
 
@@ -80,7 +79,7 @@
 
 // returns the fitcurve used in the directionAlgorithm
 - (float *) getFitCurve {
-    return [DirectionDetectionAlgo getFitCurve];
+    return [VEDirectionDetectionAlgo getFitCurve];
 }
 
 // returns the EdgeAngles for the samples

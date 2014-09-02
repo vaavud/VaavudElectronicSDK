@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "VaavudElectronicSDK.h"
 
 
 @protocol DirectionDetectionDelegate
@@ -19,7 +18,7 @@
 @end
 
 
-@interface DirectionDetectionAlgo : NSObject
+@interface VEDirectionDetectionAlgo : NSObject
 
 - (void) newTick:(int)samples;
 - (id) initWithDelegate:(id<DirectionDetectionDelegate>)delegate;

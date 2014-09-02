@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "VaavudElectronicSDK.h"
 
 @protocol locationManagerDelegate <NSObject>
 
@@ -15,7 +14,7 @@
 
 @end
 
-@interface LocationManager : NSObject
+@interface VELocationManager : NSObject
 
 - (id) initWithDelegate:(id<locationManagerDelegate>)delegate;
 

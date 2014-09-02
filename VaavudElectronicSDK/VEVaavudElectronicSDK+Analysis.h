@@ -6,7 +6,6 @@
 //  Copyright (c) 2014 Vaavud. All rights reserved.
 //
 
-#import <VaavudElectronicSDK/VaavudElectronicSDK.h>
 
 @protocol VaavudElectronicAnalysisDelegate <NSObject>
 
@@ -19,7 +18,7 @@
 
 
 
-@interface VaavudElectronicSDK (Analysis)
+@interface VEVaavudElectronicSDK (Analysis)
 
 /* add listener of analysis information */
 - (void) addAnalysisListener:(id <VaavudElectronicAnalysisDelegate>) delegate;

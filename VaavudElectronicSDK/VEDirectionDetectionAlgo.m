@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Vaavud. All rights reserved.
 //
 
-#import "DirectionDetectionAlgo.h"
+#import "VEDirectionDetectionAlgo.h"
 //#define TICKS_PR_REV 10
 #define TICKS_PR_REV 15
 #define SAMPLE_BUFFER_SIZE 40
@@ -14,7 +14,7 @@
 #define ANGLE_CORRRECTION_COEFFICIENT 200 // originally 400 (but since actual velocity difference is about double...
 #define ANGLE_DIFF 1
 
-@interface DirectionDetectionAlgo() {
+@interface VEDirectionDetectionAlgo() {
     
     unsigned long totalTickCounter;
     unsigned int tickCounter;
@@ -40,7 +40,7 @@
 @end
 
 
-@implementation DirectionDetectionAlgo
+@implementation VEDirectionDetectionAlgo
 
 
 float compensation[TICKS_PR_REV] = {1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,0.774193548387097};

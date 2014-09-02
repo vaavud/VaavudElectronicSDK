@@ -7,8 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "VaavudElectronicSDK.h"
-#import "DirectionDetectionAlgo.h"
+#import "VEDirectionDetectionAlgo.h"
 
 @protocol SoundProcessingDelegate <NSObject>
 
@@ -17,9 +16,9 @@
 @end
 
 
-@interface SoundProcessingAlgo : NSObject
+@interface VESoundProcessingAlgo : NSObject
 
-@property (strong, nonatomic) DirectionDetectionAlgo *dirDetectionAlgo;
+@property (strong, nonatomic) VEDirectionDetectionAlgo *dirDetectionAlgo;
 
 - (void) newSoundData:(int *)data bufferLength:(UInt32) bufferLength;
 - (id)initWithDelegate:(id<SoundProcessingDelegate, DirectionDetectionDelegate>)delegate;

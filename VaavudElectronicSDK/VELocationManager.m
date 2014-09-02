@@ -6,10 +6,10 @@
 //  Copyright (c) 2014 Vaavud. All rights reserved.
 //
 
-#import "LocationManager.h"
+#import "VELocationManager.h"
 #import <CoreLocation/CoreLocation.h>
 
-@interface LocationManager() <CLLocationManagerDelegate>
+@interface VELocationManager() <CLLocationManagerDelegate>
 
 @property (strong, nonatomic) id<locationManagerDelegate> delegate;
 @property (strong, nonatomic) CLLocationManager *locationManager;
@@ -17,7 +17,7 @@
 @end
 
 
-@implementation LocationManager
+@implementation VELocationManager
 
 
 

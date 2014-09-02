@@ -6,15 +6,15 @@
 //  Copyright (c) 2014 Vaavud. All rights reserved.
 //
 
-#import "AudioVaavudElectronicDetection.h"
-#import "AudioManager.h"
+#import "VEAudioVaavudElectronicDetection.h"
+#import "VEAudioManager.h"
 
 # define VAAVUD_NOISE_MAXIMUM 0.015
 # define VAAVUD_NOISE_MINIMUM -0.002
 # define MAX_CHECKS 5
 # define NUMBER_OF_SAMPLES 40
 
-@interface AudioVaavudElectronicDetection() <EZMicrophoneDelegate>
+@interface VEAudioVaavudElectronicDetection() <EZMicrophoneDelegate>
 
 @property id<AudioVaavudElectronicDetectionDelegate> delegate;
 @property (nonatomic, readwrite) VaavudElectronicConnectionStatus vaavudElectronicConnectionStatus;
@@ -33,7 +33,7 @@
 
 @end
 
-@implementation AudioVaavudElectronicDetection
+@implementation VEAudioVaavudElectronicDetection
 
 
 -(id)init {

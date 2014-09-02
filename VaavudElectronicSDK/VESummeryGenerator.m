@@ -6,20 +6,19 @@
 //  Copyright (c) 2014 Vaavud. All rights reserved.
 //
 
-#import "SummeryGenerator.h"
-#import "VaavudElectronicSDK.h"
+#import "VESummeryGenerator.h"
 
-@interface SummeryGenerator()
+@interface VESummeryGenerator()
 @property (nonatomic, strong) NSNumber *speed;
 @property (nonatomic, strong) NSNumber *angle;
 @property (nonatomic, strong) NSNumber *heading;
 @property (nonatomic, strong) NSArray *anglularVelocties;
-@property (nonatomic, weak) VaavudElectronicSDK *vaavudElectronic;
+@property (nonatomic, weak) VEVaavudElectronicSDK *vaavudElectronic;
 
 
 @end
 
-@implementation SummeryGenerator
+@implementation VESummeryGenerator
 
 
 - (id) init {
@@ -58,7 +57,7 @@
 // Starts the recieving updates
 - (void) startRecording {
     if (!self.vaavudElectronic) {
-        self.vaavudElectronic = [VaavudElectronicSDK sharedVaavudElectronic];
+        self.vaavudElectronic = [VEVaavudElectronicSDK sharedVaavudElectronic];
     }
     
     [self.vaavudElectronic addListener:self];
@@ -73,7 +72,7 @@
 - (void) endRecording {
     
     if (!self.vaavudElectronic) {
-        self.vaavudElectronic = [VaavudElectronicSDK sharedVaavudElectronic];
+        self.vaavudElectronic = [VEVaavudElectronicSDK sharedVaavudElectronic];
     }
     
     [self.vaavudElectronic removeListener:self];

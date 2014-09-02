@@ -6,31 +6,30 @@
 //  Copyright (c) 2014 Vaavud. All rights reserved.
 //
 
-#import "VaavudElectronicSDK.h"
-#import "AudioManager.h"
-#import "DirectionDetectionAlgo.h"
-#import "SummeryGenerator.h"
-#import "LocationManager.h"
-#import "AudioVaavudElectronicDetection.h"
+#import "VEAudioManager.h"
+#import "VEDirectionDetectionAlgo.h"
+#import "VESummeryGenerator.h"
+#import "VELocationManager.h"
+#import "VEAudioVaavudElectronicDetection.h"
 
-@interface VaavudElectronicSDK() <SoundProcessingDelegate, DirectionDetectionDelegate, AudioManagerDelegate, locationManagerDelegate, AudioVaavudElectronicDetectionDelegate>
+@interface VEVaavudElectronicSDK() <SoundProcessingDelegate, DirectionDetectionDelegate, AudioManagerDelegate, locationManagerDelegate, AudioVaavudElectronicDetectionDelegate>
 
 @property (strong, atomic) NSMutableArray *VaaElecWindDelegates;
 @property (strong, atomic) NSMutableArray *VaaElecAnalysisDelegates;
-@property (strong, nonatomic) AudioManager *audioManager;
-@property (strong, nonatomic) SummeryGenerator *summeryGenerator;
-@property (strong, nonatomic) LocationManager *locationManager;
-@property (strong, nonatomic) AudioVaavudElectronicDetection *AVElectronicDetection;
+@property (strong, nonatomic) VEAudioManager *audioManager;
+@property (strong, nonatomic) VESummeryGenerator *summeryGenerator;
+@property (strong, nonatomic) VELocationManager *locationManager;
+@property (strong, nonatomic) VEAudioVaavudElectronicDetection *AVElectronicDetection;
 @property (strong, atomic) NSNumber* currentHeading;
 
 @end
 
-@implementation VaavudElectronicSDK
+@implementation VEVaavudElectronicSDK
 
 // initialize sharedObject as nil (first call only)
-static VaavudElectronicSDK *sharedInstance = nil;
+static VEVaavudElectronicSDK *sharedInstance = nil;
 
-+ (VaavudElectronicSDK *) sharedVaavudElectronic {
++ (VEVaavudElectronicSDK *) sharedVaavudElectronic {
     // structure used to test whether the block has completed or not
     static dispatch_once_t p = 0;
     
@@ -47,16 +46,16 @@ static VaavudElectronicSDK *sharedInstance = nil;
 - (void) initSingleton {
     self.VaaElecWindDelegates = [[NSMutableArray alloc] initWithCapacity:3];
     self.VaaElecAnalysisDelegates = [[NSMutableArray alloc] initWithCapacity:3];
-    self.audioManager = [[AudioManager alloc] initWithDelegate:self];
-    self.summeryGenerator = [[SummeryGenerator alloc] init];
-    self.locationManager = [[LocationManager alloc] initWithDelegate:self];
-    self.AVElectronicDetection = [[AudioVaavudElectronicDetection alloc] initWithDelegate:self];
+    self.audioManager = [[VEAudioManager alloc] initWithDelegate:self];
+    self.summeryGenerator = [[VESummeryGenerator alloc] init];
+    self.locationManager = [[VELocationManager alloc] initWithDelegate:self];
+    self.AVElectronicDetection = [[VEAudioVaavudElectronicDetection alloc] initWithDelegate:self];
 }
 
 + (id) allocWithZone:(NSZone *)zone {
     //If coder misunderstands this is a singleton, behave properly with
     // ref count +1 on alloc anyway, and still return singleton!
-    return [VaavudElectronicSDK sharedVaavudElectronic];
+    return [VEVaavudElectronicSDK sharedVaavudElectronic];
 }
 
 

@@ -6,10 +6,9 @@
 //  Copyright (c) 2014 Vaavud. All rights reserved.
 //
 
-#import "SoundProcessingAlgo.h"
-#import "VaavudElectronicSDK.h"
+#import "VESoundProcessingAlgo.h"
 
-@interface SoundProcessingAlgo() {
+@interface VESoundProcessingAlgo() {
     int mvgAvg[3];
     int mvgAvgSum;
     int mvgDiff[3];
@@ -26,7 +25,7 @@
 
 @end
 
-@implementation SoundProcessingAlgo
+@implementation VESoundProcessingAlgo
 
 
 #pragma mark - Initialization
@@ -48,7 +47,7 @@
     
     diffSumRiseThreshold = 800; // STARTING VALUE
     
-    self.dirDetectionAlgo = [[DirectionDetectionAlgo alloc] initWithDelegate:delegate];
+    self.dirDetectionAlgo = [[VEDirectionDetectionAlgo alloc] initWithDelegate:delegate];
     
     self.windDelegate = delegate;
     
