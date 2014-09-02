@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "VaavudElectronicSDK.h"
 
 @interface SummeryGenerator : NSObject <VaavudElectronicWindDelegate, VaavudElectronicAnalysisDelegate>
 
