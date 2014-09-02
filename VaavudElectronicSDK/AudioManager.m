@@ -15,8 +15,9 @@
 
 @interface AudioManager() <EZMicrophoneDelegate, EZOutputDataSource>
 
-@property (nonatomic) BOOL askedToMeasure;
-@property (nonatomic) BOOL measureingActive;
+@property (atomic) BOOL askedToMeasure;
+@property (atomic) BOOL recordingActive;
+@property (atomic) BOOL algorithmActice;
 @property (nonatomic, strong) NSNumber *originalAudioVolume;
 
 /** The microphone component */
@@ -60,7 +61,12 @@
     
     // Create an instance of the microphone and tell it to use this object as the delegate
     self.microphone = [EZMicrophone microphoneWithDelegate:self];
-
+    // CHECK MICROPHONE INPUT FORMAT
+    [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
+    
+    
+    
+    
     [self setupSoundOutput];
     
     // Assign a delegate to the shared instance of the output to provide the output audio data
@@ -68,7 +74,15 @@
     
     // set the output format from the audioOutput stream.
     [[EZOutput sharedOutput] setAudioStreamBasicDescription: [self getBasicAudioOutStreamingFormat]];
-
+    [EZAudio printASBD: [[EZOutput sharedOutput] audioStreamBasicDescription]];
+    
+    
+    
+    // CHECK OUTPUT FORMAT
+    
+    self.askedToMeasure = NO;
+    self.algorithmActice = NO;
+    self.recordingActive = NO;
     
     return self;
 }
@@ -84,14 +98,18 @@
 }
 
 -(void) stop {
-    
     self.askedToMeasure = NO;
-    [self stopInternal];
     
+    if (self.algorithmActice) {
+        [self stopInternal];
+    }
 }
 
 
 - (void) startInternal {
+    
+    self.algorithmActice = YES;
+    
     [self toggleMicrophone: YES];
     [self toggleOutput: YES];
     
@@ -104,6 +122,8 @@
 
 
 - (void) stopInternal {
+    self.algorithmActice = NO;
+    
     [self toggleMicrophone: NO];
     [self toggleOutput: NO];
     
@@ -113,12 +133,13 @@
 }
 
 
-
-
-- (void) vaavudWasUnpluged {
+- (void) deviceWasUnpluged {
     
     [self returnVolumeToInitialState];
-    [self stopInternal];
+    if (self.algorithmActice) {
+        [self stopInternal];
+    }
+    
 }
 
 - (void) vaavudPlugedIn {
@@ -161,12 +182,12 @@
                                               sourceFormat:self.microphone.audioStreamBasicDescription
                                        destinationFileType:EZRecorderFileTypeWAV];
     
-    self.measureingActive = YES;
+    self.recordingActive = YES;
 }
 
 // Ends the internal soundfile recorder
 - (void) endRecording {
-    self.measureingActive = NO;
+    self.recordingActive = NO;
     [self.recorder closeAudioFile];
     self.recorder = nil;
     
@@ -174,7 +195,7 @@
 
 // returns true if recording is active
 - (BOOL) isRecording {
-    return self.measureingActive;
+    return self.recordingActive;
 }
 
 // returns the local path of the recording
@@ -250,7 +271,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 withNumberOfChannels:(UInt32)numberOfChannels {
     
     // Getting audio data as a buffer list that can be directly fed into the EZRecorder. This is happening on the audio thread - any UI updating needs a GCD main queue block. This will keep appending data to the tail of the audio file.
-    if( self.measureingActive ){
+    if( self.recordingActive ){
         [self.recorder appendDataFromBufferList:bufferList
                                  withBufferSize:bufferSize];
     }

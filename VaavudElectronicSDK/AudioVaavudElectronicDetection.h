@@ -8,13 +8,13 @@
 #import <AVFoundation/AVFoundation.h>
 #import <MediaPlayer/MediaPlayer.h>
 #import <Foundation/Foundation.h>
-#import "VaavudElectronicSDK.h"
 
 @protocol AudioVaavudElectronicDetectionDelegate <NSObject>
 
+- (void) devicePlugedInChecking;
 - (void) vaavudPlugedIn;
-- (void) vaavudWasUnpluged;
 - (void) notVaavudPlugedIn;
+- (void) deviceWasUnpluged;
 
 @end
 

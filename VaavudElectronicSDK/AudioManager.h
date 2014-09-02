@@ -51,7 +51,8 @@
 // returns the local path of the recording
 - (NSURL*) recordingPath;
 
-- (void) vaavudWasUnpluged;
+- (void) deviceWasUnpluged;
+
 - (void) vaavudPlugedIn;
 
 - (void) returnVolumeToInitialState;

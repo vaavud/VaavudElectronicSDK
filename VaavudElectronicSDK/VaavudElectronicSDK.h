@@ -17,11 +17,14 @@
 - (void) newSpeed: (NSNumber*) speed;
 - (void) newWindDirection: (NSNumber*) windDirection;
 
+- (void) devicePlugedInChecking;
+- (void) notVaavudPlugedIn;
 - (void) vaavudPlugedIn;
-- (void) vaavudWasUnpluged;
+- (void) deviceWasUnpluged;
+
 - (void) vaavudStartedMeasureing;
 - (void) vaavudStopMeasureing;
-- (void) notVaavudPlugedIn;
+
 
 @end
 

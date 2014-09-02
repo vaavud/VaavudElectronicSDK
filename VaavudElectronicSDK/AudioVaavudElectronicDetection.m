@@ -56,17 +56,13 @@
         self.samplingMicrophoneActice = NO;
         
         // INITIALIZE CHECK;
-        
         [self checkIfRegularHeadsetOrVaavud];
-        
-        
     }
     
     return  self;
     
     
 }
-
 
 
 - (BOOL) isHeadphoneOutAvailable {
@@ -115,13 +111,17 @@
             
             self.vaavudElectronicConnectionStatus = VaavudElectronicConnectionStatusNotConnected;
             dispatch_async(dispatch_get_main_queue(),^{
-                [self.delegate vaavudWasUnpluged];
+                [self.delegate deviceWasUnpluged];
             });
             break;
         }
         case AVAudioSessionRouteChangeReasonNewDeviceAvailable: {
             
             if (self.vaavudElectronicConnectionStatus != VaavudElectronicConnectionStatusConnected) {
+                dispatch_async(dispatch_get_main_queue(),^{
+                    [self.delegate devicePlugedInChecking];
+                });
+                
                 [self checkIfRegularHeadsetOrVaavud];
             }
             

@@ -21,7 +21,7 @@
 @property (strong, nonatomic) SummeryGenerator *summeryGenerator;
 @property (strong, nonatomic) LocationManager *locationManager;
 @property (strong, nonatomic) AudioVaavudElectronicDetection *AVElectronicDetection;
-@property (strong, nonatomic) NSNumber* currentHeading;
+@property (strong, atomic) NSNumber* currentHeading;
 
 @end
 
@@ -158,6 +158,14 @@ static VaavudElectronicSDK *sharedInstance = nil;
 }
 
 
+- (void) devicePlugedInChecking {
+    
+    for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
+        if ([delegate respondsToSelector:@selector(devicePlugedInChecking)]) {
+            [delegate devicePlugedInChecking];
+        }
+    }
+}
 
 
 - (void) vaavudPlugedIn {
@@ -171,13 +179,13 @@ static VaavudElectronicSDK *sharedInstance = nil;
         }
     }
 }
-- (void) vaavudWasUnpluged {
+- (void) deviceWasUnpluged {
     
-    [self.audioManager vaavudWasUnpluged];
+    [self.audioManager deviceWasUnpluged];
     
     for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(vaavudWasUnpluged)]) {
-            [delegate vaavudWasUnpluged];
+        if ([delegate respondsToSelector:@selector(deviceWasUnpluged)]) {
+            [delegate deviceWasUnpluged];
         }
     }
 }
