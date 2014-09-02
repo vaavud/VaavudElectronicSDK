@@ -61,6 +61,7 @@
     
     // Create an instance of the microphone and tell it to use this object as the delegate
     self.microphone = [EZMicrophone microphoneWithDelegate:self];
+    [self.microphone setAudioStreamBasicDescription: [self getBasicAudioOutStreamingFormatMicrophone]];
     // CHECK MICROPHONE INPUT FORMAT
     [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
     
@@ -91,7 +92,7 @@
     
     self.askedToMeasure = YES;
     
-    if ([self.delegate isVaavudElectronicConnected]) {
+    if ([self.delegate vaavudElectronicConnectionStatus] == VaavudElectronicConnectionStatusConnected) {
         [self startInternal];
         
     }
@@ -370,11 +371,34 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     stereoStreamFormat.mFramesPerPacket   = 1;
     stereoStreamFormat.mBitsPerChannel    = 8 * bytesPerSample;
     stereoStreamFormat.mChannelsPerFrame  = 2;           // 2 indicates stereo
-    stereoStreamFormat.mSampleRate        = 44100;
+    stereoStreamFormat.mSampleRate        = sampleFrequency;
     
     return stereoStreamFormat;
     
 }
+
+
+- (AudioStreamBasicDescription) getBasicAudioOutStreamingFormatMicrophone {
+    
+    size_t bytesPerSample = sizeof (AudioUnitSampleType);
+    AudioStreamBasicDescription stereoStreamFormat = {0};
+    
+    
+    stereoStreamFormat.mFormatID          = kAudioFormatLinearPCM;
+    //    stereoStreamFormat.mFormatFlags       = kAudioFormatFlagsAudioUnitCanonical;
+    stereoStreamFormat.mFormatFlags       = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked | kAudioFormatFlagIsNonInterleaved;
+    stereoStreamFormat.mBytesPerPacket    = bytesPerSample;
+    stereoStreamFormat.mBytesPerFrame     = bytesPerSample;
+    stereoStreamFormat.mFramesPerPacket   = 1;
+    stereoStreamFormat.mBitsPerChannel    = 8 * bytesPerSample;
+    stereoStreamFormat.mChannelsPerFrame  = 2;           // 2 indicates stereo
+    stereoStreamFormat.mSampleRate        = sampleFrequency;
+    
+    return stereoStreamFormat;
+    
+}
+
+
 
 
 @end

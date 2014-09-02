@@ -9,8 +9,10 @@
 #import "AudioVaavudElectronicDetection.h"
 #import "AudioManager.h"
 
-# define VAAVUD_NOISE_PP_MAXIMUM 0.01
-# define NUMBER_OF_SAMPLES 20
+# define VAAVUD_NOISE_MAXIMUM 0.015
+# define VAAVUD_NOISE_MINIMUM -0.002
+# define MAX_CHECKS 5
+# define NUMBER_OF_SAMPLES 40
 
 @interface AudioVaavudElectronicDetection() <EZMicrophoneDelegate>
 
@@ -21,9 +23,12 @@
 @property (nonatomic,strong) EZMicrophone *microphone;
 
 @property (nonatomic) NSUInteger sampleCounter;
+@property (nonatomic) NSUInteger checkCounter;
 @property (nonatomic) float noiseMax;
 @property (nonatomic) float noiseMin;
 @property (nonatomic) BOOL samplingMicrophoneActice;
+@property (atomic) BOOL startupSequence;
+@property (nonatomic) double timer;
 
 
 @end
@@ -56,7 +61,9 @@
         self.samplingMicrophoneActice = NO;
         
         // INITIALIZE CHECK;
-        [self checkIfRegularHeadsetOrVaavud];
+        self.timer = CACurrentMediaTime();
+        self.startupSequence = YES;
+        [self startCheckIfRegularHeadsetOrVaavud];
     }
     
     return  self;
@@ -66,15 +73,16 @@
 
 
 - (BOOL) isHeadphoneOutAvailable {
-    [self.microphone startFetchingAudio];
+    //   Microphone should be on before running script
     AVAudioSessionRouteDescription *audioRoute = [[AVAudioSession sharedInstance] currentRoute];
     for (AVAudioSessionPortDescription* desc in [audioRoute outputs]) {
         if ([[desc portType] isEqualToString:AVAudioSessionPortHeadphones]) {
-            [self.microphone stopFetchingAudio];
             return YES;
         }
     }
+    NSLog(@"Not vaavud, failed on headphoneOut");
     return NO;
+    
 }
 
 
@@ -83,16 +91,16 @@
     // For some reason Microphone needs to be active to determine audio route properly.
     // It works fine the first time the app is started without....
 
-    [self.microphone startFetchingAudio];
+    //   Microphone should be on before running script
     AVAudioSessionRouteDescription *audioRoute = [[AVAudioSession sharedInstance] currentRoute];
     for (AVAudioSessionPortDescription* desc in [audioRoute inputs]) {
         if ([[desc portType] isEqualToString:AVAudioSessionPortHeadsetMic]) {
-            [self.microphone stopFetchingAudio];
             return YES;
         }
         
     }
-    [self.microphone stopFetchingAudio];
+    //[self.microphone stopFetchingAudio];
+    NSLog(@"Not vaavud, failed on mic availiable");
     return NO;
 }
 
@@ -122,7 +130,9 @@
                     [self.delegate devicePlugedInChecking];
                 });
                 
-                [self checkIfRegularHeadsetOrVaavud];
+                self.timer = CACurrentMediaTime();
+                self.startupSequence = NO;
+                [self startCheckIfRegularHeadsetOrVaavud];
             }
             
             break;
@@ -139,54 +149,80 @@
 }
 
 
+- (void) startCheckIfRegularHeadsetOrVaavud {
+     self.checkCounter = 0;
+    [self checkIfRegularHeadsetOrVaavud];
+}
+
 - (void) checkIfRegularHeadsetOrVaavud {
     
+    float sampleFrequency = 44100;
+    float wantedBufferLength = 512;
+    float bufferDuration = wantedBufferLength / sampleFrequency;
+    
+    NSError* err;
+    [[AVAudioSession sharedInstance] setPreferredIOBufferDuration:bufferDuration error:&err];
+    
+    if (err) {
+        [NSException raise:@"VAEAudioException" format: @"Could not set prefered IOBuffer durration on AVAudioSession. %@", err.description];
+    }
+    
+    
+    [self.microphone startFetchingAudio];
     
     if ([self isHeadphoneOutAvailable] && [self isHeadphoneMicAvailable]) {
          // take 20 samples (full buffers) from the micrphone and estimate sum. If sum is over a certain threshold it's most likely a microphone because of the low frequency noise.
-
+        
+        self.checkCounter++;
         self.sampleCounter = 0;
         self.samplingMicrophoneActice = YES;
         
-        float sampleFrequency = 44100;
-        float wantedBufferLength = 512;
-        float bufferDuration = wantedBufferLength / sampleFrequency;
+
+    } else {
         
-        NSError* err;
-        [[AVAudioSession sharedInstance] setPreferredIOBufferDuration:bufferDuration error:&err];
+        self.vaavudElectronicConnectionStatus = VaavudElectronicConnectionStatusNotConnected;
         
-        if (err) {
-            [NSException raise:@"VAEAudioException" format: @"Could not set prefered IOBuffer durration on AVAudioSession. %@", err.description];
+        if (!self.startupSequence) {
+            dispatch_async(dispatch_get_main_queue(),^{
+                [self.delegate notVaavudPlugedIn];
+            });
         }
-        
-        
-        [self.microphone startFetchingAudio];
-
     }
-
-    
 }
 
 - (void) endCheckIfRegularHeadSetOrVaavud {
     
     self.samplingMicrophoneActice = NO;
-    [self.microphone stopFetchingAudio];
+ //   [self.microphone stopFetchingAudio];
     
-    float noisePP = self.noiseMax - self.noiseMin;
     
-    NSLog(@"Noise max: %f, min: %f, PP-value: %f", self.noiseMax, self.noiseMin, noisePP);
+    NSLog(@"Noise max: %f, min: %f", self.noiseMax, self.noiseMin);
     
-    if (noisePP < VAAVUD_NOISE_PP_MAXIMUM) {
+    if (self.noiseMax < VAAVUD_NOISE_MAXIMUM && self.noiseMin > VAAVUD_NOISE_MINIMUM) {
         self.vaavudElectronicConnectionStatus = VaavudElectronicConnectionStatusConnected;
+            NSLog(@"Vaavud Connected!");
         dispatch_async(dispatch_get_main_queue(),^{
             [self.delegate vaavudPlugedIn];
         });
     } else {
+        
+        if (self.checkCounter < MAX_CHECKS) {
+            [self checkIfRegularHeadsetOrVaavud];
+            return;
+        }
+        
         self.vaavudElectronicConnectionStatus = VaavudElectronicConnectionStatusNotConnected;
-        dispatch_async(dispatch_get_main_queue(),^{
-            [self.delegate notVaavudPlugedIn];
-        });
+            NSLog(@"Not Vaavud Connected!");
+        
+        if (!self.startupSequence) {
+            dispatch_async(dispatch_get_main_queue(),^{
+                [self.delegate notVaavudPlugedIn];
+            });
+        }
+
     }
+    
+    NSLog(@"timePassed %f", CACurrentMediaTime() - self.timer);
     
 }
 
@@ -228,7 +264,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
         self.sampleCounter += 1;
         
         
-        NSLog(@"sum value: %f with Bufferlength %i", sum, (unsigned int)bufferSize);
+        //NSLog(@"sum value: %f with Bufferlength %i", sum, (unsigned int)bufferSize);
         
         
         if (self.sampleCounter == NUMBER_OF_SAMPLES) {

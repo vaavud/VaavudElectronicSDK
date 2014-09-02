@@ -60,7 +60,7 @@ static VaavudElectronicSDK *sharedInstance = nil;
 }
 
 
-- (VaavudElectronicConnectionStatus) isVaavudElectronicConnected {
+- (VaavudElectronicConnectionStatus) vaavudElectronicConnectionStatus {
     return self.AVElectronicDetection.vaavudElectronicConnectionStatus;
 }
 
