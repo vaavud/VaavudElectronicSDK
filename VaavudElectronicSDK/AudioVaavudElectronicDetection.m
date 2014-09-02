@@ -9,7 +9,7 @@
 #import "AudioVaavudElectronicDetection.h"
 #import "AudioManager.h"
 
-# define VAAVUD_NOISE_MAXIMUM 0.018
+# define VAAVUD_NOISE_PP_MAXIMUM 0.01
 # define NUMBER_OF_SAMPLES 20
 
 @interface AudioVaavudElectronicDetection() <EZMicrophoneDelegate>
@@ -22,7 +22,8 @@
 
 @property (nonatomic) NSUInteger sampleCounter;
 @property (nonatomic) float noiseMax;
-
+@property (nonatomic) float noiseMin;
+@property (nonatomic) BOOL samplingMicrophoneActice;
 
 
 @end
@@ -51,12 +52,14 @@
         
         // Create an instance of the microphone and tell it to use this object as the delegate
         self.microphone = [EZMicrophone microphoneWithDelegate:self];
-
+        
+        self.samplingMicrophoneActice = NO;
         
         // INITIALIZE CHECK;
+        
         [self checkIfRegularHeadsetOrVaavud];
         
-        self.sampleCounter = NUMBER_OF_SAMPLES + 1;
+        
     }
     
     return  self;
@@ -141,8 +144,21 @@
     
     if ([self isHeadphoneOutAvailable] && [self isHeadphoneMicAvailable]) {
          // take 20 samples (full buffers) from the micrphone and estimate sum. If sum is over a certain threshold it's most likely a microphone because of the low frequency noise.
-        self.noiseMax = 0;
+
         self.sampleCounter = 0;
+        self.samplingMicrophoneActice = YES;
+        
+        float sampleFrequency = 44100;
+        float wantedBufferLength = 512;
+        float bufferDuration = wantedBufferLength / sampleFrequency;
+        
+        NSError* err;
+        [[AVAudioSession sharedInstance] setPreferredIOBufferDuration:bufferDuration error:&err];
+        
+        if (err) {
+            [NSException raise:@"VAEAudioException" format: @"Could not set prefered IOBuffer durration on AVAudioSession. %@", err.description];
+        }
+        
         
         [self.microphone startFetchingAudio];
 
@@ -153,11 +169,14 @@
 
 - (void) endCheckIfRegularHeadSetOrVaavud {
     
+    self.samplingMicrophoneActice = NO;
     [self.microphone stopFetchingAudio];
     
-    NSLog(@"Noise max: %f", self.noiseMax);
+    float noisePP = self.noiseMax - self.noiseMin;
     
-    if (self.noiseMax < VAAVUD_NOISE_MAXIMUM) {
+    NSLog(@"Noise max: %f, min: %f, PP-value: %f", self.noiseMax, self.noiseMin, noisePP);
+    
+    if (noisePP < VAAVUD_NOISE_PP_MAXIMUM) {
         self.vaavudElectronicConnectionStatus = VaavudElectronicConnectionStatusConnected;
         dispatch_async(dispatch_get_main_queue(),^{
             [self.delegate vaavudPlugedIn];
@@ -182,7 +201,7 @@
 withNumberOfChannels:(UInt32)numberOfChannels {
     // Getting audio data as an array of float buffer arrays. What does that mean? Because the audio is coming in as a stereo signal the data is split into a left and right channel. So buffer[0] corresponds to the float* data for the left channel while buffer[1] corresponds to the float* data for the right channel.
     
-    if (self.sampleCounter <= NUMBER_OF_SAMPLES) {
+    if (self.samplingMicrophoneActice) {
         float *bufferArray = buffer[0];
         
         float sum = 0;
@@ -191,14 +210,25 @@ withNumberOfChannels:(UInt32)numberOfChannels {
             sum = sum + bufferArray[i];
         }
         
-        if (fabsf(sum) > self.noiseMax) {
+        
+        if (self.sampleCounter == 0) {
             self.noiseMax = sum;
+            self.noiseMin = sum;
+        } else {
+            if (sum > self.noiseMax) {
+                self.noiseMax = sum;
+            }
+            
+            if (sum < self.noiseMin) {
+                self.noiseMin = sum;
+            }
         }
+        
         
         self.sampleCounter += 1;
         
         
-        NSLog(@"sum value: %f", sum);
+        NSLog(@"sum value: %f with Bufferlength %i", sum, (unsigned int)bufferSize);
         
         
         if (self.sampleCounter == NUMBER_OF_SAMPLES) {
