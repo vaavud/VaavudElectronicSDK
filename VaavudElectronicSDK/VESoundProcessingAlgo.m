@@ -101,7 +101,7 @@
         if ([self detectTick: (int) (counter - lastTick)]) {
             [self.dirDetectionAlgo newTick: (int) (counter - lastTick)];
             
-            NSLog(@"Tick %lu", counter - lastTick);
+//            NSLog(@"Tick %lu", counter - lastTick);
             
             lastTick = counter;
         }
