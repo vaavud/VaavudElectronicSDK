@@ -10,7 +10,7 @@
 #import "VEAudioManager.h"
 
 # define VAAVUD_NOISE_MAXIMUM 0.015
-# define VAAVUD_NOISE_MINIMUM -0.002
+# define VAAVUD_NOISE_MINIMUM -0.005
 # define MAX_CHECKS 5
 # define NUMBER_OF_SAMPLES 40
 
@@ -27,7 +27,6 @@
 @property (nonatomic) float noiseMax;
 @property (nonatomic) float noiseMin;
 @property (nonatomic) BOOL samplingMicrophoneActice;
-@property (atomic) BOOL startupSequence;
 @property (nonatomic) double timer;
 
 
@@ -62,7 +61,6 @@
         
         // INITIALIZE CHECK;
         self.timer = CACurrentMediaTime();
-        self.startupSequence = YES;
         [self startCheckIfRegularHeadsetOrVaavud];
     }
     
@@ -116,7 +114,6 @@
     switch (routeChangeReason) {
             
         case AVAudioSessionRouteChangeReasonOldDeviceUnavailable: {
-            
             self.vaavudElectronicConnectionStatus = VaavudElectronicConnectionStatusNotConnected;
             dispatch_async(dispatch_get_main_queue(),^{
                 [self.delegate deviceWasUnpluged];
@@ -131,7 +128,6 @@
                 });
                 
                 self.timer = CACurrentMediaTime();
-                self.startupSequence = NO;
                 [self startCheckIfRegularHeadsetOrVaavud];
             }
             
@@ -182,17 +178,14 @@
         
         self.vaavudElectronicConnectionStatus = VaavudElectronicConnectionStatusNotConnected;
         
-        if (!self.startupSequence) {
-            dispatch_async(dispatch_get_main_queue(),^{
-                [self.delegate notVaavudPlugedIn];
-            });
-        }
+        dispatch_async(dispatch_get_main_queue(),^{
+            [self.delegate notVaavudPlugedIn];
+        });
     }
 }
 
 - (void) endCheckIfRegularHeadSetOrVaavud {
     
-    self.samplingMicrophoneActice = NO;
  //   [self.microphone stopFetchingAudio];
     
     
@@ -201,9 +194,7 @@
     if (self.noiseMax < VAAVUD_NOISE_MAXIMUM && self.noiseMin > VAAVUD_NOISE_MINIMUM) {
         self.vaavudElectronicConnectionStatus = VaavudElectronicConnectionStatusConnected;
             NSLog(@"Vaavud Connected!");
-        dispatch_async(dispatch_get_main_queue(),^{
             [self.delegate vaavudPlugedIn];
-        });
     } else {
         
         if (self.checkCounter < MAX_CHECKS) {
@@ -214,12 +205,7 @@
         self.vaavudElectronicConnectionStatus = VaavudElectronicConnectionStatusNotConnected;
             NSLog(@"Not Vaavud Connected!");
         
-        if (!self.startupSequence) {
-            dispatch_async(dispatch_get_main_queue(),^{
-                [self.delegate notVaavudPlugedIn];
-            });
-        }
-
+        [self.delegate notVaavudPlugedIn];
     }
     
     NSLog(@"timePassed %f", CACurrentMediaTime() - self.timer);
@@ -229,7 +215,7 @@
 
 /* delegate method - Feed microphone data to sound-processor and plot */
 #pragma mark - EZMicrophoneDelegate
-#warning Thread Safety
+// #warning Thread Safety
 // Note that any callback that provides streamed audio data (like streaming microphone input) happens on a separate audio thread that should not be blocked. When we feed audio data into any of the UI components we need to explicity create a GCD block on the main thread to properly get the UI to work.
 -(void)microphone:(EZMicrophone *)microphone
  hasAudioReceived:(float **)buffer
@@ -264,11 +250,15 @@ withNumberOfChannels:(UInt32)numberOfChannels {
         self.sampleCounter += 1;
         
         
-        //NSLog(@"sum value: %f with Bufferlength %i", sum, (unsigned int)bufferSize);
+        NSLog(@"sum value: %f with Bufferlength %i", sum, (unsigned int)bufferSize);
         
         
         if (self.sampleCounter == NUMBER_OF_SAMPLES) {
-            [self endCheckIfRegularHeadSetOrVaavud];
+            self.samplingMicrophoneActice = NO;
+            
+            dispatch_async(dispatch_get_main_queue(),^{
+                [self endCheckIfRegularHeadSetOrVaavud];
+            });
         }
         
         
