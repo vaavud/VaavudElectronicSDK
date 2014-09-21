@@ -173,11 +173,14 @@
             
         case AVAudioSessionRouteChangeReasonOldDeviceUnavailable: {
             
+            
+            
             if (self.deviceConnected) {
+                self.deviceConnected = NO;
+                
                 dispatch_async(dispatch_get_main_queue(),^{
                     [self.delegate deviceDisconnectedTypeSleipnir: self.sleipnirAvailable]; // Important to send update beforesetting availablity
                     [self updateSleipnirAvailable: NO];
-                    self.deviceConnected = NO;
                 });
             }
             
