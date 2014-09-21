@@ -10,10 +10,31 @@
 
 @protocol AudioVaavudElectronicDetectionDelegate <NSObject>
 
-- (void) devicePlugedInChecking;
-- (void) vaavudPlugedIn;
-- (void) notVaavudPlugedIn;
-- (void) deviceWasUnpluged;
+
+/**
+ 
+ @param available is true if the Sliepnir wind meter is available to start measureing.
+ */
+- (void) sleipnirAvailabliltyChanged: (BOOL) available;
+
+/**
+ called when a device (jack-plug) is inserted into the jack-plug
+ @param available is true if the Sliepnir wind meter is available to start measureing.
+ */
+- (void) deviceConnectedTypeSleipnir: (BOOL) sleipnir;
+
+/**
+ called when a device is removed from the jack-plug
+ @param sleipnir is true if it were a Sliepnir wind meter that were disconnected.
+ */
+- (void) deviceDisconnectedTypeSleipnir: (BOOL) sleipnir;
+
+/**
+ called when a audio route changes and a new device is pluged in, 
+ starts checkking if it's a sleipnir.
+ */
+- (void) deviceConnectedChecking;
+
 
 @end
 
@@ -23,6 +44,6 @@
 // Initializer
 - (id) initWithDelegate:(id<AudioVaavudElectronicDetectionDelegate>)delegate;
 
-@property (nonatomic, readonly) VaavudElectronicConnectionStatus vaavudElectronicConnectionStatus;
+@property (nonatomic, readonly) BOOL sleipnirAvailable;
 
 @end

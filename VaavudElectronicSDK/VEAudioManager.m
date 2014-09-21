@@ -92,9 +92,7 @@
     
     self.askedToMeasure = YES;
     
-//    [self startInternal];
-    
-    if ([self.delegate vaavudElectronicConnectionStatus] == VaavudElectronicConnectionStatusConnected) {
+    if (self.delegate.sleipnirAvailable) {
         [self startInternal];
         
     }
@@ -136,21 +134,17 @@
 }
 
 
-- (void) deviceWasUnpluged {
-    
-    [self returnVolumeToInitialState];
-    if (self.algorithmActice) {
-        [self stopInternal];
+- (void) sleipnirAvailabliltyChanged: (BOOL) available {
+    if (available) {
+        if (self.askedToMeasure) {
+            [self startInternal];
+        }
+    } else {
+        [self returnVolumeToInitialState];
+        if (self.algorithmActice) {
+            [self stopInternal];
+        }
     }
-    
-}
-
-- (void) vaavudPlugedIn {
-    
-    if (self.askedToMeasure) {
-        [self startInternal];
-    }
-    
 }
 
 

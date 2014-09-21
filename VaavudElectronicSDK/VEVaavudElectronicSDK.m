@@ -59,9 +59,10 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 }
 
 
-- (VaavudElectronicConnectionStatus) vaavudElectronicConnectionStatus {
-    return self.AVElectronicDetection.vaavudElectronicConnectionStatus;
+- (BOOL) sleipnirAvailable {
+    return self.AVElectronicDetection.sleipnirAvailable;
 }
+
 
 
 /* add listener of heading and windspeed information */
@@ -157,42 +158,38 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 }
 
 
-- (void) devicePlugedInChecking {
+- (void) sleipnirAvailabliltyChanged: (BOOL) available {
+    
+    [self.audioManager sleipnirAvailabliltyChanged: available];
     
     for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(devicePlugedInChecking)]) {
-            [delegate devicePlugedInChecking];
+        if ([delegate respondsToSelector:@selector(sleipnirAvailabliltyChanged:)]) {
+            [delegate sleipnirAvailabliltyChanged: available];
         }
     }
 }
 
-
-- (void) vaavudPlugedIn {
-    
-    [self.audioManager vaavudPlugedIn];
-    
-    
+- (void) deviceConnectedTypeSleipnir: (BOOL) sleipnir {
     for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(vaavudPlugedIn)]) {
-            [delegate vaavudPlugedIn];
-        }
-    }
-}
-- (void) deviceWasUnpluged {
-    
-    [self.audioManager deviceWasUnpluged];
-    
-    for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(deviceWasUnpluged)]) {
-            [delegate deviceWasUnpluged];
+        if ([delegate respondsToSelector:@selector(deviceConnectedTypeSleipnir:)]) {
+            [delegate deviceConnectedTypeSleipnir: sleipnir];
         }
     }
 }
 
-- (void) notVaavudPlugedIn {
+- (void) deviceDisconnectedTypeSleipnir: (BOOL) sleipnir {
     for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(notVaavudPlugedIn)]) {
-            [delegate notVaavudPlugedIn];
+        if ([delegate respondsToSelector:@selector(deviceDisconnectedTypeSleipnir:)]) {
+            [delegate deviceDisconnectedTypeSleipnir: sleipnir];
+        }
+    }
+}
+
+- (void) deviceConnectedChecking {
+    
+    for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
+        if ([delegate respondsToSelector:@selector(deviceConnectedChecking)]) {
+            [delegate deviceConnectedChecking];
         }
     }
 }
@@ -200,16 +197,16 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 
 - (void) vaavudStartedMeasureing {
     for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(vaavudStartedMeasureing)]) {
-            [delegate vaavudStartedMeasureing];
+        if ([delegate respondsToSelector:@selector(sleipnirStartedMeasureing)]) {
+            [delegate sleipnirStartedMeasureing];
         }
     }
 }
 
 - (void) vaavudStopMeasureing {
     for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(vaavudStopMeasureing)]) {
-            [delegate vaavudStopMeasureing];
+        if ([delegate respondsToSelector:@selector(sleipnirStopedMeasureing)]) {
+            [delegate sleipnirStopedMeasureing];
         }
     }
 }

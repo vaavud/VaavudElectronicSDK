@@ -11,13 +11,15 @@
 
 # define VAAVUD_NOISE_MAXIMUM 0.015
 # define VAAVUD_NOISE_MINIMUM -0.005
-# define MAX_CHECKS 5
+# define MAX_CHECKS 20
 # define NUMBER_OF_SAMPLES 40
 
 @interface VEAudioVaavudElectronicDetection() <EZMicrophoneDelegate>
 
 @property id<AudioVaavudElectronicDetectionDelegate> delegate;
-@property (nonatomic, readwrite) VaavudElectronicConnectionStatus vaavudElectronicConnectionStatus;
+@property (atomic, readwrite) BOOL sleipnirAvailable;
+@property (atomic) BOOL deviceConnected;
+@property (nonatomic) BOOL audioRouteChange;
 
 /** The microphone component */
 @property (nonatomic,strong) EZMicrophone *microphone;
@@ -37,11 +39,14 @@
 
 -(id)init {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                   reason:@"-init is not a valid initializer for the class AudioVaavudElectronicDetection"
+                                   reason:@"[VESDK] -init is not a valid initializer for the class AudioVaavudElectronicDetection"
                                  userInfo:nil];
     return nil;
 }
 
+/*
+  Initializer - setup and starts device detection
+ */
 - (id) initWithDelegate:(id<AudioVaavudElectronicDetectionDelegate>)delegate {
     self = [super init];
     if (self) {
@@ -50,107 +55,32 @@
                                                      name:AVAudioSessionRouteChangeNotification
                                                    object:nil];
         self.delegate = delegate;
-        
-        self.vaavudElectronicConnectionStatus = VaavudElectronicConnectionStatusUnchecked;
-        
+        self.sleipnirAvailable = NO;
+        self.audioRouteChange = NO;
+        self.samplingMicrophoneActice = NO;
         
         // Create an instance of the microphone and tell it to use this object as the delegate
         self.microphone = [EZMicrophone microphoneWithDelegate:self];
-        
-        self.samplingMicrophoneActice = NO;
-        
-        // INITIALIZE CHECK;
+  
         self.timer = CACurrentMediaTime();
-        [self startCheckIfRegularHeadsetOrVaavud];
+        [self startCheckDeviceAvailabilityByAudioReroute: NO];
     }
     
     return  self;
-    
-    
-}
-
-
-- (BOOL) isHeadphoneOutAvailable {
-    //   Microphone should be on before running script
-    AVAudioSessionRouteDescription *audioRoute = [[AVAudioSession sharedInstance] currentRoute];
-    for (AVAudioSessionPortDescription* desc in [audioRoute outputs]) {
-        if ([[desc portType] isEqualToString:AVAudioSessionPortHeadphones]) {
-            return YES;
-        }
-    }
-    NSLog(@"Not vaavud, failed on headphoneOut");
-    return NO;
-    
-}
-
-
-- (BOOL) isHeadphoneMicAvailable {
-    
-    // For some reason Microphone needs to be active to determine audio route properly.
-    // It works fine the first time the app is started without....
-
-    //   Microphone should be on before running script
-    AVAudioSessionRouteDescription *audioRoute = [[AVAudioSession sharedInstance] currentRoute];
-    for (AVAudioSessionPortDescription* desc in [audioRoute inputs]) {
-        if ([[desc portType] isEqualToString:AVAudioSessionPortHeadsetMic]) {
-            return YES;
-        }
-        
-    }
-    //[self.microphone stopFetchingAudio];
-    NSLog(@"Not vaavud, failed on mic availiable");
-    return NO;
 }
 
 
 
-// If the user pulls out he headphone jack, stop playing.
-- (void)audioRouteChangeListenerCallback:(NSNotification*)notification
-{
-    NSDictionary *interuptionDict = notification.userInfo;
+/*
+ Starts checking for device availability
+ */
+- (void) startCheckDeviceAvailabilityByAudioReroute: (BOOL) audioRouteChange{
     
-    NSInteger routeChangeReason = [[interuptionDict valueForKey:AVAudioSessionRouteChangeReasonKey] integerValue];
+    // resets checkcounter
+    self.checkCounter = 0;
+    self.audioRouteChange = audioRouteChange;
     
-    switch (routeChangeReason) {
-            
-        case AVAudioSessionRouteChangeReasonOldDeviceUnavailable: {
-            self.vaavudElectronicConnectionStatus = VaavudElectronicConnectionStatusNotConnected;
-            dispatch_async(dispatch_get_main_queue(),^{
-                [self.delegate deviceWasUnpluged];
-            });
-            break;
-        }
-        case AVAudioSessionRouteChangeReasonNewDeviceAvailable: {
-            
-            if (self.vaavudElectronicConnectionStatus != VaavudElectronicConnectionStatusConnected) {
-                dispatch_async(dispatch_get_main_queue(),^{
-                    [self.delegate devicePlugedInChecking];
-                });
-                
-                self.timer = CACurrentMediaTime();
-                [self startCheckIfRegularHeadsetOrVaavud];
-            }
-            
-            break;
-        }
-            //        case AVAudioSessionRouteChangeReasonCategoryChange:
-            //            // called at start - also when other audio wants to play
-            //            NSLog(@"AVAudioSessionRouteChangeReasonCategoryChange");
-            //            break;
-            
-        default: {
-            //NSLog(@"default audio stuff");
-        }
-    }
-}
-
-
-- (void) startCheckIfRegularHeadsetOrVaavud {
-     self.checkCounter = 0;
-    [self checkIfRegularHeadsetOrVaavud];
-}
-
-- (void) checkIfRegularHeadsetOrVaavud {
+    // SETUP microphone buffer settings and start microphone
     
     float sampleFrequency = 44100;
     float wantedBufferLength = 512;
@@ -163,54 +93,123 @@
         [NSException raise:@"VAEAudioException" format: @"Could not set prefered IOBuffer durration on AVAudioSession. %@", err.description];
     }
     
-    
+    // start micrphone to be able to deterime if Headphone and microphone is available
     [self.microphone startFetchingAudio];
+
+    // check if headset Out and headset mic is available
     
     if ([self isHeadphoneOutAvailable] && [self isHeadphoneMicAvailable]) {
-         // take 20 samples (full buffers) from the micrphone and estimate sum. If sum is over a certain threshold it's most likely a microphone because of the low frequency noise.
-        
-        self.checkCounter++;
-        self.sampleCounter = 0;
-        self.samplingMicrophoneActice = YES;
-        
-
+        self.deviceConnected = YES;
+        [self startAudioCharacteristicsAnalysis];
+    
     } else {
+        self.deviceConnected = NO;
+        [self updateSleipnirAvailable: NO];
         
-        self.vaavudElectronicConnectionStatus = VaavudElectronicConnectionStatusNotConnected;
-        
-        dispatch_async(dispatch_get_main_queue(),^{
-            [self.delegate notVaavudPlugedIn];
-        });
+        if (self.audioRouteChange) {
+            [self.delegate deviceConnectedTypeSleipnir:NO];
+        }
     }
+    
+    
 }
 
-- (void) endCheckIfRegularHeadSetOrVaavud {
+/*
+ Starts one pass of the checking algorithm
+ */
+
+- (void) startAudioCharacteristicsAnalysis {
     
- //   [self.microphone stopFetchingAudio];
+    self.sampleCounter = 0; // analysis algorithm is reset when samples is set to 0.
+    self.samplingMicrophoneActice = YES; // Since the micrphone is already running this enables the analysis of the data
+    self.checkCounter++;
+}
+
+/*
+ End the Check
+ */
+
+- (void) endAudioCharacteristicsAnalysisPass {
     
-    
-    NSLog(@"Noise max: %f, min: %f", self.noiseMax, self.noiseMin);
+    NSLog(@"[VESDK] Noise max: %f, min: %f", self.noiseMax, self.noiseMin);
     
     if (self.noiseMax < VAAVUD_NOISE_MAXIMUM && self.noiseMin > VAAVUD_NOISE_MINIMUM) {
-        self.vaavudElectronicConnectionStatus = VaavudElectronicConnectionStatusConnected;
-            NSLog(@"Vaavud Connected!");
-            [self.delegate vaavudPlugedIn];
+        
+        if (self.audioRouteChange) {
+            [self.delegate deviceConnectedTypeSleipnir:YES];
+        }
+        [self updateSleipnirAvailable: YES];
+        
     } else {
         
+        // Run extra check?
         if (self.checkCounter < MAX_CHECKS) {
-            [self checkIfRegularHeadsetOrVaavud];
+            [self startAudioCharacteristicsAnalysis];
             return;
         }
         
-        self.vaavudElectronicConnectionStatus = VaavudElectronicConnectionStatusNotConnected;
-            NSLog(@"Not Vaavud Connected!");
-        
-        [self.delegate notVaavudPlugedIn];
+        if (self.audioRouteChange) {
+             [self.delegate deviceConnectedTypeSleipnir:NO];
+        }
+        [self updateSleipnirAvailable: NO];
+        [self.microphone stopFetchingAudio];
     }
     
-    NSLog(@"timePassed %f", CACurrentMediaTime() - self.timer);
+    NSLog(@"[VESDK] timePassed %f", CACurrentMediaTime() - self.timer);
     
 }
+
+
+// #warning Thread Safety
+// Note that any callback that provides streamed audio data (like streaming microphone input) happens on a separate audio thread that should not be blocked. When we feed audio data into any of the UI components we need to explicity create a GCD block on the main thread to properly get the UI to work.
+// If the user pulls out he headphone jack, stop playing.
+- (void)audioRouteChangeListenerCallback:(NSNotification*)notification
+{
+    NSDictionary *interuptionDict = notification.userInfo;
+    
+    NSInteger routeChangeReason = [[interuptionDict valueForKey:AVAudioSessionRouteChangeReasonKey] integerValue];
+    
+    switch (routeChangeReason) {
+            
+        case AVAudioSessionRouteChangeReasonOldDeviceUnavailable: {
+            
+            if (self.deviceConnected) {
+                dispatch_async(dispatch_get_main_queue(),^{
+                    [self.delegate deviceDisconnectedTypeSleipnir: self.sleipnirAvailable]; // Important to send update beforesetting availablity
+                    [self updateSleipnirAvailable: NO];
+                    self.deviceConnected = NO;
+                });
+            }
+            
+            
+
+            break;
+        }
+        case AVAudioSessionRouteChangeReasonNewDeviceAvailable: {
+            
+            self.deviceConnected = YES;
+            
+            if (!self.sleipnirAvailable) {
+                
+                dispatch_async(dispatch_get_main_queue(),^{
+                    [self.delegate deviceConnectedChecking];
+                    
+                    self.timer = CACurrentMediaTime();
+                    [self startCheckDeviceAvailabilityByAudioReroute: YES];
+                });
+            }
+            
+            break;
+        }
+            
+        default: {
+            //NSLog(@"default audio stuff");
+        }
+    }
+}
+
+
+
 
 
 /* delegate method - Feed microphone data to sound-processor and plot */
@@ -250,14 +249,14 @@ withNumberOfChannels:(UInt32)numberOfChannels {
         self.sampleCounter += 1;
         
         
-        NSLog(@"sum value: %f with Bufferlength %i", sum, (unsigned int)bufferSize);
+        NSLog(@"[VESDK] sum value: %f with Bufferlength %i", sum, (unsigned int)bufferSize);
         
         
         if (self.sampleCounter == NUMBER_OF_SAMPLES) {
             self.samplingMicrophoneActice = NO;
             
             dispatch_async(dispatch_get_main_queue(),^{
-                [self endCheckIfRegularHeadSetOrVaavud];
+                [self endAudioCharacteristicsAnalysisPass];
             });
         }
         
@@ -271,6 +270,52 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     
     
 }
+
+
+- (void) updateSleipnirAvailable: (BOOL) available {
+    
+    if (self.sleipnirAvailable != available) {
+        self.sleipnirAvailable = available;
+        
+        [self.delegate sleipnirAvailabliltyChanged:available];
+        
+    }
+    
+}
+
+
+- (BOOL) isHeadphoneOutAvailable {
+    //   Microphone should be on before running script
+    AVAudioSessionRouteDescription *audioRoute = [[AVAudioSession sharedInstance] currentRoute];
+    for (AVAudioSessionPortDescription* desc in [audioRoute outputs]) {
+        if ([[desc portType] isEqualToString:AVAudioSessionPortHeadphones]) {
+            return YES;
+        }
+    }
+    NSLog(@"[VESDK] Not vaavud, failed on headphoneOut");
+    return NO;
+    
+}
+
+
+- (BOOL) isHeadphoneMicAvailable {
+    
+    // For some reason Microphone needs to be active to determine audio route properly.
+    // It works fine the first time the app is started without....
+    
+    //   Microphone should be on before running script
+    AVAudioSessionRouteDescription *audioRoute = [[AVAudioSession sharedInstance] currentRoute];
+    for (AVAudioSessionPortDescription* desc in [audioRoute inputs]) {
+        if ([[desc portType] isEqualToString:AVAudioSessionPortHeadsetMic]) {
+            return YES;
+        }
+        
+    }
+    //[self.microphone stopFetchingAudio];
+    NSLog(@"[VESDK] Not vaavud, failed on mic availiable");
+    return NO;
+}
+
 
 
 

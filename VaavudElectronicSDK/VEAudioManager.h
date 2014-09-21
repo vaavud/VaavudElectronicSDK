@@ -51,9 +51,7 @@
 // returns the local path of the recording
 - (NSURL*) recordingPath;
 
-- (void) deviceWasUnpluged;
-
-- (void) vaavudPlugedIn;
+- (void) sleipnirAvailabliltyChanged: (BOOL) available ;
 
 - (void) returnVolumeToInitialState;
 

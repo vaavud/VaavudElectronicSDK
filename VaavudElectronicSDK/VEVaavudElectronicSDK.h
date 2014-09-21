@@ -13,32 +13,65 @@
 @protocol VaavudElectronicWindDelegate <NSObject>
 
 @optional
+/**
+ 
+ @param speed is the windspeed in m/s measured.
+ */
 - (void) newSpeed: (NSNumber*) speed;
+
+/**
+ 
+ @param windDirection is the direction where the wind is comming from measured in degrees from 0 to 359.
+ */
 - (void) newWindDirection: (NSNumber*) windDirection;
 
-- (void) devicePlugedInChecking;
-- (void) notVaavudPlugedIn;
-- (void) vaavudPlugedIn;
-- (void) deviceWasUnpluged;
+/**
+ 
+ @param available is true if the Sliepnir wind meter is available to start measureing.
+ */
+- (void) sleipnirAvailabliltyChanged: (BOOL) available;
 
-- (void) vaavudStartedMeasureing;
-- (void) vaavudStopMeasureing;
+/**
+ called when a device (jack-plug) is inserted into the jack-plug
+ @param available is true if the Sliepnir wind meter is available to start measureing.
+ */
+- (void) deviceConnectedTypeSleipnir: (BOOL) sleipnir;
+
+/**
+ called when a device is removed from the jack-plug
+ @param sleipnir is true if it were a Sliepnir wind meter that were disconnected.
+ */
+- (void) deviceDisconnectedTypeSleipnir: (BOOL) sleipnir;
+
+/**
+ called when a audio route changes and a new device is pluged in,
+ starts checkking if it's a sleipnir.
+ */
+- (void) deviceConnectedChecking;
+
+/**
+ if SDK is asked start before device is avilable it will automatically start.
+ is called when the algorithm start measureing and will deliver callbacks.
+ */
+- (void) sleipnirStartedMeasureing;
+
+/**
+ is called when the algorithm stops measureing. ie. if device is removed.
+ */
+- (void) sleipnirStopedMeasureing;
 
 
 @end
 
-typedef NS_ENUM(NSUInteger, VaavudElectronicConnectionStatus) {
-    VaavudElectronicConnectionStatusUnchecked,
-    VaavudElectronicConnectionStatusConnected,
-    VaavudElectronicConnectionStatusNotConnected
-};
 
 @interface VEVaavudElectronicSDK : NSObject
 
 + (VEVaavudElectronicSDK *) sharedVaavudElectronic;
 
-/* What is the current Vaavud Electronic connection status ? Initialize class as soon as possible to start detection*/
-- (VaavudElectronicConnectionStatus) vaavudElectronicConnectionStatus;
+/**
+ is the sleipnir avialable to start measureing?
+ */
+- (BOOL) sleipnirAvailable;
 
 /* add listener of heading, windspeed and device information */
 - (void) addListener:(id <VaavudElectronicWindDelegate>) delegate;
