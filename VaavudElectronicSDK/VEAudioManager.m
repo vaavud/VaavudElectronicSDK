@@ -279,6 +279,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 
 - (void)toggleOutput: (bool) output {
     if (output) {
+        [EZOutput sharedOutput].outputDataSource = self;
         [[EZOutput sharedOutput] startPlayback];
         
     } else {

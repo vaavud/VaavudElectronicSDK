@@ -14,6 +14,7 @@
 - (void) newWindAngleLocal:(NSNumber*) angle;
 - (void) newHeading: (NSNumber*) heading;
 - (void) newMaxAmplitude: (NSNumber*) amplitude;
+- (void) newRecordingReadyToUpload;
 @end
 
 

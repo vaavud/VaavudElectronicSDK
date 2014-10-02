@@ -9,12 +9,24 @@
 #import "VEAudioVaavudElectronicDetection.h"
 #import "VEAudioManager.h"
 
-# define VAAVUD_NOISE_MAXIMUM 0.015
-# define VAAVUD_NOISE_MINIMUM -0.005
-# define MAX_CHECKS 20
+#import <Accelerate/Accelerate.h>
+
+# define VAAVUD_NOISE_MAXIMUM 0.01
+//# define VAAVUD_NOISE_MINIMUM 0.012
+//# define VAAVUD_NOISE_MINIMUM -0.01
+# define VAAVUD_NOISE_MINIMUM 0.01
+# define MAX_CHECKS 5
 # define NUMBER_OF_SAMPLES 40
 
-@interface VEAudioVaavudElectronicDetection() <EZMicrophoneDelegate>
+# define NUMBER_OF_OUTPUT_SIGNAL_SAMPLES 1024
+
+# define NFFT 8192
+# define Log2N 13
+# define sampleFrequency 44100
+
+#define kAudioFilePath @"tempRawAudioFile.wav"
+
+@interface VEAudioVaavudElectronicDetection() <EZMicrophoneDelegate, EZOutputDataSource>
 
 @property id<AudioVaavudElectronicDetectionDelegate> delegate;
 @property (atomic, readwrite) BOOL sleipnirAvailable;
@@ -24,6 +36,11 @@
 /** The microphone component */
 @property (nonatomic,strong) EZMicrophone *microphone;
 
+/** The recorder component */
+@property (nonatomic,strong) EZRecorder *recorder;
+@property (atomic) BOOL recordingActive;
+
+
 @property (nonatomic) NSUInteger sampleCounter;
 @property (nonatomic) NSUInteger checkCounter;
 @property (nonatomic) float noiseMax;
@@ -31,10 +48,15 @@
 @property (nonatomic) BOOL samplingMicrophoneActice;
 @property (nonatomic) double timer;
 
-
 @end
 
-@implementation VEAudioVaavudElectronicDetection
+@implementation VEAudioVaavudElectronicDetection {
+    float outputSignalLeft[NUMBER_OF_OUTPUT_SIGNAL_SAMPLES];
+    float outputSignalRight[NUMBER_OF_OUTPUT_SIGNAL_SAMPLES];
+    int outputSignalIndex;
+    float micSignal[NFFT];
+    int micSignalIndex;
+}
 
 
 -(id)init {
@@ -61,14 +83,52 @@
         
         // Create an instance of the microphone and tell it to use this object as the delegate
         self.microphone = [EZMicrophone microphoneWithDelegate:self];
-  
+        [self.microphone setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionMicrophone]];
+        
         self.timer = CACurrentMediaTime();
         [self startCheckDeviceAvailabilityByAudioReroute: NO];
+        
+        self.recordingActive = NO;
+        
+        // Assign a delegate to the shared instance of the output to provide the output audio data
+//        [EZOutput sharedOutput].outputDataSource = self;
+        
+        // set the output format from the audioOutput stream.
+//        [[EZOutput sharedOutput] setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionOutput]];
+        //    [EZAudio printASBD: [[EZOutput sharedOutput] audioStreamBasicDescription]];
+        
+        [self generateOutputSignal];
+        
     }
     
     return  self;
 }
 
+
+- (void) generateOutputSignal {
+    
+    outputSignalIndex = 0;
+    
+    float period[] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024};
+//    float period[] = {64};
+
+    int nSignals = 10;
+    
+    for (int i = 0; i < NUMBER_OF_OUTPUT_SIGNAL_SAMPLES; i++) {
+        for (int j = 0; j < nSignals; j++) {
+            outputSignalLeft[outputSignalIndex] += sinf(2*M_PI * (float) i / period[j]);
+            outputSignalRight[outputSignalIndex] += sinf(2*M_PI * ((float) i / period[j] + period[j]/2));
+        }
+        
+        // scale signal
+        outputSignalLeft[outputSignalIndex] = outputSignalLeft[outputSignalIndex]/5;
+        outputSignalRight[outputSignalIndex] = outputSignalRight[outputSignalIndex]/5;
+        
+        outputSignalIndex++;
+    }
+    
+    outputSignalIndex = 0;
+}
 
 
 /*
@@ -78,11 +138,13 @@
     
     // resets checkcounter
     self.checkCounter = 0;
+    
+    micSignalIndex = 0;
+    
     self.audioRouteChange = audioRouteChange;
     
     // SETUP microphone buffer settings and start microphone
     
-    float sampleFrequency = 44100;
     float wantedBufferLength = 512;
     float bufferDuration = wantedBufferLength / sampleFrequency;
     
@@ -92,15 +154,23 @@
     if (err) {
         [NSException raise:@"VAEAudioException" format: @"Could not set prefered IOBuffer durration on AVAudioSession. %@", err.description];
     }
+    [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
+
     
-    // start micrphone to be able to deterime if Headphone and microphone is available
+    // start microphone to be able to deterime if Headphone and microphone is available
     [self.microphone startFetchingAudio];
 
     // check if headset Out and headset mic is available
     
     if ([self isHeadphoneOutAvailable] && [self isHeadphoneMicAvailable]) {
         self.deviceConnected = YES;
+        
+//        [[EZOutput sharedOutput] startPlayback];
+        
+        [self startRecording];
+
         [self startAudioCharacteristicsAnalysis];
+
     
     } else {
         self.deviceConnected = NO;
@@ -110,7 +180,6 @@
             [self.delegate deviceConnectedTypeSleipnir:NO];
         }
     }
-    
     
 }
 
@@ -134,6 +203,7 @@
     NSLog(@"[VESDK] Noise max: %f, min: %f", self.noiseMax, self.noiseMin);
     
     if (self.noiseMax < VAAVUD_NOISE_MAXIMUM && self.noiseMin > VAAVUD_NOISE_MINIMUM) {
+    //if (YES) {
         
         if (self.audioRouteChange) {
             [self.delegate deviceConnectedTypeSleipnir:YES];
@@ -148,6 +218,26 @@
             return;
         }
         
+        
+////        TEMPORATY ACCEPT AFTER CHECK
+////        [[EZOutput sharedOutput] stopPlayback];
+//        [self endRecording];
+//        [self.delegate newRecordingReadyToUpload];
+//        
+//        
+//        if (self.audioRouteChange) {
+//            [self.delegate deviceConnectedTypeSleipnir:YES];
+//        }
+//        [self updateSleipnirAvailable: YES];
+//        
+//        NSLog(@"[VESDK] timePassed %f", CACurrentMediaTime() - self.timer);
+//        
+//
+//
+//        
+//        return;
+        // END REMOPRATY
+        
         if (self.audioRouteChange) {
              [self.delegate deviceConnectedTypeSleipnir:NO];
         }
@@ -155,9 +245,56 @@
         [self.microphone stopFetchingAudio];
     }
     
-    NSLog(@"[VESDK] timePassed %f", CACurrentMediaTime() - self.timer);
+    [self.delegate newRecordingReadyToUpload];
+    
+//    for (int i = 0; i < NFFT; i++) {
+//        NSLog(@"MicSignal index: %i, %f", i, micSignal[i]);
+//    }
+    
+    [self processMicSample];
+    
     
 }
+
+
+- (void) processMicSample {
+    float magnitude[NFFT/2];
+    
+    FFTSetup fftSetup = vDSP_create_fftsetup(Log2N, FFT_RADIX2);
+    COMPLEX_SPLIT A;
+    COMPLEX_SPLIT B;
+    A.realp = (float*) malloc(sizeof(float) * NFFT/2);
+    A.imagp = (float*) malloc(sizeof(float) * NFFT/2);
+    
+    B.realp = (float*) malloc(sizeof(float) * NFFT/2);
+    B.imagp = (float*) malloc(sizeof(float) * NFFT/2);
+    
+    
+    /* Carry out a Forward and Inverse FFT transform. */
+    vDSP_ctoz((COMPLEX *) micSignal, 2, &A, 1, NFFT/2);
+    vDSP_fft_zrip(fftSetup, &A, 1, Log2N, FFT_FORWARD);
+    
+    
+    
+    magnitude[0] = sqrtf(A.realp[0]*A.realp[0]);
+    
+    
+    //get magnitude;
+    for(int i = 1; i < NFFT/2; i++){
+        magnitude[i] = sqrtf(A.realp[i]*A.realp[i] + A.imagp[i] * A.imagp[i]);
+    }
+    
+    for (int i = 0 ;i < 66; i++) {
+        NSLog(@"mag %i : %f", i, magnitude[i]);
+    }
+    
+    
+    free(A.realp);
+    free(A.imagp);
+    free(B.realp);
+    free(B.imagp);
+}
+
 
 
 // #warning Thread Safety
@@ -173,8 +310,6 @@
             
         case AVAudioSessionRouteChangeReasonOldDeviceUnavailable: {
             
-            
-            
             if (self.deviceConnected) {
                 self.deviceConnected = NO;
                 
@@ -184,8 +319,6 @@
                 });
             }
             
-            
-
             break;
         }
         case AVAudioSessionRouteChangeReasonNewDeviceAvailable: {
@@ -201,7 +334,6 @@
                     [self startCheckDeviceAvailabilityByAudioReroute: YES];
                 });
             }
-            
             break;
         }
             
@@ -225,14 +357,29 @@
 withNumberOfChannels:(UInt32)numberOfChannels {
     // Getting audio data as an array of float buffer arrays. What does that mean? Because the audio is coming in as a stereo signal the data is split into a left and right channel. So buffer[0] corresponds to the float* data for the left channel while buffer[1] corresponds to the float* data for the right channel.
     
+
+    
+    
     if (self.samplingMicrophoneActice) {
-        float *bufferArray = buffer[0];
+        float *bufferArray = *buffer;
         
-        float sum = 0;
         
-        for (int i = 0; i < bufferSize; i++) {
-            sum = sum + bufferArray[i];
+        if (self.sampleCounter > 10) {
+            if (micSignalIndex < NFFT) {
+                for (int i = 0; i < bufferSize; i++) {
+                    micSignal[micSignalIndex] = bufferArray[i]*1000;
+                    micSignalIndex++;
+                }
+            }
         }
+    
+        float max;
+        float min;
+        float sum;
+        
+        vDSP_maxv(bufferArray, 1, &max, bufferSize);
+        vDSP_minv(bufferArray, 1, &min, bufferSize);
+        vDSP_sve(bufferArray, 1, &sum, bufferSize);
         
         
         if (self.sampleCounter == 0) {
@@ -252,8 +399,9 @@ withNumberOfChannels:(UInt32)numberOfChannels {
         self.sampleCounter += 1;
         
         
-        NSLog(@"[VESDK] sum value: %f with Bufferlength %i", sum, (unsigned int)bufferSize);
+//        NSLog(@"[VESDK] sum value: %f with Bufferlength %i", sum, (unsigned int)bufferSize);
         
+//        NSLog(@"[VESDK] min: %f max %f", min, max);
         
         if (self.sampleCounter == NUMBER_OF_SAMPLES) {
             self.samplingMicrophoneActice = NO;
@@ -266,13 +414,22 @@ withNumberOfChannels:(UInt32)numberOfChannels {
         
     }
     
-//    // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
-//    dispatch_async(dispatch_get_main_queue(),^{
-//        
-//    });
-    
-    
 }
+
+
+// delegate method - feed microphone data to recorder (audio file).
+-(void)microphone:(EZMicrophone *)microphone
+    hasBufferList:(AudioBufferList *)bufferList
+   withBufferSize:(UInt32)bufferSize
+withNumberOfChannels:(UInt32)numberOfChannels {
+    
+    // Getting audio data as a buffer list that can be directly fed into the EZRecorder. This is happening on the audio thread - any UI updating needs a GCD main queue block. This will keep appending data to the tail of the audio file.
+    if( self.recordingActive ){
+        [self.recorder appendDataFromBufferList:bufferList
+                                 withBufferSize:bufferSize];
+    }
+}
+
 
 
 - (void) updateSleipnirAvailable: (BOOL) available {
@@ -319,6 +476,135 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     return NO;
 }
 
+
+
+// Starts the internal soundfile recorder
+- (void) startRecording {
+    // Create the recorder
+    self.recorder = [EZRecorder recorderWithDestinationURL:[self recordingFilePathURL]
+                                              sourceFormat:self.microphone.audioStreamBasicDescription
+                                       destinationFileType:EZRecorderFileTypeWAV];
+    
+    self.recordingActive = YES;
+}
+
+// Ends the internal soundfile recorder
+- (void) endRecording {
+    self.recordingActive = NO;
+    [self.recorder closeAudioFile];
+    self.recorder = nil;
+    
+}
+
+
+// returns the local path of the recording
+- (NSURL*) recordingPath {
+    return [self recordingFilePathURL];
+}
+
+
+
+/**
+ OUTPUT
+ */
+
+// Use the AudioBufferList datasource method to read from an EZAudioFile
+-(void)             output:(EZOutput *)output
+ shouldFillAudioBufferList:(AudioBufferList *)audioBufferList
+        withNumberOfFrames:(UInt32)frames
+{
+    
+    // This is a mono tone generator so we only need the first buffer
+	const int channelLeft = 0;
+	const int channelRight = 1;
+    
+    Float32 *bufferLeft = (Float32 *)audioBufferList->mBuffers[channelLeft].mData;
+    Float32 *bufferRight = (Float32 *)audioBufferList->mBuffers[channelRight].mData;
+    
+    // Generate the samples
+	for (UInt32 frame = 0; frame < frames; frame++)
+	{
+		bufferLeft[frame] = outputSignalLeft[outputSignalIndex];
+        bufferRight[frame] = -outputSignalLeft[outputSignalIndex];
+        
+        outputSignalIndex++;
+        
+        if (outputSignalIndex == NUMBER_OF_OUTPUT_SIGNAL_SAMPLES) {
+            outputSignalIndex = 0;
+        }
+        
+        //bufferLeft[frame] = [self randomNumber];
+        //bufferRight[frame] = [self randomNumber];
+	}
+    
+}
+
+- (float) randomNumber {
+    return (( (float) rand() / (float) RAND_MAX ) - 0.5) * 2;
+}
+
+
+
+/**
+ EZaudio File Utility functions
+ */
+
+-(NSString*)applicationDocumentsDirectory
+{
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
+    return basePath;
+}
+
+-(NSURL*)recordingFilePathURL {
+    return [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%@",
+                                   [self applicationDocumentsDirectory],
+                                   kAudioFilePath]];
+}
+
+
+
+
+- (AudioStreamBasicDescription) getAudioStreamBasicDiscriptionOutput {
+    
+    size_t bytesPerSample = sizeof (AudioUnitSampleType);
+    AudioStreamBasicDescription stereoStreamFormat = {0};
+    
+    
+    stereoStreamFormat.mFormatID          = kAudioFormatLinearPCM;
+    //    stereoStreamFormat.mFormatFlags       = kAudioFormatFlagsAudioUnitCanonical;
+    stereoStreamFormat.mFormatFlags       = kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved;
+    stereoStreamFormat.mBytesPerPacket    = bytesPerSample;
+    stereoStreamFormat.mBytesPerFrame     = bytesPerSample;
+    stereoStreamFormat.mFramesPerPacket   = 1;
+    stereoStreamFormat.mBitsPerChannel    = 8 * bytesPerSample;
+    stereoStreamFormat.mChannelsPerFrame  = 2;           // 2 indicates stereo
+    stereoStreamFormat.mSampleRate        = sampleFrequency;
+    
+    return stereoStreamFormat;
+    
+}
+
+
+- (AudioStreamBasicDescription) getAudioStreamBasicDiscriptionMicrophone {
+    
+    size_t bytesPerSample = sizeof (AudioUnitSampleType);
+    AudioStreamBasicDescription stereoStreamFormat = {0};
+    
+    
+    stereoStreamFormat.mFormatID          = kAudioFormatLinearPCM;
+    //    stereoStreamFormat.mFormatFlags       = kAudioFormatFlagsAudioUnitCanonical;
+    stereoStreamFormat.mFormatFlags       = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked | kAudioFormatFlagIsNonInterleaved;
+    stereoStreamFormat.mBytesPerPacket    = bytesPerSample;
+    stereoStreamFormat.mBytesPerFrame     = bytesPerSample;
+    stereoStreamFormat.mFramesPerPacket   = 1;
+    stereoStreamFormat.mBitsPerChannel    = 8 * bytesPerSample;
+    stereoStreamFormat.mChannelsPerFrame  = 2;           // 2 indicates stereo
+    stereoStreamFormat.mSampleRate        = sampleFrequency;
+    
+    return stereoStreamFormat;
+    
+}
 
 
 

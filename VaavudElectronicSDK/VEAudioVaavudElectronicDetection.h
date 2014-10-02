@@ -35,6 +35,10 @@
  */
 - (void) deviceConnectedChecking;
 
+/**
+ called when a audiofile is ready to be uploaded for analysis purposes
+ */
+- (void) newRecordingReadyToUpload;
 
 @end
 

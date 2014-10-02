@@ -93,13 +93,16 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 
 
 - (void) newSpeed: (NSNumber*) speed {
+    
+    // REFACTOR with better naming / logic
+    NSNumber *windspeed = [self frequencyToWindspeed: speed];
+    
     for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(newSpeed:)]) {
-            [delegate newSpeed: speed];
+            [delegate newSpeed: windspeed];
         }
     }
 }
-
 
 
 - (void) newWindDirection: (NSNumber*) speed {
@@ -212,6 +215,14 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 }
 
 
+- (void) newRecordingReadyToUpload {
+    for (id<VaavudElectronicAnalysisDelegate> delegate in self.VaaElecAnalysisDelegates) {
+        if ([delegate respondsToSelector:@selector(newRecordingReadyToUpload)]){
+            [delegate newRecordingReadyToUpload];
+        }
+    }
+}
+
 
 
 
@@ -235,6 +246,11 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 
 - (void) returnVolumeToInitialState {
     [self.audioManager returnVolumeToInitialState];
+}
+
+
+- (NSNumber*) frequencyToWindspeed: (NSNumber *) frequency{
+    return [NSNumber numberWithFloat: frequency.floatValue * 0.31];
 }
 
 
