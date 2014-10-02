@@ -12,21 +12,17 @@
 #import <Accelerate/Accelerate.h>
 
 # define VAAVUD_NOISE_MAXIMUM 0.01
-//# define VAAVUD_NOISE_MINIMUM 0.012
-//# define VAAVUD_NOISE_MINIMUM -0.01
-# define VAAVUD_NOISE_MINIMUM 0.01
-# define MAX_CHECKS 5
-# define NUMBER_OF_SAMPLES 40
 
 # define NUMBER_OF_OUTPUT_SIGNAL_SAMPLES 1024
 
+# define BufferLength 256
 # define NFFT 8192
 # define Log2N 13
 # define sampleFrequency 44100
 
 #define kAudioFilePath @"tempRawAudioFile.wav"
 
-@interface VEAudioVaavudElectronicDetection() <EZMicrophoneDelegate, EZOutputDataSource>
+@interface VEAudioVaavudElectronicDetection() <EZMicrophoneDelegate>
 
 @property id<AudioVaavudElectronicDetectionDelegate> delegate;
 @property (atomic, readwrite) BOOL sleipnirAvailable;
@@ -42,18 +38,12 @@
 
 
 @property (nonatomic) NSUInteger sampleCounter;
-@property (nonatomic) NSUInteger checkCounter;
-@property (nonatomic) float noiseMax;
-@property (nonatomic) float noiseMin;
 @property (nonatomic) BOOL samplingMicrophoneActice;
 @property (nonatomic) double timer;
 
 @end
 
 @implementation VEAudioVaavudElectronicDetection {
-    float outputSignalLeft[NUMBER_OF_OUTPUT_SIGNAL_SAMPLES];
-    float outputSignalRight[NUMBER_OF_OUTPUT_SIGNAL_SAMPLES];
-    int outputSignalIndex;
     float micSignal[NFFT];
     int micSignalIndex;
 }
@@ -80,24 +70,16 @@
         self.sleipnirAvailable = NO;
         self.audioRouteChange = NO;
         self.samplingMicrophoneActice = NO;
+        self.recordingActive = NO;
         
         // Create an instance of the microphone and tell it to use this object as the delegate
         self.microphone = [EZMicrophone microphoneWithDelegate:self];
+        [self setupMicrophone];
         [self.microphone setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionMicrophone]];
+        
         
         self.timer = CACurrentMediaTime();
         [self startCheckDeviceAvailabilityByAudioReroute: NO];
-        
-        self.recordingActive = NO;
-        
-        // Assign a delegate to the shared instance of the output to provide the output audio data
-//        [EZOutput sharedOutput].outputDataSource = self;
-        
-        // set the output format from the audioOutput stream.
-//        [[EZOutput sharedOutput] setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionOutput]];
-        //    [EZAudio printASBD: [[EZOutput sharedOutput] audioStreamBasicDescription]];
-        
-        [self generateOutputSignal];
         
     }
     
@@ -105,57 +87,15 @@
 }
 
 
-- (void) generateOutputSignal {
-    
-    outputSignalIndex = 0;
-    
-    float period[] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024};
-//    float period[] = {64};
-
-    int nSignals = 10;
-    
-    for (int i = 0; i < NUMBER_OF_OUTPUT_SIGNAL_SAMPLES; i++) {
-        for (int j = 0; j < nSignals; j++) {
-            outputSignalLeft[outputSignalIndex] += sinf(2*M_PI * (float) i / period[j]);
-            outputSignalRight[outputSignalIndex] += sinf(2*M_PI * ((float) i / period[j] + period[j]/2));
-        }
-        
-        // scale signal
-        outputSignalLeft[outputSignalIndex] = outputSignalLeft[outputSignalIndex]/5;
-        outputSignalRight[outputSignalIndex] = outputSignalRight[outputSignalIndex]/5;
-        
-        outputSignalIndex++;
-    }
-    
-    outputSignalIndex = 0;
-}
-
 
 /*
  Starts checking for device availability
  */
 - (void) startCheckDeviceAvailabilityByAudioReroute: (BOOL) audioRouteChange{
     
-    // resets checkcounter
-    self.checkCounter = 0;
-    
     micSignalIndex = 0;
     
     self.audioRouteChange = audioRouteChange;
-    
-    // SETUP microphone buffer settings and start microphone
-    
-    float wantedBufferLength = 512;
-    float bufferDuration = wantedBufferLength / sampleFrequency;
-    
-    NSError* err;
-    [[AVAudioSession sharedInstance] setPreferredIOBufferDuration:bufferDuration error:&err];
-    
-    if (err) {
-        [NSException raise:@"VAEAudioException" format: @"Could not set prefered IOBuffer durration on AVAudioSession. %@", err.description];
-    }
-    [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
-
     
     // start microphone to be able to deterime if Headphone and microphone is available
     [self.microphone startFetchingAudio];
@@ -165,11 +105,9 @@
     if ([self isHeadphoneOutAvailable] && [self isHeadphoneMicAvailable]) {
         self.deviceConnected = YES;
         
-//        [[EZOutput sharedOutput] startPlayback];
-        
         [self startRecording];
-
-        [self startAudioCharacteristicsAnalysis];
+        self.sampleCounter = 0; // analysis algorithm is reset when samples is set to 0.
+        self.samplingMicrophoneActice = YES; // Since the micrphone is already running this enables the analysis of the data
 
     
     } else {
@@ -183,16 +121,26 @@
     
 }
 
+
 /*
- Starts one pass of the checking algorithm
+ Setup microphone details
  */
 
-- (void) startAudioCharacteristicsAnalysis {
+- (void) setupMicrophone {
+    // SETUP microphone buffer settings and start microphone
     
-    self.sampleCounter = 0; // analysis algorithm is reset when samples is set to 0.
-    self.samplingMicrophoneActice = YES; // Since the micrphone is already running this enables the analysis of the data
-    self.checkCounter++;
+    float bufferDuration = (float) BufferLength / sampleFrequency;
+    
+    NSError* err;
+    [[AVAudioSession sharedInstance] setPreferredIOBufferDuration:bufferDuration error:&err];
+    
+    if (err) {
+        [NSException raise:@"VAEAudioException" format: @"Could not set prefered IOBuffer durration on AVAudioSession. %@", err.description];
+    }
+    [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
+    
 }
+
 
 /*
  End the Check
@@ -200,10 +148,8 @@
 
 - (void) endAudioCharacteristicsAnalysisPass {
     
-    NSLog(@"[VESDK] Noise max: %f, min: %f", self.noiseMax, self.noiseMin);
     
-    if (self.noiseMax < VAAVUD_NOISE_MAXIMUM && self.noiseMin > VAAVUD_NOISE_MINIMUM) {
-    //if (YES) {
+    if (YES) {
         
         if (self.audioRouteChange) {
             [self.delegate deviceConnectedTypeSleipnir:YES];
@@ -211,32 +157,6 @@
         [self updateSleipnirAvailable: YES];
         
     } else {
-        
-        // Run extra check?
-        if (self.checkCounter < MAX_CHECKS) {
-            [self startAudioCharacteristicsAnalysis];
-            return;
-        }
-        
-        
-////        TEMPORATY ACCEPT AFTER CHECK
-////        [[EZOutput sharedOutput] stopPlayback];
-//        [self endRecording];
-//        [self.delegate newRecordingReadyToUpload];
-//        
-//        
-//        if (self.audioRouteChange) {
-//            [self.delegate deviceConnectedTypeSleipnir:YES];
-//        }
-//        [self updateSleipnirAvailable: YES];
-//        
-//        NSLog(@"[VESDK] timePassed %f", CACurrentMediaTime() - self.timer);
-//        
-//
-//
-//        
-//        return;
-        // END REMOPRATY
         
         if (self.audioRouteChange) {
              [self.delegate deviceConnectedTypeSleipnir:NO];
@@ -246,11 +166,6 @@
     }
     
     [self.delegate newRecordingReadyToUpload];
-    
-//    for (int i = 0; i < NFFT; i++) {
-//        NSLog(@"MicSignal index: %i, %f", i, micSignal[i]);
-//    }
-    
     [self processMicSample];
     
     
@@ -382,28 +297,12 @@ withNumberOfChannels:(UInt32)numberOfChannels {
         vDSP_sve(bufferArray, 1, &sum, bufferSize);
         
         
-        if (self.sampleCounter == 0) {
-            self.noiseMax = sum;
-            self.noiseMin = sum;
-        } else {
-            if (sum > self.noiseMax) {
-                self.noiseMax = sum;
-            }
-            
-            if (sum < self.noiseMin) {
-                self.noiseMin = sum;
-            }
-        }
-        
-        
         self.sampleCounter += 1;
         
         
-//        NSLog(@"[VESDK] sum value: %f with Bufferlength %i", sum, (unsigned int)bufferSize);
+        NSLog(@"[VESDK] sum value: %f with Bufferlength %i", sum, (unsigned int)bufferSize);
         
-//        NSLog(@"[VESDK] min: %f max %f", min, max);
-        
-        if (self.sampleCounter == NUMBER_OF_SAMPLES) {
+        if (self.sampleCounter == 100) {
             self.samplingMicrophoneActice = NO;
             
             dispatch_async(dispatch_get_main_queue(),^{
@@ -500,47 +399,6 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 // returns the local path of the recording
 - (NSURL*) recordingPath {
     return [self recordingFilePathURL];
-}
-
-
-
-/**
- OUTPUT
- */
-
-// Use the AudioBufferList datasource method to read from an EZAudioFile
--(void)             output:(EZOutput *)output
- shouldFillAudioBufferList:(AudioBufferList *)audioBufferList
-        withNumberOfFrames:(UInt32)frames
-{
-    
-    // This is a mono tone generator so we only need the first buffer
-	const int channelLeft = 0;
-	const int channelRight = 1;
-    
-    Float32 *bufferLeft = (Float32 *)audioBufferList->mBuffers[channelLeft].mData;
-    Float32 *bufferRight = (Float32 *)audioBufferList->mBuffers[channelRight].mData;
-    
-    // Generate the samples
-	for (UInt32 frame = 0; frame < frames; frame++)
-	{
-		bufferLeft[frame] = outputSignalLeft[outputSignalIndex];
-        bufferRight[frame] = -outputSignalLeft[outputSignalIndex];
-        
-        outputSignalIndex++;
-        
-        if (outputSignalIndex == NUMBER_OF_OUTPUT_SIGNAL_SAMPLES) {
-            outputSignalIndex = 0;
-        }
-        
-        //bufferLeft[frame] = [self randomNumber];
-        //bufferRight[frame] = [self randomNumber];
-	}
-    
-}
-
-- (float) randomNumber {
-    return (( (float) rand() / (float) RAND_MAX ) - 0.5) * 2;
 }
 
 
