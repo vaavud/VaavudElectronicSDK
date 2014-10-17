@@ -14,6 +14,8 @@
     int mvgDiff[3];
     int mvgDiffSum;
     int lastValue;
+    int gapBlock;
+    int mvgDiffUp;
     unsigned long counter;
     unsigned long lastTick;
     short mvgState;
@@ -44,6 +46,7 @@
     mvgAvgSum = 0;
     mvgDiffSum = 0;
     lastValue = 0;
+    mvgDiffUp = 200;
     
     diffSumRiseThreshold = 800; // STARTING VALUE
     
@@ -129,11 +132,10 @@
 
 - (BOOL) detectTick:(int) sampleSinceTick {
     
-    // NOTE ALL COMPARISON VALUES IS TIMED BY 3
     switch (mvgState) {
         case 0:
-            if (sampleSinceTick < 90) {
-                if (mvgAvgSum < -800 && mvgDiffSum > 200) {
+            if (sampleSinceTick < 70) {
+                if (mvgAvgSum < -810 && mvgDiffSum > 510) {
                     mvgState = 1;
                     diffState = 1;
                     return true;
@@ -143,8 +145,8 @@
             }
             break;
         case 1:
-            if (sampleSinceTick < 70) {
-                if (mvgAvgSum > 800) {
+            if (sampleSinceTick < 60) {
+                if (mvgAvgSum > 810) {
                     mvgState = 0;
                 }
             } else {
@@ -158,10 +160,18 @@
     
     switch (diffState) {
         case 0:
-            if (mvgDiffSum > diffSumRiseThreshold) { // outside 800
-                mvgState = 1;
-                diffState = 1;
-                return  true;
+            if (sampleSinceTick < 100) { // was 170
+                if (mvgAvgSum < -1800) {
+                    mvgState = 1;
+                    diffState = 1;
+                    return  true;
+                }
+            } else {
+                if (mvgDiffSum > 180 && mvgAvgSum < -600) { // diff was 1200
+                    mvgState = 1;
+                    diffState = 1;
+                    return  true;
+                }
             }
             break;
         case 1:
@@ -169,11 +179,28 @@
                 diffState = 2;
             }
             break;
+            
         case 2:
-            if (mvgDiffSum < 500 && mvgAvgSum < 0) { // outside 500
-                diffState = 0;
-                diffSumRiseThreshold = mvgDiffSum * 1.4 + 100;
+            if (mvgAvgSum > 0) {
+                diffState = 3;
             }
+            
+            break;
+        case 3:
+            if (mvgDiffSum < 1050) {
+                diffState = 4;
+                gapBlock = sampleSinceTick * 2.5;
+            }
+        
+        case 4:
+            if (sampleSinceTick > gapBlock) {
+                diffState = 0;
+//                mvgDiffUp = (int) mvgDiffSum * 1.7;
+//                if (mvgDiffUp > 1200)
+//                    mvgDiffUp = 1200;
+                
+            }
+            break;
         default:
             break;
     }

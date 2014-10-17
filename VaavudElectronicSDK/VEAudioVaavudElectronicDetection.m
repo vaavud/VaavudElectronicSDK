@@ -105,7 +105,7 @@
     if ([self isHeadphoneOutAvailable] && [self isHeadphoneMicAvailable]) {
         self.deviceConnected = YES;
         
-        [self startRecording];
+        // OTHER recording doesnt work when active - [self startRecording];
         self.sampleCounter = 0; // analysis algorithm is reset when samples is set to 0.
         self.samplingMicrophoneActice = YES; // Since the micrphone is already running this enables the analysis of the data
 
