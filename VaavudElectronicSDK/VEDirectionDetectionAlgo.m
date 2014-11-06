@@ -37,7 +37,7 @@
     int lastTickLength;
     float lastTickLengthCompensated;
     int tickEdgeAngle[TEETH_PR_REV]; // add one point in ether end
-    int angleEstimator;
+    float angleEstimator;
     
     int iteratorAngleCounter;
 }
@@ -216,10 +216,14 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
             teethProcessIndex = TEETH_PR_REV/2; // should be 7 for 15 teeth
         }
         
-        if (startCounter % TEETH_PR_REV != 0 || startCounter > 2 * TEETH_PR_REV) {
+        if (startCounter % TEETH_PR_REV != 0) {
             startCounter = 0;
         }
         
+    }
+    
+    if (startCounter > 2 * TEETH_PR_REV) {
+        startCounter = 0;
     }
     
     startCounter++;
@@ -278,8 +282,8 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         iteratorAngleCounter = 0;
     }
     
-    int angleLow = (angleEstimator - ANGLE_DIFF);
-    int angleHigh = (angleEstimator + ANGLE_DIFF);
+    int angleLow = (int) lroundf(angleEstimator -0.5);
+    int angleHigh = angleLow+1;
     
     if (angleLow < 0)
         angleLow += 360;
@@ -315,6 +319,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     
     iteratorAngleCounter++;
     
+    NSLog(@"AngleRMS(left): %f and diff: %f", angleLowSum, angleHLDiff*ANGLE_CORRRECTION_COEFFICIENT);
 }
 
 

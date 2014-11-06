@@ -202,6 +202,8 @@
             if (mvgDiffSum < 0.35*lastDiffMax) {
                 diffState = 3;
                 gapBlock = sampleSinceTick * 2.5;
+                if (gapBlock > 5000)
+                    gapBlock = 5000;
             }
             break;
         case 3:
@@ -239,6 +241,7 @@
     
     if (sampleSinceTick == 6000) {
         [self resetStateMachine];
+        NSLog(@"resetStateMachine");
     }
     
     return false;
