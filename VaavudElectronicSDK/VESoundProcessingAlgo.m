@@ -13,7 +13,6 @@
     int mvgAvgSum;
     int mvgDiff[3];
     int mvgDiffSum;
-    int lastValue;
     int gapBlock;
     int mvgDiffUp;
     unsigned long counter;
@@ -47,7 +46,6 @@
     counter = 0;
     mvgAvgSum = 0;
     mvgDiffSum = 0;
-    lastValue = 0;
     
     mvgState = 0;
     diffState = 0;
@@ -64,8 +62,6 @@
     lastDiffMin = 0;
     lastMvgGapMax = 0;
     
-    
-    
     self.dirDetectionAlgo = [[VEDirectionDetectionAlgo alloc] initWithDelegate:delegate];
     
     self.windDelegate = delegate;
@@ -73,7 +69,22 @@
     return self;
 }
 
-
+- (void) resetStateMachine {
+    mvgState = 0;
+    diffState = 0;
+    gapBlock = 0;
+    
+    mvgMax = 0;
+    mvgMin = 0;
+    diffMax = 0;
+    diffMin = 0;
+    
+    lastMvgMax = 500;
+    lastMvgMin = -500;
+    lastDiffMax = 1000;
+    lastDiffMin = 0;
+    lastMvgGapMax = 0;
+}
 
 - (void) newSoundData:(int *)data bufferLength:(UInt32) bufferLength {
    
@@ -125,9 +136,6 @@
             
             
             [self.dirDetectionAlgo newTick: (int) (counter - lastTick)];
-            
-//            NSLog(@"Tick %lu", counter - lastTick);
-            
             lastTick = counter;
         }
         
@@ -229,6 +237,9 @@
     if (mvgDiffSum<diffMin)
         diffMin = mvgDiffSum;
     
+    if (sampleSinceTick == 6000) {
+        [self resetStateMachine];
+    }
     
     return false;
     
