@@ -241,7 +241,6 @@
     
     if (sampleSinceTick == 6000) {
         [self resetStateMachine];
-        NSLog(@"resetStateMachine");
     }
     
     return false;

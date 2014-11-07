@@ -137,7 +137,7 @@
     if (err) {
         [NSException raise:@"VAEAudioException" format: @"Could not set prefered IOBuffer durration on AVAudioSession. %@", err.description];
     }
-    [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
+//    [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
     
 }
 
@@ -200,7 +200,7 @@
     }
     
     for (int i = 0 ;i < 66; i++) {
-        NSLog(@"mag %i : %f", i, magnitude[i]);
+//        NSLog(@"mag %i : %f", i, magnitude[i]);
     }
     
     
@@ -300,7 +300,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
         self.sampleCounter += 1;
         
         
-        NSLog(@"[VESDK] sum value: %f with Bufferlength %i", sum, (unsigned int)bufferSize);
+//        NSLog(@"[VESDK] sum value: %f with Bufferlength %i", sum, (unsigned int)bufferSize);
         
         if (self.sampleCounter == 100) {
             self.samplingMicrophoneActice = NO;

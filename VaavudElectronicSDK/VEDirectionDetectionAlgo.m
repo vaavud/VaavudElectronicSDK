@@ -102,7 +102,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     tickEdgeAngle[TEETH_PR_REV-1] = (int) (360-stdTickSize);
     
     for (int i = 0 ; i < TEETH_PR_REV; i++) {
-        NSLog(@"angle:%d", tickEdgeAngle[i]);
+//        NSLog(@"angle:%d", tickEdgeAngle[i]);
     }
     
     return self;
@@ -203,7 +203,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
 
 - (void) locateStart:(int)samples{
     
-    NSLog(@"Trying to locate start: Ratio: %f, StartCounter: %d", samples / ((float) lastTickLength), startCounter);
+//    NSLog(@"Trying to locate start: Ratio: %f, StartCounter: %d", samples / ((float) lastTickLength), startCounter);
     
     if (samples > 1.2 * lastTickLength && samples < 1.4 * lastTickLength) {
         
@@ -319,7 +319,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     
     iteratorAngleCounter++;
     
-    NSLog(@"AngleRMS(left): %f and diff: %f", angleLowSum, angleHLDiff*ANGLE_CORRRECTION_COEFFICIENT);
+//    NSLog(@"AngleRMS(left): %f and diff: %f", angleLowSum, angleHLDiff*ANGLE_CORRRECTION_COEFFICIENT);
 }
 
 
