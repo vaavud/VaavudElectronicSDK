@@ -14,6 +14,7 @@
 @property (strong, nonatomic) id<locationManagerDelegate> delegate;
 @property (strong, nonatomic) CLLocationManager *locationManager;
 @property (strong, nonatomic) NSNumber *globalHeading;
+@property (nonatomic) UIInterfaceOrientation orientation;
 @end
 
 
@@ -42,8 +43,23 @@
     return [CLLocationManager headingAvailable];
 }
 
+- (void) interfaceOrientationChanged {
+    self.orientation = [[UIApplication sharedApplication] statusBarOrientation];
+}
+
 
 - (void) start {
+    // determine upside down
+    self.orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+    
+    // Register for device orientation change notifications.
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(interfaceOrientationChanged)
+                                                 name:UIDeviceOrientationDidChangeNotification object:nil];
+    
+    
+    // start heading updates
     if ([CLLocationManager headingAvailable])
     {
         self.locationManager = [[CLLocationManager alloc] init];
@@ -54,7 +70,7 @@
     {
         @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:@"Trying to start heading. Heading is not available" userInfo:nil];
     }
-
+    
 }
 
 - (void) stop {
@@ -65,7 +81,16 @@
 - (void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading
 {
     
-    self.globalHeading = [NSNumber numberWithDouble: newHeading.trueHeading];
+    float heading = newHeading.trueHeading;
+    
+    if (self.orientation == UIInterfaceOrientationPortraitUpsideDown) {
+        heading = heading + 180;
+        if (heading > 360) {
+            heading = heading - 360;
+        }
+    }
+    
+    self.globalHeading = [NSNumber numberWithDouble: heading];
     [self.delegate newHeading: self.globalHeading];
     
 }

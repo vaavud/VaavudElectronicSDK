@@ -60,5 +60,11 @@
 // return the current heading of device (if avilale)
 - (NSNumber*) getHeading;
 
+// return the sound output description as NSString
+- (NSString*) soundOutputDescription;
+
+// return the sound input descriotion as NSString
+- (NSString*) soundInputDescription;
+
 
 @end

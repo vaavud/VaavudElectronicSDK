@@ -95,6 +95,12 @@
     return [self.locationManager getHeading];
 }
 
+- (NSString*) soundOutputDescription {
+    return [self.audioManager soundOutputDescription];
+}
 
+- (NSString*) soundInputDescription {
+    return [self.audioManager soundInputDescription];
+}
 
 @end

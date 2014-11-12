@@ -55,6 +55,12 @@
 
 - (void) returnVolumeToInitialState;
 
+// return the sound output description as NSString
+- (NSString*) soundOutputDescription;
+
+// return the sound input descriotion as NSString
+- (NSString*) soundInputDescription;
+
 
 @property (strong, nonatomic) VESoundProcessingAlgo *soundProcessor;
 @property (weak, nonatomic) EZAudioPlotGL *audioPlot;

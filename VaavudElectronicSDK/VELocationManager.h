@@ -21,6 +21,8 @@
 - (void) start;
 - (void) stop;
 
+- (void) interfaceOrientationChanged;
+
 - (BOOL) isHeadingAvailable;
 - (NSNumber*) getHeading;
 

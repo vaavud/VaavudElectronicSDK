@@ -334,6 +334,15 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 }
 
 
+- (NSString*) soundOutputDescription {
+    return [self ASBDtoString:[[EZOutput sharedOutput] audioStreamBasicDescription]];
+}
+
+- (NSString*) soundInputDescription {
+    return [self ASBDtoString:[self.microphone audioStreamBasicDescription]];
+}
+
+
 /**
  EZaudio File Utility functions
  */
@@ -392,6 +401,27 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     stereoStreamFormat.mSampleRate        = sampleFrequency;
     
     return stereoStreamFormat;
+    
+}
+
+- (NSString *) ASBDtoString:(AudioStreamBasicDescription)asbd  {
+
+    NSMutableString *description = [[NSMutableString alloc] init];
+    
+    char formatIDString[5];
+    UInt32 formatID = CFSwapInt32HostToBig(asbd.mFormatID);
+    bcopy (&formatID, formatIDString, 4);
+    formatIDString[4] = '\0';
+    [description appendFormat:@"  Sample Rate:         %10.0f\n",  asbd.mSampleRate];
+    [description appendFormat:@"  Format ID:           %10s\n",    formatIDString];
+    [description appendFormat:@"  Format Flags:        %10X\n",    (unsigned int)asbd.mFormatFlags];
+    [description appendFormat:@"  Bytes per Packet:    %10d\n",    (unsigned int)asbd.mBytesPerPacket];
+    [description appendFormat:@"  Frames per Packet:   %10d\n",    (unsigned int)asbd.mFramesPerPacket];
+    [description appendFormat:@"  Bytes per Frame:     %10d\n",    (unsigned int)asbd.mBytesPerFrame];
+    [description appendFormat:@"  Channels per Frame:  %10d\n",    (unsigned int)asbd.mChannelsPerFrame];
+    [description appendFormat:@"  Bits per Channel:    %10d",    (unsigned int)asbd.mBitsPerChannel];
+    
+    return description;
     
 }
 
