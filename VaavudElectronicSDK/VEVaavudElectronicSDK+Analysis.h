@@ -12,6 +12,7 @@
 @optional
 - (void) newAngularVelocities: (NSArray*) angularVelocities;
 - (void) newWindAngleLocal:(NSNumber*) angle;
+- (void) newTickDetectionErrorCount: (NSNumber *) tickDetectionErrorCount;
 - (void) newHeading: (NSNumber*) heading;
 - (void) newMaxAmplitude: (NSNumber*) amplitude;
 - (void) newRecordingReadyToUpload;

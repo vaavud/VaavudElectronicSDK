@@ -14,6 +14,9 @@
 - (void) newSpeed: (NSNumber*) speed;
 - (void) newAngularVelocities: (NSArray*) angularVelocities;
 - (void) newWindAngleLocal:(NSNumber*) angle;
+- (void) calibrationPercentageComplete: (NSNumber*) percentage;
+- (void) newTickDetectionErrorCount: (NSNumber *) tickDetectionErrorCount;
+
 
 @end
 
@@ -24,5 +27,11 @@
 - (id) initWithDelegate:(id<DirectionDetectionDelegate>)delegate;
 + (float *) getFitCurve;
 - (int *) getEdgeAngles;
+
+// start calibration mode
+-(void) startCalibration;
+
+// end calibbration mode
+-(void) endCalibration;
 
 @end

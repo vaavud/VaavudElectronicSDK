@@ -20,8 +20,6 @@
 
 @implementation VELocationManager
 
-
-
 #pragma mark - Initialization
 -(id)init {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException

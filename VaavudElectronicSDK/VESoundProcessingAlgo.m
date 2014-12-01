@@ -14,7 +14,6 @@
     int mvgDiff[3];
     int mvgDiffSum;
     int gapBlock;
-    int mvgDiffUp;
     unsigned long counter;
     unsigned long lastTick;
     short mvgState;
@@ -22,6 +21,7 @@
     int diffSumRiseThreshold;
     
     int mvgMax, mvgMin, lastMvgMax, lastMvgMin, diffMax, diffMin, lastDiffMax, lastDiffMin, diffGap, mvgGapMax, lastMvgGapMax, mvgDropHalf, diffRiseThreshold1;
+    bool mvgDropHalfRefresh;
 }
 
 @property (strong, nonatomic) id<SoundProcessingDelegate, DirectionDetectionDelegate> windDelegate;
@@ -62,6 +62,9 @@
     lastDiffMin = 0;
     lastMvgGapMax = 0;
     
+    mvgDropHalf = 0;
+    mvgDropHalfRefresh = YES;
+    
     self.dirDetectionAlgo = [[VEDirectionDetectionAlgo alloc] initWithDelegate:delegate];
     
     self.windDelegate = delegate;
@@ -84,6 +87,7 @@
     lastDiffMax = 1000;
     lastDiffMin = 0;
     lastMvgGapMax = 0;
+    mvgDropHalfRefresh = YES;
 }
 
 - (void) newSoundData:(int *)data bufferLength:(UInt32) bufferLength {
@@ -121,8 +125,7 @@
         if ([self detectTick: (int) (counter - lastTick)]) {
             
             
-            mvgState = 0;
-            diffState = 0;
+           
             
             lastMvgMax = mvgMax;
             lastMvgMin = mvgMin;
@@ -132,11 +135,16 @@
             
             mvgMax = 0;
             mvgMin = 0;
-
+            diffMax = 0;
+            diffMin = 1000;
             
+            mvgState = 0;
+            diffState = 0;
             
             [self.dirDetectionAlgo newTick: (int) (counter - lastTick)];
+            
             lastTick = counter;
+            
         }
         
         counter++;
@@ -183,16 +191,18 @@
     
     switch (diffState) {
         case 0:
-            if (mvgAvgSum<mvgMin)
+            if (mvgAvgSum<mvgMin) {
                 mvgMin=mvgAvgSum;
+            }
             if (mvgDiffSum > 0.3*lastDiffMax) {
                 diffState = 1;
             }
             break;
             
         case 1:
-            if (mvgAvgSum<mvgMin)
+            if (mvgAvgSum<mvgMin) {
                 mvgMin=mvgAvgSum;
+            }
             if (mvgAvgSum > 0) {
                 diffState = 2;
             }
@@ -201,27 +211,39 @@
         case 2:
             if (mvgDiffSum < 0.35*lastDiffMax) {
                 diffState = 3;
-                gapBlock = sampleSinceTick * 2.5;
-                if (gapBlock > 5000)
+                gapBlock = sampleSinceTick * 2.4;
+                if (gapBlock > 5000) {
                     gapBlock = 5000;
+                }
             }
             break;
         case 3:
             if (sampleSinceTick > gapBlock) {
                 diffState = 4;
+                
                 diffGap = mvgDiffSum;
                 mvgGapMax = mvgAvgSum;
+                
                 diffRiseThreshold1 = diffGap + 0.1 * (lastDiffMax - diffGap);
-                mvgDropHalf =  (lastMvgGapMax - mvgMin)/2 ;
+                
+                int newMvgDropHalf = ( lastMvgGapMax - mvgMin)/2;
+                if (newMvgDropHalf  < mvgDropHalf*1.25 || mvgDropHalfRefresh) {
+                    mvgDropHalf = newMvgDropHalf;
+                    mvgDropHalfRefresh = NO;
+                }
+                else {
+                    mvgDropHalfRefresh = YES;
+                }
+            
                 
             }
             break;
         case 4:
-            if (mvgAvgSum > mvgGapMax)
+            if (mvgAvgSum > mvgGapMax) {
                 mvgGapMax = mvgAvgSum;
-            
-//            if (mvgDiffSum > 0.3*lastDiffMax && mvgAvgSum < 0.2*lastMvgMin) { // diff was 1200
-            if ( (mvgAvgSum < mvgGapMax - mvgDropHalf && ( mvgDiffSum > diffRiseThreshold1 ))  || mvgDiffSum > 0.5*lastDiffMax ) {
+            }
+
+            if ( ((mvgAvgSum < mvgGapMax - mvgDropHalf) && ( mvgDiffSum > diffRiseThreshold1 ))  || mvgDiffSum > 0.5*lastDiffMax ) {
                 return  true;
             }
 
@@ -230,14 +252,17 @@
             break;
     }
     
-    if (mvgAvgSum > mvgMax)
+    if (mvgAvgSum > mvgMax) {
         mvgMax=mvgAvgSum;
+    }
     
-    if (mvgDiffSum> diffMax)
+    if (mvgDiffSum> diffMax) {
         diffMax = mvgDiffSum;
-    
-    if (mvgDiffSum<diffMin)
+    }
+
+    if (mvgDiffSum<diffMin) {
         diffMin = mvgDiffSum;
+    }
     
     if (sampleSinceTick == 6000) {
         [self resetStateMachine];

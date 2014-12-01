@@ -61,6 +61,11 @@
 - (void) sleipnirStopedMeasureing;
 
 
+/**
+ called during the calibration process to provided user feedback
+ */
+- (void) calibrationPercentageComplete: (NSNumber*) percentage;
+
 @end
 
 
@@ -89,5 +94,10 @@
 // returnt the volume to initial state - to be used when the app closes
 - (void) returnVolumeToInitialState;
 
+// start calibration mode
+-(void) startCalibration;
+
+// end calibbration mode
+-(void) endCalibration;
 
 @end

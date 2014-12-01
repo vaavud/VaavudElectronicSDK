@@ -144,6 +144,14 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     
 }
 
+- (void) newTickDetectionErrorCount: (NSNumber *) tickDetectionErrorCount {
+    for (id<VaavudElectronicAnalysisDelegate> delegate in self.VaaElecAnalysisDelegates) {
+        if ([delegate respondsToSelector:@selector(newTickDetectionErrorCount:)]) {
+            [delegate newTickDetectionErrorCount:tickDetectionErrorCount];
+        }
+    }
+}
+
 - (void) newAngularVelocities: (NSArray*) angularVelocities {
     for (id<VaavudElectronicAnalysisDelegate> delegate in self.VaaElecAnalysisDelegates) {
         if ([delegate respondsToSelector:@selector(newAngularVelocities:)]) {
@@ -223,6 +231,14 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     }
 }
 
+- (void) calibrationPercentageComplete: (NSNumber*) percentage {
+    for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
+        if ([delegate respondsToSelector:@selector(calibrationPercentageComplete:)]) {
+            [delegate calibrationPercentageComplete: percentage];
+        }
+    }
+}
+
 
 
 
@@ -253,6 +269,16 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     return [NSNumber numberWithFloat: frequency.floatValue * 0.31];
 }
 
+
+// start calibration mode
+-(void) startCalibration {
+    [self.audioManager.soundProcessor.dirDetectionAlgo startCalibration];
+}
+
+// end calibbration mode
+-(void) endCalibration {
+    [self.audioManager.soundProcessor.dirDetectionAlgo endCalibration];
+}
 
 
 @end
