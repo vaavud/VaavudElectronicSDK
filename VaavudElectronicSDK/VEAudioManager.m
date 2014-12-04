@@ -365,7 +365,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 
 - (AudioStreamBasicDescription) getAudioStreamBasicDiscriptionOutput {
     
-    size_t bytesPerSample = sizeof (float);
+    UInt32 bytesPerSample = sizeof (float);
     AudioStreamBasicDescription stereoStreamFormat = {0};
     
     
@@ -386,7 +386,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 
 - (AudioStreamBasicDescription) getAudioStreamBasicDiscriptionMicrophone {
     
-    size_t bytesPerSample = sizeof (float);
+    UInt32 bytesPerSample = sizeof (float);
     AudioStreamBasicDescription stereoStreamFormat = {0};
     
     
