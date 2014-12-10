@@ -209,9 +209,9 @@
             
             break;
         case 2:
-            if (mvgDiffSum < 0.35*lastDiffMax) {
+            if (mvgDiffSum < 0.30*lastDiffMax) {
                 diffState = 3;
-                gapBlock = sampleSinceTick * 2.4;
+                gapBlock = sampleSinceTick * 2.3;
                 if (gapBlock > 5000) {
                     gapBlock = 5000;
                 }
@@ -243,7 +243,7 @@
                 mvgGapMax = mvgAvgSum;
             }
 
-            if ( ((mvgAvgSum < mvgGapMax - mvgDropHalf) && ( mvgDiffSum > diffRiseThreshold1 ))  || mvgDiffSum > 0.5*lastDiffMax ) {
+            if ( ((mvgAvgSum < mvgGapMax - mvgDropHalf) && ( mvgDiffSum > diffRiseThreshold1 ))  || mvgDiffSum > 0.75*lastDiffMax ) {
                 return  true;
             }
 
