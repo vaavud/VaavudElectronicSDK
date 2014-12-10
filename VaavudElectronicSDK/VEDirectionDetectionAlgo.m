@@ -97,7 +97,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
 }
 
 
-- (void) newTick:(int)tickLength {
+- (BOOL) newTick:(int)tickLength {
     
 //    NSLog(@"tick Length: %i", tickLength);
     
@@ -105,7 +105,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     if (!startLocated) {
         [self locateStart:tickLength];
         lastTickLength = tickLength;
-        return;
+        return NO;
     }
     
     // check if new tick value is within 20% of expected value
@@ -131,6 +131,11 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     
     lastTickLengthCompensated = tickLengthCompensated;
     
+    if (teethIndex == TEETH_PR_REV-1) {
+        return YES;
+    } else {
+        return NO;
+    }
     
 }
 
@@ -145,7 +150,6 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     startLocated = false;
     initializeExponentialFilter = false;
 }
-
 
 
 - (void) processValidTick:(int)tickLength {

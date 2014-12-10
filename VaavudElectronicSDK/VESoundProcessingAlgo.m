@@ -21,7 +21,7 @@
     int diffSumRiseThreshold;
     
     int mvgMax, mvgMin, lastMvgMax, lastMvgMin, diffMax, diffMin, lastDiffMax, lastDiffMin, diffGap, mvgGapMax, lastMvgGapMax, mvgDropHalf, diffRiseThreshold1;
-    bool mvgDropHalfRefresh;
+    bool mvgDropHalfRefresh, longTick;
 }
 
 @property (strong, nonatomic) id<SoundProcessingDelegate, DirectionDetectionDelegate> windDelegate;
@@ -141,7 +141,7 @@
             mvgState = 0;
             diffState = 0;
             
-            [self.dirDetectionAlgo newTick: (int) (counter - lastTick)];
+            longTick = [self.dirDetectionAlgo newTick: (int) (counter - lastTick)];
             
             lastTick = counter;
             
@@ -211,7 +211,12 @@
         case 2:
             if (mvgDiffSum < 0.30*lastDiffMax) {
                 diffState = 3;
-                gapBlock = sampleSinceTick * 2.3;
+                if (longTick) {
+                    gapBlock = sampleSinceTick * 2.9;
+                } else {
+                    gapBlock = sampleSinceTick * 2.3;
+                }
+                
                 if (gapBlock > 5000) {
                     gapBlock = 5000;
                 }

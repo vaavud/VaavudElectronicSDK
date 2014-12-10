@@ -23,7 +23,7 @@
 
 @interface VEDirectionDetectionAlgo : NSObject
 
-- (void) newTick:(int)tickLength;
+- (BOOL) newTick:(int)tickLength; // return true if next tick is long
 - (id) initWithDelegate:(id<DirectionDetectionDelegate>)delegate;
 + (float *) getFitCurve;
 - (int *) getEdgeAngles;
