@@ -61,11 +61,22 @@
     
     // Create an instance of the microphone and tell it to use this object as the delegate
     self.microphone = [EZMicrophone microphoneWithDelegate:self];
+    
+    
     [self.microphone setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionMicrophone]];
+    
+    
     // CHECK MICROPHONE INPUT FORMAT
-//    [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
+    [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
     
     
+    AudioStreamBasicDescription ASBDinputDesired = [self getAudioStreamBasicDiscriptionMicrophone];
+    AudioStreamBasicDescription ASBDinput = [self.microphone audioStreamBasicDescription];
+    
+    if (ASBDinput.mSampleRate != ASBDinputDesired.mSampleRate) {
+        NSLog(@"Ups wrong sample rate");
+    }
+      
     
     
     [self setupSoundOutput];
