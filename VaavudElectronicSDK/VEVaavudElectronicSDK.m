@@ -117,7 +117,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     
     self.currentHeading = heading;
     
-    for (id<VaavudElectronicAnalysisDelegate> delegate in self.VaaElecAnalysisDelegates) {
+    for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(newHeading:)]) {
             [delegate newHeading: heading];
         }
@@ -125,7 +125,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 }
 
 - (void) newWindAngleLocal:(NSNumber*) angle {
-    for (id<VaavudElectronicAnalysisDelegate> delegate in self.VaaElecAnalysisDelegates) {
+    for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(newWindAngleLocal:)]) {
             [delegate newWindAngleLocal: angle];
         }

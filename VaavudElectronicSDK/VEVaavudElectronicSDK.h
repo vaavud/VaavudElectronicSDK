@@ -27,6 +27,21 @@
 
 /**
  
+ @param wind angle is the wind direction where the wind is comming from relative to the phone in degrees
+ from 0 to 359. The 0 reference direction is when the direction perpendicular to the screen, comming from the backside
+ towards the front.
+ */
+- (void) newWindAngleLocal:(NSNumber*) angle;
+
+/**
+ 
+ @param heading is the direction the the phone is pointing as defined by iOS when the phone is upside down 180 degrees is added.
+ */
+- (void) newHeading: (NSNumber*) heading;
+
+
+/**
+ 
  @param available is true if the Sliepnir wind meter is available to start measureing.
  */
 - (void) sleipnirAvailabliltyChanged: (BOOL) available;
