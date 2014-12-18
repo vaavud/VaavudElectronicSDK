@@ -103,9 +103,11 @@
     
     self.askedToMeasure = YES;
     
-    if (self.delegate.sleipnirAvailable) {
-        [self startInternal];
-        
+    if (!self.algorithmActice) {
+        if (self.delegate.sleipnirAvailable) {
+            [self startInternal];
+            
+        }
     }
 }
 
