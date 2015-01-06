@@ -28,9 +28,7 @@
 
 @property (nonatomic, weak) VEVaavudElectronicSDK <AudioManagerDelegate> *delegate;
 
-
 @end
-
 
 @implementation VEAudioManager {
     double theta;
@@ -49,9 +47,7 @@
     return nil;
 }
 
-
-- (id)initWithDelegate:(VEVaavudElectronicSDK <AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>*) delegate {
-    
+- (id)initWithDelegate:(id <AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>)delegate {
     self = [super init];
     
     self.delegate = delegate;
@@ -62,13 +58,10 @@
     // Create an instance of the microphone and tell it to use this object as the delegate
     self.microphone = [EZMicrophone microphoneWithDelegate:self];
     
-    
     [self.microphone setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionMicrophone]];
-    
     
     // CHECK MICROPHONE INPUT FORMAT
     [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
-    
     
     AudioStreamBasicDescription ASBDinputDesired = [self getAudioStreamBasicDiscriptionMicrophone];
     AudioStreamBasicDescription ASBDinput = [self.microphone audioStreamBasicDescription];
@@ -77,8 +70,6 @@
         NSLog(@"Ups wrong sample rate");
     }
       
-    
-    
     [self setupSoundOutput];
     
     // Assign a delegate to the shared instance of the output to provide the output audio data
@@ -86,9 +77,7 @@
     
     // set the output format from the audioOutput stream.
     [[EZOutput sharedOutput] setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionOutput]];
-//    [EZAudio printASBD: [[EZOutput sharedOutput] audioStreamBasicDescription]];
-    
-    
+    // [EZAudio printASBD: [[EZOutput sharedOutput] audioStreamBasicDescription]];
     
     // CHECK OUTPUT FORMAT
     
@@ -143,7 +132,7 @@
     });
 }
 
-- (void)sleipnirAvailabliltyChanged: (BOOL) available {
+- (void)sleipnirAvailabliltyChanged:(BOOL)available {
     if (available) {
         if (self.askedToMeasure) {
             [self startInternal];
