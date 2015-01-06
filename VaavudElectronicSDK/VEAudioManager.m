@@ -42,7 +42,7 @@
 
 
 #pragma mark - Initialization
--(id)init {
+- (id)init {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:@"-init is not a valid initializer for the class SoundManager"
                                  userInfo:nil];
@@ -99,19 +99,17 @@
     return self;
 }
 
--(void) start {
-    
+- (void)start {
     self.askedToMeasure = YES;
     
     if (!self.algorithmActice) {
         if (self.delegate.sleipnirAvailable) {
             [self startInternal];
-            
         }
     }
 }
 
--(void) stop {
+- (void)stop {
     self.askedToMeasure = NO;
     
     if (self.algorithmActice) {
@@ -120,8 +118,7 @@
 }
 
 
-- (void) startInternal {
-    
+- (void)startInternal {
     self.algorithmActice = YES;
     
     [self toggleMicrophone: YES];
@@ -135,7 +132,7 @@
 }
 
 
-- (void) stopInternal {
+- (void)stopInternal {
     self.algorithmActice = NO;
     
     [self toggleMicrophone: NO];
@@ -146,13 +143,13 @@
     });
 }
 
-
-- (void) sleipnirAvailabliltyChanged: (BOOL) available {
+- (void)sleipnirAvailabliltyChanged: (BOOL) available {
     if (available) {
         if (self.askedToMeasure) {
             [self startInternal];
         }
-    } else {
+    }
+    else {
         [self returnVolumeToInitialState];
         if (self.algorithmActice) {
             [self stopInternal];
@@ -161,20 +158,17 @@
 }
 
 
-- (void) checkIfVolumeIsAtMaximum {
+- (void)checkIfVolumeIsAtMaximum {
     // check if volume is at maximum.
-    MPMusicPlayerController* musicPlayer = [MPMusicPlayerController iPodMusicPlayer];
-    
+    MPMusicPlayerController *musicPlayer = [MPMusicPlayerController iPodMusicPlayer];
     
     if (musicPlayer.volume != 1) {
-        self.originalAudioVolume = [NSNumber numberWithFloat: musicPlayer.volume];
+        self.originalAudioVolume = @(musicPlayer.volume);
         musicPlayer.volume = 1; // device volume will be changed to maximum value
     }
-
 }
 
-- (void) returnVolumeToInitialState {
-    
+- (void)returnVolumeToInitialState {
     if (self.originalAudioVolume) {
         MPMusicPlayerController* musicPlayer = [MPMusicPlayerController iPodMusicPlayer];
         if (musicPlayer.volume != self.originalAudioVolume.floatValue) {
@@ -183,10 +177,8 @@
     }
 }
 
-
-
 // Starts the internal soundfile recorder
-- (void) startRecording {
+- (void)startRecording {
     // Create the recorder
     self.recorder = [EZRecorder recorderWithDestinationURL:[self recordingFilePathURL]
                                               sourceFormat:self.microphone.audioStreamBasicDescription
@@ -196,37 +188,28 @@
 }
 
 // Ends the internal soundfile recorder
-- (void) endRecording {
+- (void)endRecording {
     self.recordingActive = NO;
     [self.recorder closeAudioFile];
     self.recorder = nil;
-    
 }
 
 // returns true if recording is active
-- (BOOL) isRecording {
+- (BOOL)isRecording {
     return self.recordingActive;
 }
 
 // returns the local path of the recording
-- (NSURL*) recordingPath {
+- (NSURL *)recordingPath {
     return [self recordingFilePathURL];
 }
 
-
-
-- (void) setupSoundOutput {
-    
+- (void)setupSoundOutput {
     double frequency = signalFrequency;
     double samplerate = sampleFrequency;
-    theta_increment = 2.0 * M_PI * frequency / samplerate;
+    theta_increment = 2.0*M_PI*frequency/samplerate;
     amplitude = 1;
-    
 }
-
-
-
-
 
 /* delegate method - Feed microphone data to sound-processor and plot */
 #pragma mark - EZMicrophoneDelegate
@@ -253,13 +236,11 @@ withNumberOfChannels:(UInt32)numberOfChannels {
         /* now our array contains all zeroes. */
     }
     
-    
-    for(int i = 0; i < bufferSize; ++i) {
+    for (int i = 0; i < bufferSize; ++i) {
         intArray[i] = (int) (arrayLeft[i]*1000);
     }
     
     [self.soundProcessor newSoundData:intArray bufferLength:bufferSize];
-    
     
     // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
     dispatch_async(dispatch_get_main_queue(),^{
@@ -268,62 +249,50 @@ withNumberOfChannels:(UInt32)numberOfChannels {
             [self.audioPlot updateBuffer:buffer[0] withBufferSize:bufferSize];
         }
     });
-    
-    
 }
-
-
 
 // delegate method - feed microphone data to recorder (audio file).
 -(void)microphone:(EZMicrophone *)microphone
     hasBufferList:(AudioBufferList *)bufferList
    withBufferSize:(UInt32)bufferSize
 withNumberOfChannels:(UInt32)numberOfChannels {
-    
     // Getting audio data as a buffer list that can be directly fed into the EZRecorder. This is happening on the audio thread - any UI updating needs a GCD main queue block. This will keep appending data to the tail of the audio file.
-    if( self.recordingActive ){
-        [self.recorder appendDataFromBufferList:bufferList
-                                 withBufferSize:bufferSize];
+    if (self.recordingActive) {
+        [self.recorder appendDataFromBufferList:bufferList withBufferSize:bufferSize];
     }
 }
 
 
 
 
-- (void)toggleOutput: (bool) output {
+- (void)toggleOutput:(BOOL)output {
     if (output) {
         [EZOutput sharedOutput].outputDataSource = self;
         [[EZOutput sharedOutput] startPlayback];
-        
-    } else {
+    }
+    else {
         [[EZOutput sharedOutput] stopPlayback];
     }
 }
 
-- (void) toggleMicrophone:(bool) micOn {
-    
-    if( micOn){
+- (void)toggleMicrophone:(BOOL)micOn {
+    if (micOn) {
         [self.microphone startFetchingAudio];
     }
     else {
         [self.microphone stopFetchingAudio];
     }
-    
 }
-
-
 
 /**
  OUTPUT
  */
 
 // Use the AudioBufferList datasource method to read from an EZAudioFile
--(void)             output:(EZOutput *)output
+- (void)             output:(EZOutput *)output
  shouldFillAudioBufferList:(AudioBufferList *)audioBufferList
         withNumberOfFrames:(UInt32)frames
 {
-    
-    
     // This is a mono tone generator so we only need the first buffer
 	const int channelLeft = 0;
 	const int channelRight = 1;
@@ -338,49 +307,40 @@ withNumberOfChannels:(UInt32)numberOfChannels {
         bufferRight[frame] = -sin(theta) * amplitude;
         
 		theta += theta_increment;
-		if (theta > 2.0 * M_PI)
+		if (theta > 2.0*M_PI)
 		{
-			theta -= 2.0 * M_PI;
+			theta -= 2.0*M_PI;
 		}
 	}
-    
 }
 
-
-- (NSString*) soundOutputDescription {
+- (NSString *)soundOutputDescription {
     return [self ASBDtoString:[[EZOutput sharedOutput] audioStreamBasicDescription]];
 }
 
-- (NSString*) soundInputDescription {
+- (NSString *)soundInputDescription {
     return [self ASBDtoString:[self.microphone audioStreamBasicDescription]];
 }
-
 
 /**
  EZaudio File Utility functions
  */
 
--(NSString*)applicationDocumentsDirectory
-{
+- (NSString *)applicationDocumentsDirectory {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
     return basePath;
 }
 
--(NSURL*)recordingFilePathURL {
+-(NSURL *)recordingFilePathURL {
     return [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%@",
                                    [self applicationDocumentsDirectory],
                                    kAudioFilePath]];
 }
 
-
-
-
-- (AudioStreamBasicDescription) getAudioStreamBasicDiscriptionOutput {
-    
-    UInt32 bytesPerSample = sizeof (float);
+- (AudioStreamBasicDescription)getAudioStreamBasicDiscriptionOutput {
+    UInt32 bytesPerSample = sizeof(float);
     AudioStreamBasicDescription stereoStreamFormat = {0};
-    
     
     stereoStreamFormat.mFormatID          = kAudioFormatLinearPCM;
     //    stereoStreamFormat.mFormatFlags       = kAudioFormatFlagsAudioUnitCanonical;
@@ -393,15 +353,11 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     stereoStreamFormat.mSampleRate        = sampleFrequency;
     
     return stereoStreamFormat;
-    
 }
 
-
-- (AudioStreamBasicDescription) getAudioStreamBasicDiscriptionMicrophone {
-    
-    UInt32 bytesPerSample = sizeof (float);
+- (AudioStreamBasicDescription)getAudioStreamBasicDiscriptionMicrophone {
+    UInt32 bytesPerSample = sizeof(float);
     AudioStreamBasicDescription stereoStreamFormat = {0};
-    
     
     stereoStreamFormat.mFormatID          = kAudioFormatLinearPCM;
     //    stereoStreamFormat.mFormatFlags       = kAudioFormatFlagsAudioUnitCanonical;
@@ -414,11 +370,9 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     stereoStreamFormat.mSampleRate        = sampleFrequency;
     
     return stereoStreamFormat;
-    
 }
 
-- (NSString *) ASBDtoString:(AudioStreamBasicDescription)asbd  {
-
+- (NSString *)ASBDtoString:(AudioStreamBasicDescription)asbd  {
     NSMutableString *description = [[NSMutableString alloc] init];
     
     char formatIDString[5];
@@ -432,13 +386,9 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     [description appendFormat:@"  Frames per Packet:   %10d\n",    (unsigned int)asbd.mFramesPerPacket];
     [description appendFormat:@"  Bytes per Frame:     %10d\n",    (unsigned int)asbd.mBytesPerFrame];
     [description appendFormat:@"  Channels per Frame:  %10d\n",    (unsigned int)asbd.mChannelsPerFrame];
-    [description appendFormat:@"  Bits per Channel:    %10d",    (unsigned int)asbd.mBitsPerChannel];
+    [description appendFormat:@"  Bits per Channel:    %10d",      (unsigned int)asbd.mBitsPerChannel];
     
     return description;
-    
 }
-
-
-
 
 @end
