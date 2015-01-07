@@ -152,6 +152,14 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     }
 }
 
+- (void) newVelocityProfileError: (NSNumber *) profileError {
+    for (id<VaavudElectronicAnalysisDelegate> delegate in self.VaaElecAnalysisDelegates) {
+        if ([delegate respondsToSelector:@selector(newVelocityProfileError:)]) {
+            [delegate newVelocityProfileError:profileError];
+        }
+    }
+}
+
 - (void) newAngularVelocities: (NSArray*) angularVelocities {
     for (id<VaavudElectronicAnalysisDelegate> delegate in self.VaaElecAnalysisDelegates) {
         if ([delegate respondsToSelector:@selector(newAngularVelocities:)]) {

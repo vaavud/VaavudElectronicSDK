@@ -41,6 +41,7 @@
     float lastTickLengthCompensated;
     int tickEdgeAngle[TEETH_PR_REV]; // add one point in ether end
     float angleEstimator;
+    float velocityProfileError;
     
     int iteratorAngleCounter;
     
@@ -348,6 +349,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         [self.dirDelegate newWindAngleLocal:[NSNumber numberWithFloat:angleEstimator]];
         [self.dirDelegate newAngularVelocities: angularVelocities];
         [self.dirDelegate newSpeed: [NSNumber numberWithFloat:windSpeed]];
+        [self.dirDelegate newVelocityProfileError:[NSNumber numberWithFloat:velocityProfileError]];
     });
     
 }
@@ -398,6 +400,8 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         angleEstimator -= 360;
     
     iteratorAngleCounter++;
+    
+    velocityProfileError = angleLowSum;
     
 //    NSLog(@"AngleRMS(left): %f and diff: %f", angleLowSum, angleHLDiff*ANGLE_CORRRECTION_COEFFICIENT);
 }
