@@ -12,6 +12,7 @@
 #define UPDATE_INTERVAL 0.2 // 5 times a second
 #define ANGLE_CORRRECTION_COEFFICIENT 100 // originally 400 (but since actual velocity difference is about double...
 #define ANGLE_DIFF 1
+#define ANGLE_ITERATIONS_PR_UPDATE 3
 #define SMOOTHING_TIME_CONSTANT 4
 #define SMOOTHING_TIME_CONSTANT_CALIBRATION 12
 #define SAMPLE_FREQUENCY 44100
@@ -41,6 +42,7 @@
     float lastTickLengthCompensated;
     int tickEdgeAngle[TEETH_PR_REV]; // add one point in ether end
     float angleEstimator;
+    float velocityProfileError;
     
     int iteratorAngleCounter;
     
@@ -321,9 +323,6 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
 }
 
 
-
-
-
 - (void) updateUI {
     
     float tickLengthRelativePrTeethCompensated[TEETH_PR_REV];
@@ -338,9 +337,11 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     
     // Calculate velocity for last revolution
 
-    float windSpeed = 44100 / ((float)tickLengthOneRotation);
+    float windSpeed = SAMPLE_FREQUENCY / ((float)tickLengthOneRotation);
     
-    [self iterateAngle: (float *) tickLengthRelativePrTeethCompensated];
+    for (int i = 0; i < ANGLE_ITERATIONS_PR_UPDATE; i++) { // iterate 3 times to improve responsiveness
+        [self iterateAngle: (float *) tickLengthRelativePrTeethCompensated];
+    }
     
     
     // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
@@ -348,14 +349,13 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         [self.dirDelegate newWindAngleLocal:[NSNumber numberWithFloat:angleEstimator]];
         [self.dirDelegate newAngularVelocities: angularVelocities];
         [self.dirDelegate newSpeed: [NSNumber numberWithFloat:windSpeed]];
+        [self.dirDelegate newVelocityProfileError:[NSNumber numberWithFloat:velocityProfileError]];
     });
     
 }
 
 
 - (void) iterateAngle: (float *) mvgRelativeSpeedPercent {
-    
-       // SMALL NOTICE (ANGLES IN USE ARE EDGE ANGLES, MIGHT BE BETTER TO CALCULATE EXCATE ANGLES!)
     
     if (iteratorAngleCounter == 5) {
         [self checkOppositeAngle: mvgRelativeSpeedPercent];
@@ -398,6 +398,8 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         angleEstimator -= 360;
     
     iteratorAngleCounter++;
+    
+    velocityProfileError = angleLowSum;
     
 //    NSLog(@"AngleRMS(left): %f and diff: %f", angleLowSum, angleHLDiff*ANGLE_CORRRECTION_COEFFICIENT);
 }

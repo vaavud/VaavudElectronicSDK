@@ -16,6 +16,7 @@
 - (void) newWindAngleLocal:(NSNumber*) angle;
 - (void) calibrationPercentageComplete: (NSNumber*) percentage;
 - (void) newTickDetectionErrorCount: (NSNumber *) tickDetectionErrorCount;
+- (void) newVelocityProfileError: (NSNumber *) profileError;
 
 
 @end
