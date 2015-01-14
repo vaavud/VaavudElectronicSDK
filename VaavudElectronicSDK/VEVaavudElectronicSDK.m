@@ -217,7 +217,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 - (void) vaavudStartedMeasureing {
     for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(sleipnirStartedMeasureing)]) {
-            [delegate sleipnirStartedMeasureing];
+            [delegate sleipnirStartedMeasuring];
         }
     }
 }

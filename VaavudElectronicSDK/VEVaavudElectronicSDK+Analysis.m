@@ -87,7 +87,7 @@
     return [self.audioManager.soundProcessor.dirDetectionAlgo getEdgeAngles];
 }
 
-- (void) generateSummeryFile {
+- (void) generateSummaryFile {
     [self.summeryGenerator generateFile];
 }
 
