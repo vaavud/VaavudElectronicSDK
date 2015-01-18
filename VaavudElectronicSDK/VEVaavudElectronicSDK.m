@@ -216,7 +216,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 
 - (void) vaavudStartedMeasureing {
     for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(sleipnirStartedMeasureing)]) {
+        if ([delegate respondsToSelector:@selector(sleipnirStartedMeasuring)]) {
             [delegate sleipnirStartedMeasuring];
         }
     }
@@ -224,8 +224,8 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 
 - (void) vaavudStopMeasureing {
     for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(sleipnirStopedMeasureing)]) {
-            [delegate sleipnirStopedMeasureing];
+        if ([delegate respondsToSelector:@selector(sleipnirStopedMeasuring)]) {
+            [delegate sleipnirStopedMeasuring];
         }
     }
 }
