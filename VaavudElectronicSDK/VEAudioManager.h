@@ -19,8 +19,8 @@
 
 @protocol AudioManagerDelegate <NSObject>
 
-- (void) vaavudStartedMeasureing;
-- (void) vaavudStopMeasureing;
+- (void) vaavudStartedMeasuring;
+- (void) vaavudStopMeasuring;
 
 @end
 

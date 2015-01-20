@@ -214,18 +214,18 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 }
 
 
-- (void) vaavudStartedMeasureing {
+- (void) vaavudStartedMeasuring {
     for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(sleipnirStartedMeasureing)]) {
+        if ([delegate respondsToSelector:@selector(sleipnirStartedMeasuring)]) {
             [delegate sleipnirStartedMeasuring];
         }
     }
 }
 
-- (void) vaavudStopMeasureing {
+- (void) vaavudStopMeasuring {
     for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(sleipnirStopedMeasureing)]) {
-            [delegate sleipnirStopedMeasureing];
+        if ([delegate respondsToSelector:@selector(sleipnirStoppedMeasuring)]) {
+            [delegate sleipnirStoppedMeasuring];
         }
     }
 }

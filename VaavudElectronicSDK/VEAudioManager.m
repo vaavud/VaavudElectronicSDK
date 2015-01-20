@@ -116,7 +116,7 @@
     [self checkIfVolumeIsAtMaximum];
     
      dispatch_async(dispatch_get_main_queue(),^{
-        [self.delegate vaavudStartedMeasureing];
+        [self.delegate vaavudStartedMeasuring];
     });
 }
 
@@ -128,7 +128,7 @@
     [self toggleOutput: NO];
     
     dispatch_async(dispatch_get_main_queue(),^{
-        [self.delegate vaavudStopMeasureing];
+        [self.delegate vaavudStopMeasuring];
     });
 }
 

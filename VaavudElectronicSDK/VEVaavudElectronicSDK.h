@@ -71,7 +71,7 @@
 /**
  Is called when the algorithm stops measureing. ie. if device is removed.
  */
-- (void)sleipnirStopedMeasureing;
+- (void)sleipnirStoppedMeasuring;
 
 
 /**
