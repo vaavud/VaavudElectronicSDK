@@ -194,7 +194,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
             }
         }
         
-        if (!(initializeExponentialFilter) && tickLengthOneRotation < 15000 && calibrationTickSlowdownCounter > 200 && tickLengthOneRotation > 750) {
+        if (calibrationTickSlowdownCounter > 200 && tickLengthOneRotation > 750 && !(initializeExponentialFilter) && tickLengthOneRotation < 15000) {
             // Filter calibration
             [self updateExponentialFilter];
             

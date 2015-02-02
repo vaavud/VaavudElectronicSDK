@@ -8,13 +8,10 @@
 
 #import "VEAudioVaavudElectronicDetection.h"
 #import "VEAudioManager.h"
-
 #import <Accelerate/Accelerate.h>
 
 # define VAAVUD_NOISE_MAXIMUM 0.01
-
 # define NUMBER_OF_OUTPUT_SIGNAL_SAMPLES 1024
-
 # define BufferLength 256
 # define NFFT 8192
 # define Log2N 13
@@ -103,6 +100,7 @@
     // check if headset Out and headset mic is available
     
     if ([self isHeadphoneOutAvailable] && [self isHeadphoneMicAvailable]) {
+        //NSLog(@"[VESDK] Device with headphoneOut and microphone connected");
         self.deviceConnected = YES;
         
         // OTHER recording doesnt work when active - [self startRecording];
@@ -221,9 +219,15 @@
     
     NSInteger routeChangeReason = [[interuptionDict valueForKey:AVAudioSessionRouteChangeReasonKey] integerValue];
     
+    
     switch (routeChangeReason) {
             
         case AVAudioSessionRouteChangeReasonOldDeviceUnavailable: {
+            
+            NSLog(@"[VESDK] AVAudioSessionRouteChangeReasonOldDeviceUnavailable");
+            
+            [self isHeadphoneMicAvailable];
+            [self isHeadphoneOutAvailable];
             
             if (self.deviceConnected) {
                 self.deviceConnected = NO;
@@ -237,6 +241,7 @@
             break;
         }
         case AVAudioSessionRouteChangeReasonNewDeviceAvailable: {
+            NSLog(@"[VESDK] AVAudioSessionRouteChangeReasonNewDeviceAvailable");
             
             self.deviceConnected = YES;
             
@@ -351,7 +356,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
             return YES;
         }
     }
-    NSLog(@"[VESDK] Not vaavud, failed on headphoneOut");
+    NSLog(@"[VESDK] headphoneOut not Available");
     return NO;
     
 }
@@ -371,7 +376,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
         
     }
     //[self.microphone stopFetchingAudio];
-    NSLog(@"[VESDK] Not vaavud, failed on mic availiable");
+    NSLog(@"[VESDK] microphone not availiable");
     return NO;
 }
 
