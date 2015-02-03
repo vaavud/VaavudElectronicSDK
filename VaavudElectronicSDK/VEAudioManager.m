@@ -10,6 +10,7 @@
 
 #define sampleFrequency 44100
 #define signalFrequency 14700
+#define musicPlayerVolume 0.95
 
 #import "VEAudioManager.h"
 
@@ -151,10 +152,11 @@
     // check if volume is at maximum.
     MPMusicPlayerController *musicPlayer = [MPMusicPlayerController iPodMusicPlayer];
     
-    if (musicPlayer.volume != 1) {
-        self.originalAudioVolume = @(musicPlayer.volume);
-        musicPlayer.volume = 1; // device volume will be changed to maximum value
+    if (musicPlayer.volume != musicPlayerVolume) {
+        self.originalAudioVolume = [NSNumber numberWithFloat: musicPlayer.volume];
+        musicPlayer.volume = musicPlayerVolume; // device volume will be changed to maximum value
     }
+    
 }
 
 - (void)returnVolumeToInitialState {
