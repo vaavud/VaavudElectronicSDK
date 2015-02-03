@@ -216,16 +216,16 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 
 - (void) vaavudStartedMeasureing {
     for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(sleipnirStartedMeasuring)]) {
-            [delegate sleipnirStartedMeasuring];
+        if ([delegate respondsToSelector:@selector(sleipnirStartedMeasureing)]) {
+            [delegate sleipnirStartedMeasureing];
         }
     }
 }
 
 - (void) vaavudStopMeasureing {
     for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(sleipnirStopedMeasuring)]) {
-            [delegate sleipnirStopedMeasuring];
+        if ([delegate respondsToSelector:@selector(sleipnirStopedMeasureing)]) {
+            [delegate sleipnirStopedMeasureing];
         }
     }
 }
@@ -274,7 +274,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 
 
 - (NSNumber*) frequencyToWindspeed: (NSNumber *) frequency{
-    return [NSNumber numberWithFloat: frequency.floatValue * 0.31];
+    return [NSNumber numberWithFloat: frequency.floatValue * 0.325+0.2];
 }
 
 
