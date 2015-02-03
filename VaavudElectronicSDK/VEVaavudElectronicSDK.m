@@ -274,7 +274,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 
 
 - (NSNumber*) frequencyToWindspeed: (NSNumber *) frequency{
-    return [NSNumber numberWithFloat: frequency.floatValue * 0.325+0.2];
+    return [NSNumber numberWithFloat:frequency.floatValue * 0.325+0.2];
 }
 
 
