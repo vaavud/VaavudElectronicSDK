@@ -17,6 +17,7 @@
 #define SMOOTHING_TIME_CONSTANT_CALIBRATION 12
 #define SAMPLE_FREQUENCY 44100
 #define REQUIRED_CALIBRATION_TICKS 1500
+#define DIRECTION_OFFSET 10.0
 
 
 @interface VEDirectionDetectionAlgo() {
@@ -343,10 +344,18 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         [self iterateAngle: (float *) tickLengthRelativePrTeethCompensated];
     }
     
+    float angleCompensated = angleEstimator + DIRECTION_OFFSET;
+    
+    if (angleCompensated < 0)
+        angleCompensated += 360;
+    
+    if (angleCompensated > 360)
+        angleCompensated -= 360;
+    
     
     // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
     dispatch_async(dispatch_get_main_queue(),^{
-        [self.dirDelegate newWindAngleLocal:[NSNumber numberWithFloat:angleEstimator]];
+        [self.dirDelegate newWindAngleLocal:[NSNumber numberWithFloat:angleCompensated]];
         [self.dirDelegate newAngularVelocities: angularVelocities];
         [self.dirDelegate newSpeed: [NSNumber numberWithFloat:windSpeed]];
         [self.dirDelegate newVelocityProfileError:[NSNumber numberWithFloat:velocityProfileError]];
