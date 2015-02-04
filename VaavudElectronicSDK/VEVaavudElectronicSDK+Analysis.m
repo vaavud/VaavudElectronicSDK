@@ -19,7 +19,7 @@
     
     if ([array containsObject:delegate]) {
         // do nothing
-        NSLog(@"trying to add delegate twice");
+        NSLog(@"[SDK] trying to add delegate twice");
     } else {
         [self.VaaElecAnalysisDelegates addObject:delegate];
     }
@@ -33,7 +33,7 @@
         // do nothing
         [self.VaaElecAnalysisDelegates removeObject:delegate];
     } else {
-        NSLog(@"trying to remove delegate, which does not excists");
+        NSLog(@"[SDK] trying to remove delegate, which does not excists");
     }
 }
 
