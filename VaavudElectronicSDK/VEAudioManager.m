@@ -48,7 +48,7 @@
     return nil;
 }
 
-- (id)initWithDelegate:(id <AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>)delegate {
+- (id)initWithDelegate:(id<AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>)delegate {
     self = [super init];
     
     self.delegate = delegate;
@@ -131,6 +131,8 @@
     dispatch_async(dispatch_get_main_queue(),^{
         [self.delegate vaavudStopMeasuring];
     });
+    
+    [self returnVolumeToInitialState];
 }
 
 - (void)sleipnirAvailabliltyChanged:(BOOL)available {
@@ -153,10 +155,9 @@
     MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
     
     if (musicPlayer.volume != musicPlayerVolume) {
-        self.originalAudioVolume = [NSNumber numberWithFloat: musicPlayer.volume];
+        self.originalAudioVolume = @(musicPlayer.volume);
         musicPlayer.volume = musicPlayerVolume; // device volume will be changed to maximum value
     }
-    
 }
 
 - (void)returnVolumeToInitialState {

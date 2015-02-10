@@ -19,8 +19,8 @@
 
 @protocol AudioManagerDelegate <NSObject>
 
-- (void) vaavudStartedMeasuring;
-- (void) vaavudStopMeasuring;
+- (void)vaavudStartedMeasuring;
+- (void)vaavudStopMeasuring;
 
 @end
 
@@ -28,38 +28,37 @@
 @interface VEAudioManager : NSObject
 
 // Initializer
-- (id) initWithDelegate:( VEVaavudElectronicSDK <AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>*) delegate;
-
+- (id)initWithDelegate:(id<AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>)delegate;
 
 // Starts Playback and Recording when Vaavud becomes available
-- (void) start;
+- (void)start;
 
 // End Playback and Recording
-- (void) stop;
-
+- (void)stop;
 
 // Recording of sound files
+
 // Starts the internal soundfile recorder
-- (void) startRecording;
+- (void)startRecording;
 
 // Ends the internal soundfile recorder
-- (void) endRecording;
+- (void)endRecording;
 
 // returns true if recording is active
-- (BOOL) isRecording;
+- (BOOL)isRecording;
 
 // returns the local path of the recording
-- (NSURL*) recordingPath;
+- (NSURL *)recordingPath;
 
-- (void) sleipnirAvailabliltyChanged: (BOOL) available ;
+- (void)sleipnirAvailabliltyChanged:(BOOL)available ;
 
-- (void) returnVolumeToInitialState;
+- (void)returnVolumeToInitialState;
 
 // return the sound output description as NSString
-- (NSString*) soundOutputDescription;
+- (NSString *)soundOutputDescription;
 
 // return the sound input descriotion as NSString
-- (NSString*) soundInputDescription;
+- (NSString *)soundInputDescription;
 
 
 @property (strong, nonatomic) VESoundProcessingAlgo *soundProcessor;

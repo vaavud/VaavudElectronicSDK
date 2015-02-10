@@ -20,7 +20,7 @@
 @property (strong, nonatomic) VESummeryGenerator *summeryGenerator;
 @property (strong, nonatomic) VELocationManager *locationManager;
 @property (strong, nonatomic) VEAudioVaavudElectronicDetection *AVElectronicDetection;
-@property (strong, atomic) NSNumber* currentHeading;
+@property (strong, atomic) NSNumber *currentHeading;
 
 @end
 
@@ -29,7 +29,7 @@
 // initialize sharedObject as nil (first call only)
 static VEVaavudElectronicSDK *sharedInstance = nil;
 
-+ (VEVaavudElectronicSDK *) sharedVaavudElectronic {
++ (VEVaavudElectronicSDK *)sharedVaavudElectronic {
     // structure used to test whether the block has completed or not
     static dispatch_once_t p = 0;
     
@@ -43,7 +43,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     return sharedInstance;
 }
 
-- (void) initSingleton {
+- (void)initSingleton {
     self.VaaElecWindDelegates = [[NSMutableArray alloc] initWithCapacity:3];
     self.VaaElecAnalysisDelegates = [[NSMutableArray alloc] initWithCapacity:3];
     self.audioManager = [[VEAudioManager alloc] initWithDelegate:self];
@@ -52,22 +52,18 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     self.AVElectronicDetection = [[VEAudioVaavudElectronicDetection alloc] initWithDelegate:self];
 }
 
-+ (id) allocWithZone:(NSZone *)zone {
++ (id)allocWithZone:(NSZone *)zone {
     //If coder misunderstands this is a singleton, behave properly with
     // ref count +1 on alloc anyway, and still return singleton!
     return [VEVaavudElectronicSDK sharedVaavudElectronic];
 }
 
-
-- (BOOL) sleipnirAvailable {
+- (BOOL)sleipnirAvailable {
     return self.AVElectronicDetection.sleipnirAvailable;
 }
 
-
-
 /* add listener of heading and windspeed information */
-- (void) addListener:(id <VaavudElectronicWindDelegate>) delegate {
-    
+- (void)addListener:(id<VaavudElectronicWindDelegate>)delegate {
     NSArray *array = [self.VaaElecWindDelegates copy];
     
     if ([array containsObject:delegate]) {
@@ -78,9 +74,8 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     }
 }
 
-
 /* remove listener of heading and windspeed information */
-- (void) removeListener:(id <VaavudElectronicWindDelegate>) delegate {
+- (void)removeListener:(id<VaavudElectronicWindDelegate>)delegate {
     NSArray *array = [self.VaaElecWindDelegates copy];
     if ([array containsObject:delegate]) {
         // do nothing
@@ -90,44 +85,39 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     }
 }
 
-
-
-- (void) newSpeed: (NSNumber*) speed {
-    
+- (void)newSpeed:(NSNumber *)speed {
     // REFACTOR with better naming / logic
-    NSNumber *windspeed = [self frequencyToWindspeed: speed];
+    NSNumber *windspeed = [self frequencyToWindspeed:speed];
     
-    for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
+    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(newSpeed:)]) {
-            [delegate newSpeed: windspeed];
+            [delegate newSpeed:windspeed];
         }
     }
 }
 
-
-- (void) newWindDirection: (NSNumber*) speed {
-    for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
+- (void)newWindDirection:(NSNumber *)speed {
+    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(newWindDirection:)]) {
-            [delegate newWindDirection: speed];
+            [delegate newWindDirection:speed];
         }
     }
 }
 
-- (void) newHeading:(NSNumber *)heading {
-    
+- (void)newHeading:(NSNumber *)heading {
     self.currentHeading = heading;
     
-    for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
+    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(newHeading:)]) {
-            [delegate newHeading: heading];
+            [delegate newHeading:heading];
         }
     }
 }
 
-- (void) newWindAngleLocal:(NSNumber*) angle {
-    for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
+- (void)newWindAngleLocal:(NSNumber *)angle {
+    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(newWindAngleLocal:)]) {
-            [delegate newWindAngleLocal: angle];
+            [delegate newWindAngleLocal:angle];
         }
     }
     
@@ -138,75 +128,70 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
             windDirection = windDirection - 360;
         }
         
-        [self newWindDirection: [NSNumber numberWithFloat: windDirection]];
-        
+        [self newWindDirection:@(windDirection)];
     }
-    
 }
 
-- (void) newTickDetectionErrorCount: (NSNumber *) tickDetectionErrorCount {
-    for (id<VaavudElectronicAnalysisDelegate> delegate in self.VaaElecAnalysisDelegates) {
+- (void)newTickDetectionErrorCount:(NSNumber *)tickDetectionErrorCount {
+    for (id<VaavudElectronicAnalysisDelegate>delegate in self.VaaElecAnalysisDelegates) {
         if ([delegate respondsToSelector:@selector(newTickDetectionErrorCount:)]) {
             [delegate newTickDetectionErrorCount:tickDetectionErrorCount];
         }
     }
 }
 
-- (void) newVelocityProfileError: (NSNumber *) profileError {
-    for (id<VaavudElectronicAnalysisDelegate> delegate in self.VaaElecAnalysisDelegates) {
+- (void)newVelocityProfileError:(NSNumber *)profileError {
+    for (id<VaavudElectronicAnalysisDelegate>delegate in self.VaaElecAnalysisDelegates) {
         if ([delegate respondsToSelector:@selector(newVelocityProfileError:)]) {
             [delegate newVelocityProfileError:profileError];
         }
     }
 }
 
-- (void) newAngularVelocities: (NSArray*) angularVelocities {
-    for (id<VaavudElectronicAnalysisDelegate> delegate in self.VaaElecAnalysisDelegates) {
+- (void)newAngularVelocities:(NSArray *)angularVelocities {
+    for (id<VaavudElectronicAnalysisDelegate>delegate in self.VaaElecAnalysisDelegates) {
         if ([delegate respondsToSelector:@selector(newAngularVelocities:)]) {
             [delegate newAngularVelocities:angularVelocities];
         }
     }
 }
 
-- (void) newMaxAmplitude: (NSNumber*) amplitude {
-    for (id<VaavudElectronicAnalysisDelegate> delegate in self.VaaElecAnalysisDelegates) {
+- (void)newMaxAmplitude:(NSNumber *)amplitude {
+    for (id<VaavudElectronicAnalysisDelegate>delegate in self.VaaElecAnalysisDelegates) {
         if ([delegate respondsToSelector:@selector(newMaxAmplitude:)]){
-            [delegate newMaxAmplitude: amplitude];
+            [delegate newMaxAmplitude:amplitude];
         }
     }
 }
 
-
-- (void) sleipnirAvailabliltyChanged: (BOOL) available {
+- (void)sleipnirAvailabliltyChanged:(BOOL)available {
+    [self.audioManager sleipnirAvailabliltyChanged:available];
     
-    [self.audioManager sleipnirAvailabliltyChanged: available];
-    
-    for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
+    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(sleipnirAvailabliltyChanged:)]) {
-            [delegate sleipnirAvailabliltyChanged: available];
+            [delegate sleipnirAvailabliltyChanged:available];
         }
     }
 }
 
-- (void) deviceConnectedTypeSleipnir: (BOOL) sleipnir {
-    for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
+- (void)deviceConnectedTypeSleipnir:(BOOL)sleipnir {
+    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(deviceConnectedTypeSleipnir:)]) {
-            [delegate deviceConnectedTypeSleipnir: sleipnir];
+            [delegate deviceConnectedTypeSleipnir:sleipnir];
         }
     }
 }
 
-- (void) deviceDisconnectedTypeSleipnir: (BOOL) sleipnir {
-    for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
+- (void)deviceDisconnectedTypeSleipnir:(BOOL)sleipnir {
+    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(deviceDisconnectedTypeSleipnir:)]) {
-            [delegate deviceDisconnectedTypeSleipnir: sleipnir];
+            [delegate deviceDisconnectedTypeSleipnir:sleipnir];
         }
     }
 }
 
-- (void) deviceConnectedChecking {
-    
-    for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
+- (void)deviceConnectedChecking {
+    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(deviceConnectedChecking)]) {
             [delegate deviceConnectedChecking];
         }
@@ -214,16 +199,16 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 }
 
 
-- (void) vaavudStartedMeasuring {
-    for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
+- (void)vaavudStartedMeasuring {
+    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(sleipnirStartedMeasuring)]) {
             [delegate sleipnirStartedMeasuring];
         }
     }
 }
 
-- (void) vaavudStopMeasuring {
-    for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
+- (void)vaavudStopMeasuring {
+    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(sleipnirStoppedMeasuring)]) {
             [delegate sleipnirStoppedMeasuring];
         }
@@ -231,27 +216,24 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 }
 
 
-- (void) newRecordingReadyToUpload {
-    for (id<VaavudElectronicAnalysisDelegate> delegate in self.VaaElecAnalysisDelegates) {
+- (void)newRecordingReadyToUpload {
+    for (id<VaavudElectronicAnalysisDelegate>delegate in self.VaaElecAnalysisDelegates) {
         if ([delegate respondsToSelector:@selector(newRecordingReadyToUpload)]){
             [delegate newRecordingReadyToUpload];
         }
     }
 }
 
-- (void) calibrationPercentageComplete: (NSNumber*) percentage {
-    for (id<VaavudElectronicWindDelegate> delegate in self.VaaElecWindDelegates) {
+- (void)calibrationPercentageComplete:(NSNumber *)percentage {
+    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(calibrationPercentageComplete:)]) {
-            [delegate calibrationPercentageComplete: percentage];
+            [delegate calibrationPercentageComplete:percentage];
         }
     }
 }
 
-
-
-
 /* start the audio input/output and starts sending data */
-- (void) start {
+- (void)start {
     [self.audioManager start];
     
     if ([self.locationManager isHeadingAvailable]) {
@@ -263,28 +245,27 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 }
 
 /* start the audio input/output and starts sending data */
-- (void) stop {
+- (void)stop {
     [self.audioManager stop];
     [self.locationManager stop];
 }
 
-- (void) returnVolumeToInitialState {
+- (void)returnVolumeToInitialState {
     [self.audioManager returnVolumeToInitialState];
 }
 
-
-- (NSNumber*) frequencyToWindspeed: (NSNumber *) frequency{
-    return [NSNumber numberWithFloat:frequency.floatValue * 0.325+0.2];
+- (NSNumber *)frequencyToWindspeed:(NSNumber *)frequency {
+    return @(frequency.floatValue*0.325 + 0.2);
 }
 
 
 // start calibration mode
--(void) startCalibration {
+- (void)startCalibration {
     [self.audioManager.soundProcessor.dirDetectionAlgo startCalibration];
 }
 
 // end calibbration mode
--(void) endCalibration {
+-(void)endCalibration {
     [self.audioManager.soundProcessor.dirDetectionAlgo endCalibration];
 }
 
