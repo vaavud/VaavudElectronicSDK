@@ -150,7 +150,7 @@
 
 - (void)checkIfVolumeIsAtMaximum {
     // check if volume is at maximum.
-    MPMusicPlayerController *musicPlayer = [MPMusicPlayerController iPodMusicPlayer];
+    MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
     
     if (musicPlayer.volume != musicPlayerVolume) {
         self.originalAudioVolume = [NSNumber numberWithFloat: musicPlayer.volume];
@@ -161,7 +161,7 @@
 
 - (void)returnVolumeToInitialState {
     if (self.originalAudioVolume) {
-        MPMusicPlayerController* musicPlayer = [MPMusicPlayerController iPodMusicPlayer];
+        MPMusicPlayerController* musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
         if (musicPlayer.volume != self.originalAudioVolume.floatValue) {
             musicPlayer.volume = self.originalAudioVolume.floatValue;
         }
