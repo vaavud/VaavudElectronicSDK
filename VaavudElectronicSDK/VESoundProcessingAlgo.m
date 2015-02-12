@@ -24,7 +24,7 @@
     bool mvgDropHalfRefresh, longTick;
 }
 
-@property (strong, nonatomic) id<SoundProcessingDelegate, DirectionDetectionDelegate> windDelegate;
+@property (strong, nonatomic) id<SoundProcessingDelegate, DirectionDetectionDelegate> delegate;
 
 @end
 
@@ -66,8 +66,7 @@
     mvgDropHalfRefresh = YES;
     
     self.dirDetectionAlgo = [[VEDirectionDetectionAlgo alloc] initWithDelegate:delegate];
-    
-    self.windDelegate = delegate;
+    self.delegate = delegate;
     
     return self;
 }
@@ -121,11 +120,7 @@
             maxDiff = mvgDiffSum;
         }
         
-        
         if ([self detectTick: (int) (counter - lastTick)]) {
-            
-            
-           
             
             lastMvgMax = mvgMax;
             lastMvgMin = mvgMin;
@@ -149,15 +144,11 @@
         
         counter++;
         
-        
-        
-        
-        
     }
     
     // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
     dispatch_async(dispatch_get_main_queue(),^{
-        [self.windDelegate newMaxAmplitude: [NSNumber numberWithInt:maxDiff]];
+        [self.delegate newMaxAmplitude: [NSNumber numberWithInt:maxDiff]];
     });
 
 }
