@@ -7,6 +7,7 @@
 //
 
 #import "VESoundProcessingAlgo.h"
+#import "VEDirectionDetectionAlgo.h"
 
 @interface VESoundProcessingAlgo() {
     int mvgAvg[3];
@@ -22,9 +23,14 @@
     
     int mvgMax, mvgMin, lastMvgMax, lastMvgMin, diffMax, diffMin, lastDiffMax, lastDiffMin, diffGap, mvgGapMax, lastMvgGapMax, mvgDropHalf, diffRiseThreshold1;
     bool mvgDropHalfRefresh, longTick;
+    
+    int calibrationCounter;
+    float volume;
 }
 
 @property (strong, nonatomic) id<SoundProcessingDelegate, DirectionDetectionDelegate> delegate;
+@property (strong, nonatomic) MPMusicPlayerController *musicPlayer;
+
 
 @end
 
@@ -68,6 +74,10 @@
     self.dirDetectionAlgo = [[VEDirectionDetectionAlgo alloc] initWithDelegate:delegate];
     self.delegate = delegate;
     
+    self.musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
+    volume = 0.7;
+    self.musicPlayer.volume = volume;
+    
     return self;
 }
 
@@ -93,6 +103,9 @@
    
     
     int maxDiff = 0;
+    int minDiff = 100000;
+    long sumDiff = 0;
+    int zeroes = 0;
     
     for (int i = 0; i < bufferLength; i++) {
         
@@ -116,9 +129,21 @@
         mvgDiffSum += mvgDiff[bufferIndex];
         
         
+        // stats
         if (maxDiff < mvgDiffSum) {
             maxDiff = mvgDiffSum;
         }
+
+        if (minDiff > mvgDiffSum) {
+            minDiff = mvgDiffSum;
+        }
+        
+        sumDiff += mvgDiffSum;
+        if (data[i] == 0) {
+            zeroes++;
+        }
+        
+        
         
         if ([self detectTick: (int) (counter - lastTick)]) {
             
@@ -146,6 +171,9 @@
         
     }
     
+    // calibration
+    [self adjustVolumeMaxDiff:maxDiff andMinDiff:minDiff andAvgDiff:sumDiff/bufferLength andZeroes:zeroes];
+    
     // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
     dispatch_async(dispatch_get_main_queue(),^{
         [self.delegate newMaxAmplitude: [NSNumber numberWithInt:maxDiff]];
@@ -153,6 +181,29 @@
 
 }
 
+-(void) adjustVolumeMaxDiff:(int)maxDiff andMinDiff:(int)minDiff andAvgDiff:(int)avgDiff andZeroes:(int)zeroes{
+    
+    calibrationCounter++;
+    
+    if (calibrationCounter == 10) {
+        calibrationCounter = 0;
+        
+        if (avgDiff < 30 && zeroes == 0) {
+            volume += 0.01;
+            self.musicPlayer.volume = volume;
+            NSLog(@"[VESDK] Volume: %f, max: %i, min: %i, avg: %i, zeroes: %i", volume, maxDiff, minDiff, avgDiff, zeroes);
+        }
+        
+        if (maxDiff > 3800 && zeroes == 0) {
+            volume -= 0.01;
+            self.musicPlayer.volume = volume;
+            NSLog(@"[VESDK] Volume: %f, max: %i, min: %i, avg: %i, zeroes: %i", volume, maxDiff, minDiff, avgDiff, zeroes);
+        }
+    }
+    
+    
+}
+            
 
 - (BOOL) detectTick:(int) sampleSinceTick {
     
@@ -267,7 +318,5 @@
     return false;
     
 }
-
-
 
 @end

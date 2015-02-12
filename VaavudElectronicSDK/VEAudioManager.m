@@ -114,7 +114,7 @@
     [self toggleMicrophone: YES];
     [self toggleOutput: YES];
     
-    [self checkIfVolumeIsAtMaximum];
+//    [self checkIfVolumeIsAtMaximum]; // TESTING calibration
     
      dispatch_async(dispatch_get_main_queue(),^{
         [self.delegate vaavudStartedMeasuring];
