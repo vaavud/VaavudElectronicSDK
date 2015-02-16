@@ -9,6 +9,8 @@
 #import "VESoundProcessingAlgo.h"
 #import "VEDirectionDetectionAlgo.h"
 
+#define CALIBRATE_AUDIO_EVERY_X_BUFFER 20
+
 @interface VESoundProcessingAlgo() {
     int mvgAvg[3];
     int mvgAvgSum;
@@ -25,7 +27,7 @@
     bool mvgDropHalfRefresh, longTick;
     
     int calibrationCounter;
-    float volume;
+    int volume;
 }
 
 @property (strong, nonatomic) id<SoundProcessingDelegate, DirectionDetectionDelegate> delegate;
@@ -75,14 +77,7 @@
     self.delegate = delegate;
     
     self.musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
-   
-    volume = [[NSUserDefaults standardUserDefaults] floatForKey:@"VOLUME"];
-    
-    if (volume == 0) {
-        volume = 1.0;
-    }
-    self.musicPlayer.volume = volume;
-    
+    volume = (int) (self.musicPlayer.volume * 100);
     return self;
 }
 
@@ -160,14 +155,17 @@
         counter++;
         
         // stats
-        if (calibrationCounter == 0) {
+        if (calibrationCounter == CALIBRATE_AUDIO_EVERY_X_BUFFER) {
             if (lDiffMax < mvgDiffSum){
                 lDiffMax = mvgDiffSum;
             }
             
-            if (lDiffMin > mvgDiffSum){
-                lDiffMin = mvgDiffSum;
+            if (mvgAvgSum < 0) {
+                if (lDiffMin > mvgDiffSum){
+                    lDiffMin = mvgDiffSum;
+                }
             }
+
             
             if (avgMax < mvgAvgSum){
                 avgMax = mvgAvgSum;
@@ -181,34 +179,29 @@
         }
     }
     
-    if (calibrationCounter == 0) {
+    if (calibrationCounter == CALIBRATE_AUDIO_EVERY_X_BUFFER) {
         [self adjustVolumediffMax:lDiffMax anddiffMin:lDiffMin andAvgDiff:lDiffSum/bufferLength andAvgMax:avgMax andAvgMin:avgMin];
-        calibrationCounter-= 20; // Calibrate every X buffer
+        calibrationCounter= 0;
+        // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
+        dispatch_async(dispatch_get_main_queue(),^{
+            [self.delegate newMaxAmplitude: [NSNumber numberWithInt:lDiffMax]];
+        });
     }
     calibrationCounter++;
-    
-    
-    // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
-    dispatch_async(dispatch_get_main_queue(),^{
-        [self.delegate newMaxAmplitude: [NSNumber numberWithInt:lDiffMax]];
-    });
-
 }
 
 -(void) adjustVolumediffMax:(int)ldiffMax anddiffMin:(int)ldiffMin andAvgDiff:(int)avgDiff andAvgMax:(int)avgMax andAvgMin:(int)avgMin{
     
-    if (avgDiff < 25 && avgMax < 2 && avgMin > -2) {
-        volume += 0.01;
-        self.musicPlayer.volume = volume;
-        [[NSUserDefaults standardUserDefaults] setFloat:volume forKey:@"VOLUME"];
-        NSLog(@"[VESDK] Volume: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", volume, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
+    if ((avgDiff < 25 && avgMax < 2 && avgMin > -2) || (ldiffMax < 2000 && (avgMax > 2000 && avgMin < -2000))) {
+        volume += 1;
+        self.musicPlayer.volume = volume/(float)100;
+        NSLog(@"[VESDK] Volume +: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", volume/(float)100, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
     
-    if (ldiffMax > 3750 || (ldiffMax > 2700 && (avgMax > 2000 && avgMin < -2000))) {
-        volume -= 0.01;
-        self.musicPlayer.volume = volume;
-        [[NSUserDefaults standardUserDefaults] setFloat:volume forKey:@"VOLUME"];
-        NSLog(@"[VESDK] Volume: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", volume, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
+    if (ldiffMax > 3800 || (ldiffMin > 50 && (avgMax > 2000 && avgMin < -2000))) { // ldiffMax > 2700
+        volume -= 1;
+        self.musicPlayer.volume = volume/(float)100;
+        NSLog(@"[VESDK] Volume -: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", volume/(float)100, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
 }
             

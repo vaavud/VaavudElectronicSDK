@@ -62,14 +62,15 @@
     [self.microphone setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionMicrophone]];
     
     // CHECK MICROPHONE INPUT FORMAT
-    NSLog(@"[VESDK] input");
-    [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
+    if (LOG_AUDIO){
+        NSLog(@"[VESDK] input");
+        [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
+    }
     
-    AudioStreamBasicDescription ASBDinputDesired = [self getAudioStreamBasicDiscriptionMicrophone];
     AudioStreamBasicDescription ASBDinput = [self.microphone audioStreamBasicDescription];
     
-    if (ASBDinput.mSampleRate != ASBDinputDesired.mSampleRate) {
-        NSLog(@"Ups wrong sample rate");
+    if (ASBDinput.mSampleRate != [self getAudioStreamBasicDiscriptionMicrophone].mSampleRate) {
+        if(LOG_AUDIO){NSLog(@"[VESDK] Ups wrong sample rate");}
     }
       
     [self setupSoundOutput];
@@ -80,8 +81,10 @@
     // set the output format from the audioOutput stream.
     [[EZOutput sharedOutput] setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionOutput]];
     
-    NSLog(@"[VESDK] output");
-    [EZAudio printASBD: [[EZOutput sharedOutput] audioStreamBasicDescription]];
+    if(LOG_AUDIO){
+        NSLog(@"[VESDK] output");
+        [EZAudio printASBD: [[EZOutput sharedOutput] audioStreamBasicDescription]];
+    }
     
     // CHECK OUTPUT FORMAT
     
@@ -117,7 +120,7 @@
     [self toggleMicrophone: YES];
     [self toggleOutput: YES];
     
-//    [self checkIfVolumeIsAtMaximum]; // TESTING calibration
+    [self checkIfVolumeAtSavedLevel];
     
      dispatch_async(dispatch_get_main_queue(),^{
         [self.delegate vaavudStartedMeasuring];
@@ -153,17 +156,25 @@
 }
 
 
-- (void)checkIfVolumeIsAtMaximum {
+- (void)checkIfVolumeAtSavedLevel {
     // check if volume is at maximum.
     MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
+    float volume = [[NSUserDefaults standardUserDefaults] floatForKey:@"VOLUME"];
     
-    if (musicPlayer.volume != musicPlayerVolume) {
+    if (volume == 0) {
+        volume = 1.0;
+    }
+    
+    volume = 0;
+    
+    if (musicPlayer.volume != volume) {
         self.originalAudioVolume = @(musicPlayer.volume);
-        musicPlayer.volume = musicPlayerVolume; // device volume will be changed to maximum value
+        musicPlayer.volume = volume; // device volume will be changed to maximum value
     }
 }
 
 - (void)returnVolumeToInitialState {
+    [[NSUserDefaults standardUserDefaults] setFloat:[MPMusicPlayerController applicationMusicPlayer].volume forKey:@"VOLUME"];
     if (self.originalAudioVolume) {
         MPMusicPlayerController* musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
         if (musicPlayer.volume != self.originalAudioVolume.floatValue) {
