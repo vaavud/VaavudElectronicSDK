@@ -12,6 +12,7 @@
 
 // Import EZAudio header
 #import "EZAudio.h"
+#import "EZMicrophone+VESDK.h"
 
 #import "VESoundProcessingAlgo.h"
 #import "VEAudioVaavudElectronicDetection.h"

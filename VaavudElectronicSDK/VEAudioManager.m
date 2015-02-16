@@ -60,6 +60,8 @@
     self.microphone = [EZMicrophone microphoneWithDelegate:self];
     
     [self.microphone setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionMicrophone]];
+    [self.microphone _configureStreamFormatWithSampleRate: sampleFrequency]; // need to set ASBD first
+    
     
     // CHECK MICROPHONE INPUT FORMAT
     if (LOG_AUDIO){
@@ -396,5 +398,4 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     
     return description;
 }
-
 @end
