@@ -79,7 +79,7 @@
     volume = [[NSUserDefaults standardUserDefaults] floatForKey:@"VOLUME"];
     
     if (volume == 0) {
-        volume = 0.8;
+        volume = 1.0;
     }
     self.musicPlayer.volume = volume;
     
@@ -107,10 +107,12 @@
 - (void) newSoundData:(int *)data bufferLength:(UInt32) bufferLength {
    
     // used for stats & volume calibration
-    int maxDiff = 0;
-    int minDiff = 100000;
-    long sumDiff = 0;
-    int zeroes = 0;
+    int lDiffMax = 0;
+    int lDiffMin = 10000;
+    long lDiffSum = 0;
+    
+    int avgMax = -10000;
+    int avgMin = 10000;
     
     for (int i = 0; i < bufferLength; i++) {
         
@@ -133,23 +135,7 @@
         mvgAvgSum += mvgAvg[bufferIndex];
         mvgDiffSum += mvgDiff[bufferIndex];
         
-        
-        // stats
-        if (maxDiff < mvgDiffSum) {
-            maxDiff = mvgDiffSum;
-        }
 
-        if (minDiff > mvgDiffSum) {
-            minDiff = mvgDiffSum;
-        }
-        
-        sumDiff += mvgDiffSum;
-        if (data[i] == 0) {
-            zeroes++;
-        }
-        
-        
-        
         if ([self detectTick: (int) (counter - lastTick)]) {
             
             lastMvgMax = mvgMax;
@@ -167,48 +153,63 @@
             diffState = 0;
             
             longTick = [self.dirDetectionAlgo newTick: (int) (counter - lastTick)];
-            
             lastTick = counter;
             
         }
         
         counter++;
         
+        // stats
+        if (calibrationCounter == 0) {
+            if (lDiffMax < mvgDiffSum){
+                lDiffMax = mvgDiffSum;
+            }
+            
+            if (lDiffMin > mvgDiffSum){
+                lDiffMin = mvgDiffSum;
+            }
+            
+            if (avgMax < mvgAvgSum){
+                avgMax = mvgAvgSum;
+            }
+            
+            if (avgMin > mvgAvgSum){
+                avgMin = mvgAvgSum;
+            }
+            
+            lDiffSum += mvgDiffSum;
+        }
     }
     
-    // calibration
-    [self adjustVolumeMaxDiff:maxDiff andMinDiff:minDiff andAvgDiff:sumDiff/bufferLength andZeroes:zeroes];
+    if (calibrationCounter == 0) {
+        [self adjustVolumediffMax:lDiffMax anddiffMin:lDiffMin andAvgDiff:lDiffSum/bufferLength andAvgMax:avgMax andAvgMin:avgMin];
+        calibrationCounter-= 20; // Calibrate every X buffer
+    }
+    calibrationCounter++;
+    
     
     // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
     dispatch_async(dispatch_get_main_queue(),^{
-        [self.delegate newMaxAmplitude: [NSNumber numberWithInt:maxDiff]];
+        [self.delegate newMaxAmplitude: [NSNumber numberWithInt:lDiffMax]];
     });
 
 }
 
--(void) adjustVolumeMaxDiff:(int)maxDiff andMinDiff:(int)minDiff andAvgDiff:(int)avgDiff andZeroes:(int)zeroes{
+-(void) adjustVolumediffMax:(int)ldiffMax anddiffMin:(int)ldiffMin andAvgDiff:(int)avgDiff andAvgMax:(int)avgMax andAvgMin:(int)avgMin{
     
-    calibrationCounter++;
-    
-    if (calibrationCounter == 10) {
-        calibrationCounter = 0;
-        
-        if (avgDiff < 30) {
-            volume += 0.01;
-            self.musicPlayer.volume = volume;
-            [[NSUserDefaults standardUserDefaults] setFloat:volume forKey:@"VOLUME"];
-            NSLog(@"[VESDK] Volume: %f, max: %i, min: %i, avg: %i, zeroes: %i", volume, maxDiff, minDiff, avgDiff, zeroes);
-        }
-        
-        if (maxDiff > 3800 && zeroes == 0) {
-            volume -= 0.01;
-            self.musicPlayer.volume = volume;
-            [[NSUserDefaults standardUserDefaults] setFloat:volume forKey:@"VOLUME"];
-            NSLog(@"[VESDK] Volume: %f, max: %i, min: %i, avg: %i, zeroes: %i", volume, maxDiff, minDiff, avgDiff, zeroes);
-        }
+    if (avgDiff < 25 && avgMax < 2 && avgMin > -2) {
+        volume += 0.01;
+        self.musicPlayer.volume = volume;
+        [[NSUserDefaults standardUserDefaults] setFloat:volume forKey:@"VOLUME"];
+        NSLog(@"[VESDK] Volume: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", volume, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
     
-    
+    if (ldiffMax > 3750 || (ldiffMax > 2700 && (avgMax > 2000 && avgMin < -2000))) {
+        volume -= 0.01;
+        self.musicPlayer.volume = volume;
+        [[NSUserDefaults standardUserDefaults] setFloat:volume forKey:@"VOLUME"];
+        NSLog(@"[VESDK] Volume: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", volume, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
+    }
 }
             
 

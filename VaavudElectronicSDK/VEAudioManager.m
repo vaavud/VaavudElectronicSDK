@@ -43,7 +43,7 @@
 #pragma mark - Initialization
 - (id)init {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                   reason:@"-init is not a valid initializer for the class SoundManager"
+                                   reason:@"-init is not a valid initializer for the class AudioManager"
                                  userInfo:nil];
     return nil;
 }
@@ -62,6 +62,7 @@
     [self.microphone setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionMicrophone]];
     
     // CHECK MICROPHONE INPUT FORMAT
+    NSLog(@"[VESDK] input");
     [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
     
     AudioStreamBasicDescription ASBDinputDesired = [self getAudioStreamBasicDiscriptionMicrophone];
@@ -78,7 +79,9 @@
     
     // set the output format from the audioOutput stream.
     [[EZOutput sharedOutput] setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionOutput]];
-    // [EZAudio printASBD: [[EZOutput sharedOutput] audioStreamBasicDescription]];
+    
+    NSLog(@"[VESDK] output");
+    [EZAudio printASBD: [[EZOutput sharedOutput] audioStreamBasicDescription]];
     
     // CHECK OUTPUT FORMAT
     
