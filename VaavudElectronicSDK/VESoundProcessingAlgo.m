@@ -75,7 +75,12 @@
     self.delegate = delegate;
     
     self.musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
-    volume = 0.7;
+   
+    volume = [[NSUserDefaults standardUserDefaults] floatForKey:@"VOLUME"];
+    
+    if (volume == 0) {
+        volume = 0.8;
+    }
     self.musicPlayer.volume = volume;
     
     return self;
@@ -101,7 +106,7 @@
 
 - (void) newSoundData:(int *)data bufferLength:(UInt32) bufferLength {
    
-    
+    // used for stats & volume calibration
     int maxDiff = 0;
     int minDiff = 100000;
     long sumDiff = 0;
@@ -188,15 +193,17 @@
     if (calibrationCounter == 10) {
         calibrationCounter = 0;
         
-        if (avgDiff < 30 && zeroes == 0) {
+        if (avgDiff < 30) {
             volume += 0.01;
             self.musicPlayer.volume = volume;
+            [[NSUserDefaults standardUserDefaults] setFloat:volume forKey:@"VOLUME"];
             NSLog(@"[VESDK] Volume: %f, max: %i, min: %i, avg: %i, zeroes: %i", volume, maxDiff, minDiff, avgDiff, zeroes);
         }
         
         if (maxDiff > 3800 && zeroes == 0) {
             volume -= 0.01;
             self.musicPlayer.volume = volume;
+            [[NSUserDefaults standardUserDefaults] setFloat:volume forKey:@"VOLUME"];
             NSLog(@"[VESDK] Volume: %f, max: %i, min: %i, avg: %i, zeroes: %i", volume, maxDiff, minDiff, avgDiff, zeroes);
         }
     }
