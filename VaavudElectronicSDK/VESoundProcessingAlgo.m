@@ -195,13 +195,13 @@
     if ((avgDiff < 25 && avgMax < 2 && avgMin > -2) || (ldiffMax < 2000 && (avgMax > 2000 && avgMin < -2000))) {
         volume += 1;
         self.musicPlayer.volume = volume/(float)100;
-        NSLog(@"[VESDK] Volume +: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", volume/(float)100, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
+        if(LOG_VOLUME) NSLog(@"[VESDK] Volume +: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", volume/(float)100, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
     
     if (ldiffMax > 3800 || (ldiffMin > 50 && (avgMax > 2000 && avgMin < -2000))) { // ldiffMax > 2700
         volume -= 1;
         self.musicPlayer.volume = volume/(float)100;
-        NSLog(@"[VESDK] Volume -: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", volume/(float)100, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
+        if(LOG_VOLUME) NSLog(@"[VESDK] Volume -: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", volume/(float)100, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
 }
             

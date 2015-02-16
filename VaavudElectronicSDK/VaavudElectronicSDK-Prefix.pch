@@ -10,6 +10,7 @@
     #import "VEVaavudElectronicSDK+Analysis.h"
 #endif
 
-#define LOG_AUDIO YES
-#define LOG_TICK_DETECTION YES
-#define LOG YES
+#define LOG_AUDIO NO
+#define LOG_VOLUME NO
+#define LOG_TICK_DETECTION NO
+#define LOG NO
