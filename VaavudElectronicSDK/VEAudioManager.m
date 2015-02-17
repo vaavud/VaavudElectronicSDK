@@ -117,6 +117,8 @@
     if (self.algorithmActice) {
         [self stopInternal];
     }
+    
+    [self returnVolumeToInitialState];
 }
 
 
@@ -137,14 +139,12 @@
 - (void)stopInternal {
     self.algorithmActice = NO;
     
-    [self toggleMicrophone: NO];
-    [self toggleOutput: NO];
+    [self toggleMicrophone:NO];
+    [self toggleOutput:NO];
     
     dispatch_async(dispatch_get_main_queue(),^{
         [self.delegate vaavudStopMeasuring];
     });
-    
-    [self returnVolumeToInitialState];
 }
 
 - (void)sleipnirAvailabliltyChanged:(BOOL)available {
@@ -154,34 +154,28 @@
         }
     }
     else {
-        [self returnVolumeToInitialState];
         if (self.algorithmActice) {
             [self stopInternal];
         }
     }
 }
 
-
 - (void)checkIfVolumeAtSavedLevel {
     // check if volume is at maximum.
     MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
     
-    if (musicPlayer.volume != self.soundProcessor.volume.floatValue) {
-        self.originalAudioVolume = @(musicPlayer.volume);
-        musicPlayer.volume = self.soundProcessor.volume.floatValue; // device volume will be changed to stored
-        if(LOG_AUDIO) NSLog(@"[VESDK] Loaded volume from user defaults and set to %f", self.soundProcessor.volume.floatValue);
-    }
+    self.originalAudioVolume = @(musicPlayer.volume);
+    musicPlayer.volume = self.soundProcessor.volume.floatValue; // device volume will be changed to stored
+    if (LOG_AUDIO) NSLog(@"[VESDK] Loaded volume from user defaults and set to %f", self.soundProcessor.volume.floatValue);
 }
 
 - (void)returnVolumeToInitialState {
     [[NSUserDefaults standardUserDefaults] setFloat:self.soundProcessor.volume.floatValue forKey:@"VOLUME"];
     if(LOG_AUDIO) NSLog(@"[VESDK] Saved volume: %f to user defaults", self.soundProcessor.volume.floatValue);
     if (self.originalAudioVolume) {
-        MPMusicPlayerController* musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
-        if (musicPlayer.volume != self.originalAudioVolume.floatValue) {
-            musicPlayer.volume = self.originalAudioVolume.floatValue;
-            if(LOG_AUDIO) NSLog(@"[VESDK] Returned volume to original setting: %f", self.originalAudioVolume.floatValue);
-        }
+        MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
+        musicPlayer.volume = self.originalAudioVolume.floatValue;
+        if(LOG_AUDIO) NSLog(@"[VESDK] Returned volume to original setting: %f", self.originalAudioVolume.floatValue);
     }
 }
 
@@ -245,7 +239,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     }
     
     for (int i = 0; i < bufferSize; ++i) {
-        intArray[i] = (int) (arrayLeft[i]*1000);
+        intArray[i] = (int)(arrayLeft[i]*1000);
     }
     
     [self.soundProcessor newSoundData:intArray bufferLength:bufferSize];
@@ -269,9 +263,6 @@ withNumberOfChannels:(UInt32)numberOfChannels {
         [self.recorder appendDataFromBufferList:bufferList withBufferSize:bufferSize];
     }
 }
-
-
-
 
 - (void)toggleOutput:(BOOL)output {
     if (output) {

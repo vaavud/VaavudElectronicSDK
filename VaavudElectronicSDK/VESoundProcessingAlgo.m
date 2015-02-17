@@ -46,8 +46,7 @@
     return nil;
 }
 
-- (id)initWithDelegate:(id<SoundProcessingDelegate, DirectionDetectionDelegate>)delegate andVolume:(float)volume{
-    
+- (id)initWithDelegate:(id<SoundProcessingDelegate, DirectionDetectionDelegate>)delegate andVolume:(float)volume {
     self = [super init];
     
     counter = 0;
@@ -169,6 +168,7 @@
             if (avgMax < mvgAvgSum){
                 avgMax = mvgAvgSum;
             }
+//            avgMax = MIN(avgMax, mvgAvgSum);
             
             if (avgMin > mvgAvgSum){
                 avgMin = mvgAvgSum;
@@ -189,15 +189,16 @@
     calibrationCounter++;
 }
 
--(void) adjustVolumediffMax:(int)ldiffMax anddiffMin:(int)ldiffMin andAvgDiff:(int)avgDiff andAvgMax:(int)avgMax andAvgMin:(int)avgMin{
+-(void)adjustVolumediffMax:(int)ldiffMax anddiffMin:(int)ldiffMin andAvgDiff:(int)avgDiff andAvgMax:(int)avgMax andAvgMin:(int)avgMin{
+    BOOL rotating = avgMax > 2000 && avgMin < -2000;
+    BOOL stationary = avgMax < 2 && avgMin > -2;
     
-    if ((avgDiff < 25 && avgMax < 2 && avgMin > -2) || (ldiffMax < 2000 && (avgMax > 2000 && avgMin < -2000))) {
+    if ((stationary && avgDiff < 25) || (rotating && ldiffMax < 2000)) {
         self.volume = @(self.volume.floatValue + 0.01);
         self.musicPlayer.volume = self.volume.floatValue;
         if(LOG_VOLUME) NSLog(@"[VESDK] Volume +: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", self.volume.floatValue, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
-    
-    if (ldiffMax > 3800 || (ldiffMin > 50 && (avgMax > 2000 && avgMin < -2000))) { // ldiffMax > 2700
+    else if (ldiffMax > 3800 || (rotating && ldiffMin > 50)) { // ldiffMax > 2700
         self.volume = @(self.volume.floatValue - 0.01);
         self.musicPlayer.volume = self.volume.floatValue;
         if(LOG_VOLUME) NSLog(@"[VESDK] Volume -: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", self.volume.floatValue, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
