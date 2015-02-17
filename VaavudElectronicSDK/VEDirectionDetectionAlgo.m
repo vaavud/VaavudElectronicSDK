@@ -124,7 +124,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         
     } else {
         
-        if(LOG_TICK_DETECTION) NSLog(@"Out of ratio: %f, teeth: %03d, ticks: %03d, tickLength: %03d", tickLengthCompensated / ((float) lastTickLengthCompensated), teethIndex, tickCounterSinceStart, tickLength);
+        if(LOG_TICK_DETECTION) NSLog(@"[VESDK] Out of ratio: %f, teeth: %03d, ticks: %03d, tickLength: %03d", tickLengthCompensated / ((float) lastTickLengthCompensated), teethIndex, tickCounterSinceStart, tickLength);
         [self resetDirectionAlgorithm];
         
         tickDetectionErrorCount++;
@@ -293,7 +293,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         if (startCounter == 2* TEETH_PR_REV) {
             startLocated = true;
             lastTickLengthCompensated = samples * compensation[TEETH_PR_REV-1];
-            if(LOG_TICK_DETECTION) NSLog(@"Start: Ratio: %f", samples / ((float) lastTickLength));
+            if(LOG_TICK_DETECTION) NSLog(@"[VESDK] Start: Ratio: %f", samples / ((float) lastTickLength));
             startCounter = 0;
             teethIndex = 0;
             teethProcessIndex = TEETH_PR_REV/2; // should be 7 for 15 teeth

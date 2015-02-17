@@ -54,7 +54,11 @@
     self.delegate = delegate;
     
     // create sound processor (locates ticks)
-    self.soundProcessor = [[VESoundProcessingAlgo alloc] initWithDelegate:delegate];
+    float volume = [[NSUserDefaults standardUserDefaults] floatForKey:@"VOLUME"];
+    if (volume == 0) {
+        volume = 1.0;
+    }
+    self.soundProcessor = [[VESoundProcessingAlgo alloc] initWithDelegate:delegate andVolume:volume];
     
     // Create an instance of the microphone and tell it to use this object as the delegate
     self.microphone = [EZMicrophone microphoneWithDelegate:self];
@@ -161,26 +165,22 @@
 - (void)checkIfVolumeAtSavedLevel {
     // check if volume is at maximum.
     MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
-    float volume = [[NSUserDefaults standardUserDefaults] floatForKey:@"VOLUME"];
     
-    if (volume == 0) {
-        volume = 1.0;
-    }
-    
-    volume = 0;
-    
-    if (musicPlayer.volume != volume) {
+    if (musicPlayer.volume != self.soundProcessor.volume.floatValue) {
         self.originalAudioVolume = @(musicPlayer.volume);
-        musicPlayer.volume = volume; // device volume will be changed to maximum value
+        musicPlayer.volume = self.soundProcessor.volume.floatValue; // device volume will be changed to stored
+        if(LOG_AUDIO) NSLog(@"[VESDK] Loaded volume from user defaults and set to %f", self.soundProcessor.volume.floatValue);
     }
 }
 
 - (void)returnVolumeToInitialState {
-    [[NSUserDefaults standardUserDefaults] setFloat:[MPMusicPlayerController applicationMusicPlayer].volume forKey:@"VOLUME"];
+    [[NSUserDefaults standardUserDefaults] setFloat:self.soundProcessor.volume.floatValue forKey:@"VOLUME"];
+    if(LOG_AUDIO) NSLog(@"[VESDK] Saved volume: %f to user defaults", self.soundProcessor.volume.floatValue);
     if (self.originalAudioVolume) {
         MPMusicPlayerController* musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
         if (musicPlayer.volume != self.originalAudioVolume.floatValue) {
             musicPlayer.volume = self.originalAudioVolume.floatValue;
+            if(LOG_AUDIO) NSLog(@"[VESDK] Returned volume to original setting: %f", self.originalAudioVolume.floatValue);
         }
     }
 }

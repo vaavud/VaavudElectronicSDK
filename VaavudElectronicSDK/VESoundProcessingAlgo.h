@@ -21,9 +21,9 @@
 
 - (void) newSoundData:(int *)data bufferLength:(UInt32) bufferLength;
 
-- (id)initWithDelegate:(id<SoundProcessingDelegate, DirectionDetectionDelegate>)delegate;
+- (id)initWithDelegate:(id<SoundProcessingDelegate, DirectionDetectionDelegate>)delegate andVolume:(float)volume;
 
 @property (strong, nonatomic) VEDirectionDetectionAlgo *dirDetectionAlgo;
-
+@property (nonatomic, readonly) NSNumber *volume;
 
 @end

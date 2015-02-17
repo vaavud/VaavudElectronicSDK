@@ -27,12 +27,11 @@
     bool mvgDropHalfRefresh, longTick;
     
     int calibrationCounter;
-    int volume;
 }
 
 @property (strong, nonatomic) id<SoundProcessingDelegate, DirectionDetectionDelegate> delegate;
 @property (strong, nonatomic) MPMusicPlayerController *musicPlayer;
-
+@property (nonatomic, readwrite) NSNumber *volume;
 
 @end
 
@@ -47,7 +46,7 @@
     return nil;
 }
 
-- (id)initWithDelegate:(id<SoundProcessingDelegate, DirectionDetectionDelegate>)delegate {
+- (id)initWithDelegate:(id<SoundProcessingDelegate, DirectionDetectionDelegate>)delegate andVolume:(float)volume{
     
     self = [super init];
     
@@ -76,8 +75,8 @@
     self.dirDetectionAlgo = [[VEDirectionDetectionAlgo alloc] initWithDelegate:delegate];
     self.delegate = delegate;
     
+    self.volume = @(volume);
     self.musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
-    volume = (int) (self.musicPlayer.volume * 100);
     return self;
 }
 
@@ -180,7 +179,7 @@
     }
     
     if (calibrationCounter == CALIBRATE_AUDIO_EVERY_X_BUFFER) {
-        [self adjustVolumediffMax:lDiffMax anddiffMin:lDiffMin andAvgDiff:lDiffSum/bufferLength andAvgMax:avgMax andAvgMin:avgMin];
+        [self adjustVolumediffMax:lDiffMax anddiffMin:lDiffMin andAvgDiff:(int)(lDiffSum/bufferLength) andAvgMax:avgMax andAvgMin:avgMin];
         calibrationCounter= 0;
         // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
         dispatch_async(dispatch_get_main_queue(),^{
@@ -193,15 +192,15 @@
 -(void) adjustVolumediffMax:(int)ldiffMax anddiffMin:(int)ldiffMin andAvgDiff:(int)avgDiff andAvgMax:(int)avgMax andAvgMin:(int)avgMin{
     
     if ((avgDiff < 25 && avgMax < 2 && avgMin > -2) || (ldiffMax < 2000 && (avgMax > 2000 && avgMin < -2000))) {
-        volume += 1;
-        self.musicPlayer.volume = volume/(float)100;
-        if(LOG_VOLUME) NSLog(@"[VESDK] Volume +: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", volume/(float)100, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
+        self.volume = @(self.volume.floatValue + 0.01);
+        self.musicPlayer.volume = self.volume.floatValue;
+        if(LOG_VOLUME) NSLog(@"[VESDK] Volume +: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", self.volume.floatValue, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
     
     if (ldiffMax > 3800 || (ldiffMin > 50 && (avgMax > 2000 && avgMin < -2000))) { // ldiffMax > 2700
-        volume -= 1;
-        self.musicPlayer.volume = volume/(float)100;
-        if(LOG_VOLUME) NSLog(@"[VESDK] Volume -: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", volume/(float)100, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
+        self.volume = @(self.volume.floatValue - 0.01);
+        self.musicPlayer.volume = self.volume.floatValue;
+        if(LOG_VOLUME) NSLog(@"[VESDK] Volume -: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", self.volume.floatValue, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
 }
             
