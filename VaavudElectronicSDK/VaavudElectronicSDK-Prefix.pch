@@ -14,3 +14,6 @@
 #define LOG_VOLUME YES
 #define LOG_TICK_DETECTION YES
 #define LOG NO
+
+#define sampleFrequency 44100
+#define signalFrequency 14700

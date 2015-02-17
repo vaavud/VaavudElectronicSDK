@@ -250,10 +250,6 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     [self.locationManager stop];
 }
 
-- (void)returnVolumeToInitialState {
-    [self.audioManager returnVolumeToInitialState];
-}
-
 - (NSNumber *)frequencyToWindspeed:(NSNumber *)frequency {
     return @(frequency.floatValue*0.325 + 0.2);
 }

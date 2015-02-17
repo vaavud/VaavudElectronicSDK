@@ -8,17 +8,13 @@
 
 #define kAudioFilePath @"tempRawAudioFile.wav"
 
-#define sampleFrequency 44100
-#define signalFrequency 14700
-#define musicPlayerVolume 0.95
-
 #import "VEAudioManager.h"
 
 @interface VEAudioManager() <EZMicrophoneDelegate, EZOutputDataSource>
 
 @property (atomic) BOOL askedToMeasure;
 @property (atomic) BOOL recordingActive;
-@property (atomic) BOOL algorithmActice;
+@property (atomic) BOOL algorithmActive;
 @property (nonatomic, strong) NSNumber *originalAudioVolume;
 
 /** The microphone component */
@@ -54,11 +50,7 @@
     self.delegate = delegate;
     
     // create sound processor (locates ticks)
-    float volume = [[NSUserDefaults standardUserDefaults] floatForKey:@"VOLUME"];
-    if (volume == 0) {
-        volume = 1.0;
-    }
-    self.soundProcessor = [[VESoundProcessingAlgo alloc] initWithDelegate:delegate andVolume:volume];
+    self.soundProcessor = [[VESoundProcessingAlgo alloc] initWithDelegate:delegate];
     
     // Create an instance of the microphone and tell it to use this object as the delegate
     self.microphone = [EZMicrophone microphoneWithDelegate:self];
@@ -95,7 +87,7 @@
     // CHECK OUTPUT FORMAT
     
     self.askedToMeasure = NO;
-    self.algorithmActice = NO;
+    self.algorithmActive = NO;
     self.recordingActive = NO;
     
     return self;
@@ -104,7 +96,7 @@
 - (void)start {
     self.askedToMeasure = YES;
     
-    if (!self.algorithmActice) {
+    if (!self.algorithmActive) {
         if (self.delegate.sleipnirAvailable) {
             [self startInternal];
         }
@@ -114,21 +106,21 @@
 - (void)stop {
     self.askedToMeasure = NO;
     
-    if (self.algorithmActice) {
+    if (self.algorithmActive) {
         [self stopInternal];
     }
     
-    [self returnVolumeToInitialState];
+    [self.soundProcessor returnVolumeToInitialState];;
 }
 
 
 - (void)startInternal {
-    self.algorithmActice = YES;
+    self.algorithmActive = YES;
     
     [self toggleMicrophone: YES];
     [self toggleOutput: YES];
     
-    [self checkIfVolumeAtSavedLevel];
+    [self.soundProcessor setVolumeAtSavedLevel];
     
      dispatch_async(dispatch_get_main_queue(),^{
         [self.delegate vaavudStartedMeasuring];
@@ -137,7 +129,7 @@
 
 
 - (void)stopInternal {
-    self.algorithmActice = NO;
+    self.algorithmActive = NO;
     
     [self toggleMicrophone:NO];
     [self toggleOutput:NO];
@@ -154,28 +146,9 @@
         }
     }
     else {
-        if (self.algorithmActice) {
+        if (self.algorithmActive) {
             [self stopInternal];
         }
-    }
-}
-
-- (void)checkIfVolumeAtSavedLevel {
-    // check if volume is at maximum.
-    MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
-    
-    self.originalAudioVolume = @(musicPlayer.volume);
-    musicPlayer.volume = self.soundProcessor.volume.floatValue; // device volume will be changed to stored
-    if (LOG_AUDIO) NSLog(@"[VESDK] Loaded volume from user defaults and set to %f", self.soundProcessor.volume.floatValue);
-}
-
-- (void)returnVolumeToInitialState {
-    [[NSUserDefaults standardUserDefaults] setFloat:self.soundProcessor.volume.floatValue forKey:@"VOLUME"];
-    if(LOG_AUDIO) NSLog(@"[VESDK] Saved volume: %f to user defaults", self.soundProcessor.volume.floatValue);
-    if (self.originalAudioVolume) {
-        MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
-        musicPlayer.volume = self.originalAudioVolume.floatValue;
-        if(LOG_AUDIO) NSLog(@"[VESDK] Returned volume to original setting: %f", self.originalAudioVolume.floatValue);
     }
 }
 

@@ -27,11 +27,10 @@
     bool mvgDropHalfRefresh, longTick;
     
     int calibrationCounter;
+    float currentVolume, originalVolume;
 }
 
 @property (strong, nonatomic) id<SoundProcessingDelegate, DirectionDetectionDelegate> delegate;
-@property (strong, nonatomic) MPMusicPlayerController *musicPlayer;
-@property (nonatomic, readwrite) NSNumber *volume;
 
 @end
 
@@ -46,7 +45,7 @@
     return nil;
 }
 
-- (id)initWithDelegate:(id<SoundProcessingDelegate, DirectionDetectionDelegate>)delegate andVolume:(float)volume {
+- (id)initWithDelegate:(id<SoundProcessingDelegate, DirectionDetectionDelegate>)delegate {
     self = [super init];
     
     counter = 0;
@@ -74,8 +73,12 @@
     self.dirDetectionAlgo = [[VEDirectionDetectionAlgo alloc] initWithDelegate:delegate];
     self.delegate = delegate;
     
-    self.volume = @(volume);
-    self.musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
+    currentVolume = [[NSUserDefaults standardUserDefaults] floatForKey:@"VOLUME"];
+    if (currentVolume == 0) {
+        currentVolume = 1.0;
+    }
+    [self setVolumeAtSavedLevel];
+    
     return self;
 }
 
@@ -193,18 +196,35 @@
     BOOL rotating = avgMax > 2000 && avgMin < -2000;
     BOOL stationary = avgMax < 2 && avgMin > -2;
     
-    if ((stationary && avgDiff < 25) || (rotating && ldiffMax < 2000)) {
-        self.volume = @(self.volume.floatValue + 0.01);
-        self.musicPlayer.volume = self.volume.floatValue;
-        if(LOG_VOLUME) NSLog(@"[VESDK] Volume +: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", self.volume.floatValue, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
+    if ((stationary && avgDiff < 20) || (rotating && ldiffMax < 2000)) {
+        currentVolume += 0.01;
+        [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
+        if(LOG_VOLUME) NSLog(@"[VESDK] Volume +: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", currentVolume, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
     else if (ldiffMax > 3800 || (rotating && ldiffMin > 50)) { // ldiffMax > 2700
-        self.volume = @(self.volume.floatValue - 0.01);
-        self.musicPlayer.volume = self.volume.floatValue;
-        if(LOG_VOLUME) NSLog(@"[VESDK] Volume -: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", self.volume.floatValue, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
+        currentVolume -= 0.01;
+        [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
+        if(LOG_VOLUME) NSLog(@"[VESDK] Volume -: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", currentVolume, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
 }
-            
+
+- (void) setVolumeAtSavedLevel{
+    // check if volume is at maximum.
+    MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
+    originalVolume = musicPlayer.volume;
+    musicPlayer.volume = currentVolume; // device volume will be changed to stored
+    if (LOG_AUDIO) NSLog(@"[VESDK] Loaded volume from user defaults and set to %f", currentVolume);
+}
+
+- (void) returnVolumeToInitialState {
+    [[NSUserDefaults standardUserDefaults] setFloat:currentVolume forKey:@"VOLUME"];
+    if(LOG_AUDIO) NSLog(@"[VESDK] Saved volume: %f to user defaults", currentVolume);
+    
+    MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
+    musicPlayer.volume = originalVolume;
+    if(LOG_AUDIO) NSLog(@"[VESDK] Returned volume to original setting: %f", originalVolume);
+    
+}
 
 - (BOOL) detectTick:(int) sampleSinceTick {
     

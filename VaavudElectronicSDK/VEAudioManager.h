@@ -53,8 +53,6 @@
 
 - (void)sleipnirAvailabliltyChanged:(BOOL)available ;
 
-- (void)returnVolumeToInitialState;
-
 // return the sound output description as NSString
 - (NSString *)soundOutputDescription;
 

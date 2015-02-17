@@ -15,7 +15,6 @@
 # define BufferLength 256
 # define NFFT 8192
 # define Log2N 13
-# define sampleFrequency 44100
 
 #define kAudioFilePath @"tempRawAudioFile.wav"
 
