@@ -73,12 +73,6 @@
     self.dirDetectionAlgo = [[VEDirectionDetectionAlgo alloc] initWithDelegate:delegate];
     self.delegate = delegate;
     
-    currentVolume = [[NSUserDefaults standardUserDefaults] floatForKey:@"VOLUME"];
-    if (currentVolume == 0) {
-        currentVolume = 1.0;
-    }
-    [self setVolumeAtSavedLevel];
-    
     return self;
 }
 
@@ -209,6 +203,10 @@
 }
 
 - (void) setVolumeAtSavedLevel{
+    currentVolume = [[NSUserDefaults standardUserDefaults] floatForKey:@"VOLUME"];
+    if (currentVolume == 0) {
+        currentVolume = 1.0;
+    }
     // check if volume is at maximum.
     MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
     originalVolume = musicPlayer.volume;
