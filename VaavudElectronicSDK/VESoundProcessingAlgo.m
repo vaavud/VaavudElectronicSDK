@@ -160,29 +160,29 @@
     }
     
     if (calibrationCounter == CALIBRATE_AUDIO_EVERY_X_BUFFER) {
-        [self adjustVolumediffMax:lDiffMax anddiffMin:lDiffMin andAvgDiff:(int)(lDiffSum/bufferLength) andAvgMax:avgMax andAvgMin:avgMin];
+        [self adjustVolumeDiffMax:lDiffMax diffMin:lDiffMin avgDiff:(int)(lDiffSum/bufferLength) avgMax:avgMax avgMin:avgMin];
         calibrationCounter= 0;
         // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
-        dispatch_async(dispatch_get_main_queue(),^{
+        dispatch_async(dispatch_get_main_queue(), ^{
             [self.delegate newMaxAmplitude: [NSNumber numberWithInt:lDiffMax]];
         });
     }
     calibrationCounter++;
 }
 
--(void)adjustVolumediffMax:(int)ldiffMax anddiffMin:(int)ldiffMin andAvgDiff:(int)avgDiff andAvgMax:(int)avgMax andAvgMin:(int)avgMin {
+-(void)adjustVolumeDiffMax:(int)ldiffMax diffMin:(int)ldiffMin avgDiff:(int)avgDiff avgMax:(int)avgMax avgMin:(int)avgMin {
     BOOL rotating = avgMax > 2000 && avgMin < -2000;
     BOOL stationary = avgMax < 2 && avgMin > -2;
     
     if ((stationary && avgDiff < 20) || (rotating && ldiffMax < 2000)) {
         currentVolume += 0.01;
         [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
-        if(LOG_VOLUME) NSLog(@"[VESDK] Volume +: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", currentVolume, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
+        if (LOG_VOLUME) NSLog(@"[VESDK] Volume +: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", currentVolume, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
     else if (ldiffMax > 3800 || (rotating && ldiffMin > 50)) { // ldiffMax > 2700
         currentVolume -= 0.01;
         [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
-        if(LOG_VOLUME) NSLog(@"[VESDK] Volume -: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", currentVolume, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
+        if (LOG_VOLUME) NSLog(@"[VESDK] Volume -: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", currentVolume, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
 }
 
@@ -200,11 +200,11 @@
 
 - (void)returnVolumeToInitialState {
     [[NSUserDefaults standardUserDefaults] setFloat:currentVolume forKey:@"VOLUME"];
-    if(LOG_AUDIO) NSLog(@"[VESDK] Saved volume: %f to user defaults", currentVolume);
+    if (LOG_AUDIO) NSLog(@"[VESDK] Saved volume: %f to user defaults", currentVolume);
     
     MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
     musicPlayer.volume = originalVolume;
-    if(LOG_AUDIO) NSLog(@"[VESDK] Returned volume to original setting: %f", originalVolume);
+    if (LOG_AUDIO) NSLog(@"[VESDK] Returned volume to original setting: %f", originalVolume);
     
 }
 
@@ -234,8 +234,8 @@
     
     switch (diffState) {
         case 0:
-            if (mvgAvgSum<mvgMin) {
-                mvgMin=mvgAvgSum;
+            if (mvgMin > mvgAvgSum) {
+                mvgMin = mvgAvgSum;
             }
             if (mvgDiffSum > 0.3*lastDiffMax) {
                 diffState = 1;
@@ -243,8 +243,8 @@
             break;
             
         case 1:
-            if (mvgAvgSum<mvgMin) {
-                mvgMin=mvgAvgSum;
+            if (mvgMin > mvgAvgSum) {
+                mvgMin = mvgAvgSum;
             }
             if (mvgAvgSum > 0) {
                 diffState = 2;
@@ -255,9 +255,9 @@
             if (mvgDiffSum < 0.30*lastDiffMax) {
                 diffState = 3;
                 if (longTick) {
-                    gapBlock = sampleSinceTick * 2.9;
+                    gapBlock = sampleSinceTick*2.9;
                 } else {
-                    gapBlock = sampleSinceTick * 2.3;
+                    gapBlock = sampleSinceTick*2.3;
                 }
                 
                 if (gapBlock > 5000) {
@@ -282,8 +282,6 @@
                 else {
                     mvgDropHalfRefresh = YES;
                 }
-            
-                
             }
             break;
         case 4:
@@ -291,7 +289,7 @@
                 mvgGapMax = mvgAvgSum;
             }
 
-            if ( ((mvgAvgSum < mvgGapMax - mvgDropHalf) && ( mvgDiffSum > diffRiseThreshold1 ))  || mvgDiffSum > 0.75*lastDiffMax ) {
+            if (((mvgAvgSum < mvgGapMax - mvgDropHalf) && (mvgDiffSum > diffRiseThreshold1)) || mvgDiffSum > 0.75*lastDiffMax) {
                 return  true;
             }
 
@@ -300,15 +298,15 @@
             break;
     }
     
-    if (mvgAvgSum > mvgMax) {
-        mvgMax=mvgAvgSum;
+    if (mvgMax < mvgAvgSum) {
+        mvgMax = mvgAvgSum;
     }
-    
-    if (mvgDiffSum> diffMax) {
+
+    if (diffMax < mvgDiffSum) {
         diffMax = mvgDiffSum;
     }
 
-    if (mvgDiffSum<diffMin) {
+    if (diffMin > mvgDiffSum) {
         diffMin = mvgDiffSum;
     }
     
@@ -317,7 +315,6 @@
     }
     
     return false;
-    
 }
 
 @end
