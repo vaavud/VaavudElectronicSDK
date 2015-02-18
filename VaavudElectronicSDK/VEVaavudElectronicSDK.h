@@ -99,11 +99,8 @@
 // If Vaavud Electronic is not inserted nothing will happen.
 - (void)start;
 
-/* stop the audio input/output (and location,heading) and stop sending data */
+/* stop the audio input/output (and location, heading) and stop sending data */
 - (void)stop;
-
-// returnt the volume to initial state - to be used when the app closes
-- (void)returnVolumeToInitialState;
 
 // start calibration mode
 -(void)startCalibration;

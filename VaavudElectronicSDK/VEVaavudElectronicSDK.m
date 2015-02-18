@@ -241,7 +241,6 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     } else {
         // Do nothing - heading will not be updated
     }
-    
 }
 
 /* start the audio input/output and starts sending data */
@@ -253,7 +252,6 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 - (NSNumber *)frequencyToWindspeed:(NSNumber *)frequency {
     return @(frequency.floatValue*0.325 + 0.2);
 }
-
 
 // start calibration mode
 - (void)startCalibration {
