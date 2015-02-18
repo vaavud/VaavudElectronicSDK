@@ -17,7 +17,7 @@
 @property (atomic) BOOL askedToMeasure;
 @property (atomic) BOOL recordingActive;
 @property (atomic) BOOL algorithmActive;
-@property (nonatomic, weak) VEVaavudElectronicSDK <AudioManagerDelegate> *delegate;
+@property (nonatomic, weak) id<AudioManagerDelegate> delegate;
 
 @end
 
