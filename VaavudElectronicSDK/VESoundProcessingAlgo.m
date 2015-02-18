@@ -30,7 +30,7 @@
     float currentVolume, originalVolume;
 }
 
-@property (strong, nonatomic) id<SoundProcessingDelegate, DirectionDetectionDelegate> delegate;
+@property (strong, nonatomic) id<SoundProcessingDelegate, DirectionDetectionDelegate>delegate;
 
 @end
 
@@ -38,7 +38,7 @@
 
 
 #pragma mark - Initialization
--(id)init {
+- (id)init {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:@"-init is not a valid initializer for the class SoundProcessingAlgo"
                                  userInfo:nil];
@@ -76,7 +76,7 @@
     return self;
 }
 
-- (void) resetStateMachine {
+- (void)resetStateMachine {
     mvgState = 0;
     diffState = 0;
     gapBlock = 0;
@@ -94,8 +94,7 @@
     mvgDropHalfRefresh = YES;
 }
 
-- (void) newSoundData:(int *)data bufferLength:(UInt32) bufferLength {
-   
+- (void)newSoundData:(int *)data bufferLength:(UInt32)bufferLength {
     // used for stats & volume calibration
     int lDiffMax = 0;
     int lDiffMin = 10000;
@@ -105,7 +104,6 @@
     int avgMin = 10000;
     
     for (int i = 0; i < bufferLength; i++) {
-        
         int bufferIndex = counter%3;
         int bufferIndexLast = (counter-1)%3;
         
@@ -116,7 +114,7 @@
         
         
         // Moving Diff Update buffer value
-        mvgDiff[bufferIndex] = abs( data[i]- mvgAvg[bufferIndexLast]); // ! need to use old mvgAvgValue so place before mvgAvg update
+        mvgDiff[bufferIndex] = abs(data[i]- mvgAvg[bufferIndexLast]); // ! need to use old mvgAvgValue so place before mvgAvg update
         // Moving avg Update buffer value
         mvgAvg[bufferIndex] = data[i];
         
@@ -125,9 +123,7 @@
         mvgAvgSum += mvgAvg[bufferIndex];
         mvgDiffSum += mvgDiff[bufferIndex];
         
-
-        if ([self detectTick: (int) (counter - lastTick)]) {
-            
+        if ([self detectTick:(int)(counter - lastTick)]) {
             lastMvgMax = mvgMax;
             lastMvgMin = mvgMin;
             lastDiffMax = diffMax;
@@ -142,34 +138,22 @@
             mvgState = 0;
             diffState = 0;
             
-            longTick = [self.dirDetectionAlgo newTick: (int) (counter - lastTick)];
+            longTick = [self.dirDetectionAlgo newTick:(int)(counter - lastTick)];
             lastTick = counter;
-            
         }
         
         counter++;
         
         // stats
         if (calibrationCounter == CALIBRATE_AUDIO_EVERY_X_BUFFER) {
-            if (lDiffMax < mvgDiffSum){
-                lDiffMax = mvgDiffSum;
-            }
-            
-            if (mvgAvgSum < 0) {
-                if (lDiffMin > mvgDiffSum){
-                    lDiffMin = mvgDiffSum;
-                }
-            }
+            lDiffMax = MAX(lDiffMax, mvgDiffSum);
 
-            
-            if (avgMax < mvgAvgSum){
-                avgMax = mvgAvgSum;
+            if (mvgAvgSum < 0) {
+                lDiffMin = MIN(lDiffMin, mvgDiffSum);
             }
-//            avgMax = MIN(avgMax, mvgAvgSum);
             
-            if (avgMin > mvgAvgSum){
-                avgMin = mvgAvgSum;
-            }
+            avgMax = MAX(avgMax, mvgAvgSum);
+            avgMin = MIN(avgMin, mvgAvgSum);
             
             lDiffSum += mvgDiffSum;
         }
@@ -186,7 +170,7 @@
     calibrationCounter++;
 }
 
--(void)adjustVolumediffMax:(int)ldiffMax anddiffMin:(int)ldiffMin andAvgDiff:(int)avgDiff andAvgMax:(int)avgMax andAvgMin:(int)avgMin{
+-(void)adjustVolumediffMax:(int)ldiffMax anddiffMin:(int)ldiffMin andAvgDiff:(int)avgDiff andAvgMax:(int)avgMax andAvgMin:(int)avgMin {
     BOOL rotating = avgMax > 2000 && avgMin < -2000;
     BOOL stationary = avgMax < 2 && avgMin > -2;
     
@@ -202,7 +186,7 @@
     }
 }
 
-- (void) setVolumeAtSavedLevel{
+- (void)setVolumeAtSavedLevel {
     currentVolume = [[NSUserDefaults standardUserDefaults] floatForKey:@"VOLUME"];
     if (currentVolume == 0) {
         currentVolume = 1.0;
@@ -214,7 +198,7 @@
     if (LOG_AUDIO) NSLog(@"[VESDK] Loaded volume from user defaults and set to %f", currentVolume);
 }
 
-- (void) returnVolumeToInitialState {
+- (void)returnVolumeToInitialState {
     [[NSUserDefaults standardUserDefaults] setFloat:currentVolume forKey:@"VOLUME"];
     if(LOG_AUDIO) NSLog(@"[VESDK] Saved volume: %f to user defaults", currentVolume);
     
@@ -224,8 +208,7 @@
     
 }
 
-- (BOOL) detectTick:(int) sampleSinceTick {
-    
+- (BOOL)detectTick:(int)sampleSinceTick {
     switch (mvgState) {
         case 0:
             if (sampleSinceTick < 60) {
@@ -248,7 +231,6 @@
         default:
             break;
     }
-    
     
     switch (diffState) {
         case 0:

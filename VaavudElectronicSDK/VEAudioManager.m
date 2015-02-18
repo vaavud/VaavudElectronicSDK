@@ -79,7 +79,7 @@
     
     if(LOG_AUDIO){
         NSLog(@"[VESDK] output");
-        [EZAudio printASBD: [[EZOutput sharedOutput] audioStreamBasicDescription]];
+        [EZAudio printASBD:[[EZOutput sharedOutput] audioStreamBasicDescription]];
     }
     
     double frequency = signalFrequency;

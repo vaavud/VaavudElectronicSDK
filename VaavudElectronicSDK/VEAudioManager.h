@@ -22,6 +22,7 @@
 
 - (void)vaavudStartedMeasuring;
 - (void)vaavudStopMeasuring;
+- (BOOL)sleipnirAvailable;
 
 @end
 
