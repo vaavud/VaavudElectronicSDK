@@ -35,4 +35,7 @@
 // end calibbration mode
 -(void) endCalibration;
 
+// reset calibration
+- (void)resetCalibration;
+
 @end

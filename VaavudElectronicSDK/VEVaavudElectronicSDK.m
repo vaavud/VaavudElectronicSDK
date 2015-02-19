@@ -288,5 +288,9 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     [self.audioManager.soundProcessor.dirDetectionAlgo endCalibration];
 }
 
+- (void)resetCalibration {
+    [self.audioManager.soundProcessor.dirDetectionAlgo resetCalibration];
+}
+
 
 @end
