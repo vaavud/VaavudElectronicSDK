@@ -49,7 +49,7 @@
 - (NSURL*) summeryAngularVelocitiesPath;
 
 // generate summeryFile
-- (void) generateSummeryFile;
+- (void) generateSummaryFile;
 
 // returns the fitcurve used in direction algorithm
 - (float *) getFitCurve;
