@@ -17,6 +17,7 @@
 #define SMOOTHING_TIME_CONSTANT_CALIBRATION 12
 #define SAMPLE_FREQUENCY 44100
 #define REQUIRED_CALIBRATION_TICKS 1500
+#define DIRECTION_OFFSET 10.0
 
 
 @interface VEDirectionDetectionAlgo() {
@@ -123,7 +124,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         
     } else {
         
-        NSLog(@"Out of ratio: %f, teeth: %03d, ticks: %03d, tickLength: %03d", tickLengthCompensated / ((float) lastTickLengthCompensated), teethIndex, tickCounterSinceStart, tickLength);
+        if(LOG_TICK_DETECTION) NSLog(@"[VESDK] Out of ratio: %f, teeth: %03d, ticks: %03d, tickLength: %03d", tickLengthCompensated / ((float) lastTickLengthCompensated), teethIndex, tickCounterSinceStart, tickLength);
         [self resetDirectionAlgorithm];
         
         tickDetectionErrorCount++;
@@ -194,7 +195,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
             }
         }
         
-        if (!(initializeExponentialFilter) && tickLengthOneRotation < 15000 && calibrationTickSlowdownCounter > 200 && tickLengthOneRotation > 750) {
+        if (calibrationTickSlowdownCounter > 200 && tickLengthOneRotation > 750 && !(initializeExponentialFilter) && tickLengthOneRotation < 15000) {
             // Filter calibration
             [self updateExponentialFilter];
             
@@ -292,7 +293,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         if (startCounter == 2* TEETH_PR_REV) {
             startLocated = true;
             lastTickLengthCompensated = samples * compensation[TEETH_PR_REV-1];
-            NSLog(@"Start: Ratio: %f", samples / ((float) lastTickLength));
+            if(LOG_TICK_DETECTION) NSLog(@"[VESDK] Start: Ratio: %f", samples / ((float) lastTickLength));
             startCounter = 0;
             teethIndex = 0;
             teethProcessIndex = TEETH_PR_REV/2; // should be 7 for 15 teeth
@@ -343,10 +344,18 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         [self iterateAngle: (float *) tickLengthRelativePrTeethCompensated];
     }
     
+    float angleCompensated = angleEstimator + DIRECTION_OFFSET;
+    
+    if (angleCompensated < 0)
+        angleCompensated += 360;
+    
+    if (angleCompensated > 360)
+        angleCompensated -= 360;
+    
     
     // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
     dispatch_async(dispatch_get_main_queue(),^{
-        [self.dirDelegate newWindAngleLocal:[NSNumber numberWithFloat:angleEstimator]];
+        [self.dirDelegate newWindAngleLocal:[NSNumber numberWithFloat:angleCompensated]];
         [self.dirDelegate newAngularVelocities: angularVelocities];
         [self.dirDelegate newSpeed: [NSNumber numberWithFloat:windSpeed]];
         [self.dirDelegate newVelocityProfileError:[NSNumber numberWithFloat:velocityProfileError]];
@@ -401,7 +410,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     
     velocityProfileError = angleLowSum;
     
-//    NSLog(@"AngleRMS(left): %f and diff: %f", angleLowSum, angleHLDiff*ANGLE_CORRRECTION_COEFFICIENT);
+    if(LOG) NSLog(@"AngleRMS(left): %f and diff: %f", angleLowSum, angleHLDiff*ANGLE_CORRRECTION_COEFFICIENT);
 }
 
 
@@ -494,7 +503,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         }
         [compensationString appendString: [NSString stringWithFormat:@"%f]", compensation[TEETH_PR_REV-1]]];
         
-        NSLog(@"ExpFilter: %@", compensationString);
+        if(LOG) NSLog(@"ExpFilter: %@", compensationString);
     }
     
     [self resetDirectionAlgorithm];
@@ -529,7 +538,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     }
     [compensationString appendString: [NSString stringWithFormat:@"%f]", compensation[TEETH_PR_REV-1]]];
     
-    NSLog(@"MeanFilter: %@", compensationString);
+    if(LOG) NSLog(@"MeanFilter: %@", compensationString);
 
 }
 

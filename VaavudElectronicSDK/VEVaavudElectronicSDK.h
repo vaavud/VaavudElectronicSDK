@@ -14,16 +14,15 @@
 
 @optional
 /**
- 
  @param speed is the windspeed in m/s measured.
  */
-- (void) newSpeed: (NSNumber*) speed;
+- (void)newSpeed:(NSNumber *)speed;
 
 /**
  
  @param windDirection is the direction where the wind is comming from measured in degrees from 0 to 359.
  */
-- (void) newWindDirection: (NSNumber*) windDirection;
+- (void)newWindDirection:(NSNumber *)windDirection;
 
 /**
  
@@ -31,88 +30,82 @@
  from 0 to 359. The 0 reference direction is when the direction perpendicular to the screen, comming from the backside
  towards the front.
  */
-- (void) newWindAngleLocal:(NSNumber*) angle;
+- (void)newWindAngleLocal:(NSNumber *)angle;
 
 /**
  
  @param heading is the direction the the phone is pointing as defined by iOS when the phone is upside down 180 degrees is added.
  */
-- (void) newHeading: (NSNumber*) heading;
+- (void)newHeading:(NSNumber *)heading;
 
 
 /**
- 
  @param available is true if the Sliepnir wind meter is available to start measureing.
  */
-- (void) sleipnirAvailabliltyChanged: (BOOL) available;
+- (void)sleipnirAvailabliltyChanged:(BOOL)available;
 
 /**
- called when a device (jack-plug) is inserted into the jack-plug
+ Called when a device (jack-plug) is inserted into the jack-plug
  @param available is true if the Sliepnir wind meter is available to start measureing.
  */
-- (void) deviceConnectedTypeSleipnir: (BOOL) sleipnir;
+- (void)deviceConnectedTypeSleipnir:(BOOL)sleipnir;
 
 /**
- called when a device is removed from the jack-plug
+ Called when a device is removed from the jack-plug
  @param sleipnir is true if it were a Sliepnir wind meter that were disconnected.
  */
-- (void) deviceDisconnectedTypeSleipnir: (BOOL) sleipnir;
+- (void)deviceDisconnectedTypeSleipnir:(BOOL)sleipnir;
 
 /**
- called when a audio route changes and a new device is pluged in,
+ Called when a audio route changes and a new device is pluged in,
  starts checkking if it's a sleipnir.
  */
-- (void) deviceConnectedChecking;
+- (void)deviceConnectedChecking;
 
 /**
- if SDK is asked start before device is avilable it will automatically start.
+ If SDK is asked start before device is avilable it will automatically start.
  is called when the algorithm start measureing and will deliver callbacks.
  */
-- (void) sleipnirStartedMeasureing;
+- (void)sleipnirStartedMeasuring;
 
 /**
- is called when the algorithm stops measureing. ie. if device is removed.
+ Is called when the algorithm stops measureing. ie. if device is removed.
  */
-- (void) sleipnirStopedMeasureing;
+- (void)sleipnirStoppedMeasuring;
 
 
 /**
- called during the calibration process to provided user feedback
+ Called during the calibration process to provided user feedback
  */
-- (void) calibrationPercentageComplete: (NSNumber*) percentage;
+- (void)calibrationPercentageComplete:(NSNumber *)percentage;
 
 @end
 
 
 @interface VEVaavudElectronicSDK : NSObject
 
-+ (VEVaavudElectronicSDK *) sharedVaavudElectronic;
++ (VEVaavudElectronicSDK *)sharedVaavudElectronic;
 
-/**
- is the sleipnir avialable to start measureing?
- */
-- (BOOL) sleipnirAvailable;
+/* Is the Sleipnir avialable to start measureing? */
+- (BOOL)sleipnirAvailable;
 
 /* add listener of heading, windspeed and device information */
-- (void) addListener:(id <VaavudElectronicWindDelegate>) delegate;
+- (void)addListener:(id<VaavudElectronicWindDelegate>)delegate;
 
 /* remove listener of heading, windspeed and device information */
-- (void) removeListener:(id <VaavudElectronicWindDelegate>) delegate;
+- (void)removeListener:(id<VaavudElectronicWindDelegate>)delegate;
 
 /* start the audio input/output (and location,heading) and starts sending data */
 // If Vaavud Electronic is not inserted nothing will happen.
-- (void) start;
+- (void)start;
 
-/* stop the audio input/output  (and location,heading) and stop sending data */
-- (void) stop;
-
-// returnt the volume to initial state - to be used when the app closes
-- (void) returnVolumeToInitialState;
+/* stop the audio input/output (and location, heading) and stop sending data */
+- (void)stop;
 
 // start calibration mode
--(void) startCalibration;
+-(void)startCalibration;
 
 // end calibbration mode
--(void) endCalibration;
+-(void)endCalibration;
 
 @end

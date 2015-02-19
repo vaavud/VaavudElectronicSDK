@@ -9,3 +9,11 @@
     #import "VEVaavudElectronicSDK.h"
     #import "VEVaavudElectronicSDK+Analysis.h"
 #endif
+
+#define LOG_AUDIO YES
+#define LOG_VOLUME NO
+#define LOG_TICK_DETECTION NO
+#define LOG NO
+
+#define sampleFrequency 44100
+#define signalFrequency 14700

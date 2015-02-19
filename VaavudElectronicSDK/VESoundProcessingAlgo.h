@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <MediaPlayer/MediaPlayer.h>
 #import "VEDirectionDetectionAlgo.h"
 
 @protocol SoundProcessingDelegate <NSObject>
@@ -17,10 +18,10 @@
 
 
 @interface VESoundProcessingAlgo : NSObject
+- (void)newSoundData:(int *)data bufferLength:(UInt32) bufferLength;
+- (id)initWithDelegate:(id<SoundProcessingDelegate, DirectionDetectionDelegate>)delegate;
+- (void)setVolumeAtSavedLevel;
+- (void)returnVolumeToInitialState;
 
 @property (strong, nonatomic) VEDirectionDetectionAlgo *dirDetectionAlgo;
-
-- (void) newSoundData:(int *)data bufferLength:(UInt32) bufferLength;
-- (id)initWithDelegate:(id<SoundProcessingDelegate, DirectionDetectionDelegate>)delegate;
-
 @end
