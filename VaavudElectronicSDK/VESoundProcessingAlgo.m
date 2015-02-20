@@ -7,6 +7,9 @@
 //
 
 #import "VESoundProcessingAlgo.h"
+#import "VEDirectionDetectionAlgo.h"
+
+#define CALIBRATE_AUDIO_EVERY_X_BUFFER 20
 
 @interface VESoundProcessingAlgo() {
     int mvgAvg[3];
@@ -22,9 +25,12 @@
     
     int mvgMax, mvgMin, lastMvgMax, lastMvgMin, diffMax, diffMin, lastDiffMax, lastDiffMin, diffGap, mvgGapMax, lastMvgGapMax, mvgDropHalf, diffRiseThreshold1;
     bool mvgDropHalfRefresh, longTick;
+    
+    int calibrationCounter;
+    float currentVolume, originalVolume;
 }
 
-@property (strong, nonatomic) id<SoundProcessingDelegate, DirectionDetectionDelegate> windDelegate;
+@property (strong, nonatomic) id<SoundProcessingDelegate, DirectionDetectionDelegate>delegate;
 
 @end
 
@@ -32,7 +38,7 @@
 
 
 #pragma mark - Initialization
--(id)init {
+- (id)init {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:@"-init is not a valid initializer for the class SoundProcessingAlgo"
                                  userInfo:nil];
@@ -40,7 +46,6 @@
 }
 
 - (id)initWithDelegate:(id<SoundProcessingDelegate, DirectionDetectionDelegate>)delegate {
-    
     self = [super init];
     
     counter = 0;
@@ -66,13 +71,12 @@
     mvgDropHalfRefresh = YES;
     
     self.dirDetectionAlgo = [[VEDirectionDetectionAlgo alloc] initWithDelegate:delegate];
-    
-    self.windDelegate = delegate;
+    self.delegate = delegate;
     
     return self;
 }
 
-- (void) resetStateMachine {
+- (void)resetStateMachine {
     mvgState = 0;
     diffState = 0;
     gapBlock = 0;
@@ -90,13 +94,16 @@
     mvgDropHalfRefresh = YES;
 }
 
-- (void) newSoundData:(int *)data bufferLength:(UInt32) bufferLength {
-   
+- (void)newSoundData:(int *)data bufferLength:(UInt32)bufferLength {
+    // used for stats & volume calibration
+    int lDiffMax = 0;
+    int lDiffMin = 10000;
+    long lDiffSum = 0;
     
-    int maxDiff = 0;
+    int avgMax = -10000;
+    int avgMin = 10000;
     
     for (int i = 0; i < bufferLength; i++) {
-        
         int bufferIndex = counter%3;
         int bufferIndexLast = (counter-1)%3;
         
@@ -107,7 +114,7 @@
         
         
         // Moving Diff Update buffer value
-        mvgDiff[bufferIndex] = abs( data[i]- mvgAvg[bufferIndexLast]); // ! need to use old mvgAvgValue so place before mvgAvg update
+        mvgDiff[bufferIndex] = abs(data[i]- mvgAvg[bufferIndexLast]); // ! need to use old mvgAvgValue so place before mvgAvg update
         // Moving avg Update buffer value
         mvgAvg[bufferIndex] = data[i];
         
@@ -116,17 +123,7 @@
         mvgAvgSum += mvgAvg[bufferIndex];
         mvgDiffSum += mvgDiff[bufferIndex];
         
-        
-        if (maxDiff < mvgDiffSum) {
-            maxDiff = mvgDiffSum;
-        }
-        
-        
-        if ([self detectTick: (int) (counter - lastTick)]) {
-            
-            
-           
-            
+        if ([self detectTick:(int)(counter - lastTick)]) {
             lastMvgMax = mvgMax;
             lastMvgMin = mvgMin;
             lastDiffMax = diffMax;
@@ -141,30 +138,77 @@
             mvgState = 0;
             diffState = 0;
             
-            longTick = [self.dirDetectionAlgo newTick: (int) (counter - lastTick)];
-            
+            longTick = [self.dirDetectionAlgo newTick:(int)(counter - lastTick)];
             lastTick = counter;
-            
         }
         
         counter++;
         
-        
-        
-        
-        
+        // stats
+        if (calibrationCounter == CALIBRATE_AUDIO_EVERY_X_BUFFER) {
+            lDiffMax = MAX(lDiffMax, mvgDiffSum);
+
+            if (mvgAvgSum < 0) {
+                lDiffMin = MIN(lDiffMin, mvgDiffSum);
+            }
+            
+            avgMax = MAX(avgMax, mvgAvgSum);
+            avgMin = MIN(avgMin, mvgAvgSum);
+            
+            lDiffSum += mvgDiffSum;
+        }
     }
     
-    // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
-    dispatch_async(dispatch_get_main_queue(),^{
-        [self.windDelegate newMaxAmplitude: [NSNumber numberWithInt:maxDiff]];
-    });
-
+    if (calibrationCounter == CALIBRATE_AUDIO_EVERY_X_BUFFER) {
+        [self adjustVolumeDiffMax:lDiffMax diffMin:lDiffMin avgDiff:(int)(lDiffSum/bufferLength) avgMax:avgMax avgMin:avgMin];
+        calibrationCounter= 0;
+        // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.delegate newMaxAmplitude: [NSNumber numberWithInt:lDiffMax]];
+        });
+    }
+    calibrationCounter++;
 }
 
-
-- (BOOL) detectTick:(int) sampleSinceTick {
+-(void)adjustVolumeDiffMax:(int)ldiffMax diffMin:(int)ldiffMin avgDiff:(int)avgDiff avgMax:(int)avgMax avgMin:(int)avgMin {
+    BOOL rotating = avgMax > 2000 && avgMin < -2000;
+    BOOL stationary = avgMax < 2 && avgMin > -2;
     
+    if ((stationary && avgDiff < 20) || (rotating && ldiffMax < 2000)) {
+        currentVolume += 0.01;
+        [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
+        if (LOG_VOLUME) NSLog(@"[VESDK] Volume +: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", currentVolume, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
+    }
+    else if (ldiffMax > 3800 || (rotating && ldiffMin > 50)) { // ldiffMax > 2700
+        currentVolume -= 0.01;
+        [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
+        if (LOG_VOLUME) NSLog(@"[VESDK] Volume -: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", currentVolume, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
+    }
+}
+
+- (void)setVolumeAtSavedLevel {
+    currentVolume = [[NSUserDefaults standardUserDefaults] floatForKey:@"VOLUME"];
+    if (currentVolume == 0) {
+        currentVolume = 1.0;
+    }
+    // check if volume is at maximum.
+    MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
+    originalVolume = musicPlayer.volume;
+    musicPlayer.volume = currentVolume; // device volume will be changed to stored
+    if (LOG_AUDIO) NSLog(@"[VESDK] Loaded volume from user defaults and set to %f", currentVolume);
+}
+
+- (void)returnVolumeToInitialState {
+    [[NSUserDefaults standardUserDefaults] setFloat:currentVolume forKey:@"VOLUME"];
+    if (LOG_AUDIO) NSLog(@"[VESDK] Saved volume: %f to user defaults", currentVolume);
+    
+    MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
+    musicPlayer.volume = originalVolume;
+    if (LOG_AUDIO) NSLog(@"[VESDK] Returned volume to original setting: %f", originalVolume);
+    
+}
+
+- (BOOL)detectTick:(int)sampleSinceTick {
     switch (mvgState) {
         case 0:
             if (sampleSinceTick < 60) {
@@ -188,11 +232,10 @@
             break;
     }
     
-    
     switch (diffState) {
         case 0:
-            if (mvgAvgSum<mvgMin) {
-                mvgMin=mvgAvgSum;
+            if (mvgMin > mvgAvgSum) {
+                mvgMin = mvgAvgSum;
             }
             if (mvgDiffSum > 0.3*lastDiffMax) {
                 diffState = 1;
@@ -200,8 +243,8 @@
             break;
             
         case 1:
-            if (mvgAvgSum<mvgMin) {
-                mvgMin=mvgAvgSum;
+            if (mvgMin > mvgAvgSum) {
+                mvgMin = mvgAvgSum;
             }
             if (mvgAvgSum > 0) {
                 diffState = 2;
@@ -212,9 +255,9 @@
             if (mvgDiffSum < 0.30*lastDiffMax) {
                 diffState = 3;
                 if (longTick) {
-                    gapBlock = sampleSinceTick * 2.9;
+                    gapBlock = sampleSinceTick*2.9;
                 } else {
-                    gapBlock = sampleSinceTick * 2.3;
+                    gapBlock = sampleSinceTick*2.3;
                 }
                 
                 if (gapBlock > 5000) {
@@ -239,8 +282,6 @@
                 else {
                     mvgDropHalfRefresh = YES;
                 }
-            
-                
             }
             break;
         case 4:
@@ -248,7 +289,7 @@
                 mvgGapMax = mvgAvgSum;
             }
 
-            if ( ((mvgAvgSum < mvgGapMax - mvgDropHalf) && ( mvgDiffSum > diffRiseThreshold1 ))  || mvgDiffSum > 0.75*lastDiffMax ) {
+            if (((mvgAvgSum < mvgGapMax - mvgDropHalf) && (mvgDiffSum > diffRiseThreshold1)) || mvgDiffSum > 0.75*lastDiffMax) {
                 return  true;
             }
 
@@ -257,15 +298,15 @@
             break;
     }
     
-    if (mvgAvgSum > mvgMax) {
-        mvgMax=mvgAvgSum;
+    if (mvgMax < mvgAvgSum) {
+        mvgMax = mvgAvgSum;
     }
-    
-    if (mvgDiffSum> diffMax) {
+
+    if (diffMax < mvgDiffSum) {
         diffMax = mvgDiffSum;
     }
 
-    if (mvgDiffSum<diffMin) {
+    if (diffMin > mvgDiffSum) {
         diffMin = mvgDiffSum;
     }
     
@@ -274,9 +315,6 @@
     }
     
     return false;
-    
 }
-
-
 
 @end

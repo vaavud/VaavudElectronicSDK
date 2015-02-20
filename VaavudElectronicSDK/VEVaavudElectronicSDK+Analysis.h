@@ -22,48 +22,48 @@
 @interface VEVaavudElectronicSDK (Analysis)
 
 /* add listener of analysis information */
-- (void) addAnalysisListener:(id <VaavudElectronicAnalysisDelegate>) delegate;
+- (void)addAnalysisListener:(id <VaavudElectronicAnalysisDelegate>)delegate;
 
 /* remove listener of analysis information */
-- (void) removeAnalysisListener:(id <VaavudElectronicAnalysisDelegate>) delegate;
+- (void)removeAnalysisListener:(id <VaavudElectronicAnalysisDelegate>)delegate;
 
 // sets the audioPlot to which buffered raw audio values is send for plotting
-- (void) setAudioPlot:(EZAudioPlotGL *) audioPlot;
+- (void)setAudioPlot:(EZAudioPlotGL *) audioPlot;
 
 // Starts the internal soundfile recorder
-- (void) startRecording;
+- (void)startRecording;
 
 // Ends the internal soundfile recorder
-- (void) endRecording;
+- (void)endRecording;
 
 // returns true if recording is active
-- (BOOL) isRecording;
+- (BOOL)isRecording;
 
 // returns the local path of the recording
-- (NSURL*) recordingPath;
+- (NSURL *)recordingPath;
 
 // returns the local path of the recording
-- (NSURL*) summeryPath;
+- (NSURL *)summeryPath;
 
 // returns the local path of the recording
-- (NSURL*) summeryAngularVelocitiesPath;
+- (NSURL *)summeryAngularVelocitiesPath;
 
-// generate summeryFile
-- (void) generateSummaryFile;
+// generate summaryFile
+- (void)generateSummaryFile;
 
 // returns the fitcurve used in direction algorithm
-- (float *) getFitCurve;
+- (float *)getFitCurve;
 
 // returns the EdgeAngles for the samples
-- (int *) getEdgeAngles;
+- (int *)getEdgeAngles;
 
 // return the current heading of device (if avilale)
-- (NSNumber*) getHeading;
+- (NSNumber *)getHeading;
 
 // return the sound output description as NSString
-- (NSString*) soundOutputDescription;
+- (NSString *)soundOutputDescription;
 
 // return the sound input descriotion as NSString
-- (NSString*) soundInputDescription;
+- (NSString *)soundInputDescription;
 
 @end

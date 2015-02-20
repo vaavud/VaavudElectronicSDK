@@ -24,6 +24,8 @@
 /* Begin PBXBuildFile section */
 		D70629C719B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h in Headers */ = {isa = PBXBuildFile; fileRef = D70629C519B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D70629C819B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m in Sources */ = {isa = PBXBuildFile; fileRef = D70629C619B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m */; };
+		D736F3181A92A88400F617EE /* EZMicrophone+VESDK.h in Headers */ = {isa = PBXBuildFile; fileRef = D736F3161A92A88400F617EE /* EZMicrophone+VESDK.h */; };
+		D736F3191A92A88400F617EE /* EZMicrophone+VESDK.m in Sources */ = {isa = PBXBuildFile; fileRef = D736F3171A92A88400F617EE /* EZMicrophone+VESDK.m */; };
 		D77285B619D3126F00636CDA /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D77285B519D3126F00636CDA /* Accelerate.framework */; };
 		D7D9996D19B3AD3B0099FB8F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D9996C19B3AD3B0099FB8F /* Foundation.framework */; };
 		D7D9997219B3AD3B0099FB8F /* VEVaavudElectronicSDK.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = D7D9997119B3AD3B0099FB8F /* VEVaavudElectronicSDK.h */; };
@@ -84,6 +86,8 @@
 		D706293419B3BEC400E6879A /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		D70629C519B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "VEVaavudElectronicSDK+Analysis.h"; sourceTree = "<group>"; };
 		D70629C619B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "VEVaavudElectronicSDK+Analysis.m"; sourceTree = "<group>"; };
+		D736F3161A92A88400F617EE /* EZMicrophone+VESDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "EZMicrophone+VESDK.h"; sourceTree = "<group>"; };
+		D736F3171A92A88400F617EE /* EZMicrophone+VESDK.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "EZMicrophone+VESDK.m"; sourceTree = "<group>"; };
 		D77285B519D3126F00636CDA /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		D7D9996919B3AD3B0099FB8F /* libVaavudElectronicSDK.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libVaavudElectronicSDK.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		D7D9996C19B3AD3B0099FB8F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -186,6 +190,8 @@
 				D7D9996F19B3AD3B0099FB8F /* Supporting Files */,
 				D70629C519B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h */,
 				D70629C619B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m */,
+				D736F3161A92A88400F617EE /* EZMicrophone+VESDK.h */,
+				D736F3171A92A88400F617EE /* EZMicrophone+VESDK.m */,
 			);
 			path = VaavudElectronicSDK;
 			sourceTree = "<group>";
@@ -227,6 +233,7 @@
 				D70629C719B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h in Headers */,
 				D7D999AC19B3AF450099FB8F /* VEAudioManager.h in Headers */,
 				D7D999AE19B3AF450099FB8F /* VESummeryGenerator.h in Headers */,
+				D736F3181A92A88400F617EE /* EZMicrophone+VESDK.h in Headers */,
 				D7D999B219B3AF450099FB8F /* VEAudioVaavudElectronicDetection.h in Headers */,
 				D7D999B019B3AF450099FB8F /* VELocationManager.h in Headers */,
 				D7D9999319B3AD8A0099FB8F /* VEVaavudElectronicSDK.h in Headers */,
@@ -349,6 +356,7 @@
 			files = (
 				D7D999B119B3AF450099FB8F /* VELocationManager.m in Sources */,
 				D7D999A319B3AF350099FB8F /* VESoundProcessingAlgo.m in Sources */,
+				D736F3191A92A88400F617EE /* EZMicrophone+VESDK.m in Sources */,
 				D7D9999F19B3AF290099FB8F /* VEDirectionDetectionAlgo.m in Sources */,
 				D7D999AF19B3AF450099FB8F /* VESummeryGenerator.m in Sources */,
 				D7D999AD19B3AF450099FB8F /* VEAudioManager.m in Sources */,
