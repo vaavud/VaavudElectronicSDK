@@ -103,9 +103,12 @@
 - (void)stop;
 
 // start calibration mode
--(void)startCalibration;
+- (void)startCalibration;
 
-// end calibbration mode
--(void)endCalibration;
+// end calibration mode
+- (void)endCalibration;
+
+// resets the calibration coefficients
+- (void)resetCalibration;
 
 @end

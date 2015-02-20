@@ -66,5 +66,4 @@
 // return the sound input descriotion as NSString
 - (NSString *)soundInputDescription;
 
-
 @end
