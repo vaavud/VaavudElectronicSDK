@@ -64,35 +64,38 @@ static OSStatus recordingCallback(void *inRefCon,
     
 
     
-    SInt16 *bufferOut = bufferList.mBuffers[0].mData;
-    float *buffer = (float *) malloc(sizeof(float) * inNumberFrames);
-    for (int i; i < inNumberFrames; i++) {
-        buffer[i] = ((float) bufferOut[i]) / 32768.0; /// ((float) 32767.0);
+//    SInt16 *bufferOut = bufferList.mBuffers[0].mData;
+//    float *buffer = (float *) malloc(sizeof(float) * inNumberFrames);
+//    for (int i; i < inNumberFrames; i++) {
+//        buffer[i] = ((float) bufferOut[i]) / 32768.0; /// ((float) 32767.0);
+//    }
+//    
+//    for (int i=0; i < 3; i++) {
+//        NSLog(@"bufferVal[%i]: %f", i, buffer[i]);
+//    }
+//    
+//    
+//    dispatch_async(dispatch_get_main_queue(),^{
+//        // All the audio plot needs is the buffer data (float*) and the size. Internally the audio plot will handle all the drawing related code, history management, and freeing its own resources. Hence, one badass line of code gets you a pretty plot :)
+//        if (audioProcessor.audioPlot) {
+//            [audioProcessor.audioPlot updateBuffer:buffer withBufferSize:inNumberFrames];
+//        }
+//        free(buffer);
+//    });
+    
+    if (audioProcessor.delegate) {
+        [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
+    } else {
+        NSLog(@"no audioProcessor delegate");
     }
     
-    for (int i=0; i < 3; i++) {
-        NSLog(@"bufferVal[%i]: %f", i, buffer[i]);
-    }
-    
-    
-    dispatch_async(dispatch_get_main_queue(),^{
-        // All the audio plot needs is the buffer data (float*) and the size. Internally the audio plot will handle all the drawing related code, history management, and freeing its own resources. Hence, one badass line of code gets you a pretty plot :)
-        if (audioProcessor.audioPlot) {
-            [audioProcessor.audioPlot updateBuffer:buffer withBufferSize:inNumberFrames];
-        }
-        free(buffer);
-    });
-    
-    
-    
-    
-    dispatch_async(audioProcessor->dispatchQueue, ^(void){
-        if (audioProcessor.delegate) {
-            [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
-        } else {
-            NSLog(@"no audioProcessor delegate");
-        }
-    });
+//    dispatch_async(audioProcessor->dispatchQueue, ^(void){
+//        if (audioProcessor.delegate) {
+//            [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
+//        } else {
+//            NSLog(@"no audioProcessor delegate");
+//        }
+//    });
     
     
     return noErr;
