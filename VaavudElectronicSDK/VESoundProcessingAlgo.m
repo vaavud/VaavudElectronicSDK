@@ -14,6 +14,8 @@
 @interface VESoundProcessingAlgo() {
     int mvgAvg[3];
     int mvgAvgSum;
+    int bufferIndex;
+    int bufferIndexLast;
     int mvgDiff[3];
     int mvgDiffSum;
     int gapBlock;
@@ -49,6 +51,8 @@
     self = [super init];
     
     counter = 0;
+    bufferIndex = 0;
+    bufferIndexLast = 2;
     mvgAvgSum = 0;
     mvgDiffSum = 0;
     
@@ -95,12 +99,13 @@
 }
 
 - (void)processBuffer:(TPCircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames {
+    
+    NSDate *methodStart = [NSDate date];
     // keep for now to comsume bytes
     int32_t availableBytes;
     SInt16 *circBufferTail = TPCircularBufferTail(circBuffer, &availableBytes);
     
     if (circBufferTail != NULL) {
-    
         UInt32 sampleSize = sizeof(SInt16);
         UInt32 size = MIN(bufferLengthInFrames*sampleSize, availableBytes);
         UInt32 frames = size/sampleSize;
@@ -119,13 +124,25 @@
         [self newSoundData:data bufferLength:frames];
         free(data);
         
-        NSLog(@"circBuffer fillCount %i", circBuffer->fillCount);
+        if( circBuffer->fillCount != 2048) {
+            NSLog(@"circBuffer fillCount %i", circBuffer->fillCount);
+        }
         
         TPCircularBufferConsume(circBuffer, size);
 //        NSLog(@"fillCount: %i", circBuffer->fillCount);
     } else {
         NSLog(@"buffer is Null");
     }
+    
+    /* ... Do whatever you need to do ... */
+    
+    NSDate *methodFinish = [NSDate date];
+    NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
+    if (executionTime*1000 > 10) {
+        NSLog(@"executionTime = %f ms", executionTime*1000);
+    }
+//    NSLog(@"executionTime = %f ms", executionTime*1000);
+
 }
 
 
@@ -139,9 +156,6 @@
     int avgMin = 10000;
     
     for (int i = 0; i < bufferLength; i++) {
-        int bufferIndex = counter%3;
-        int bufferIndexLast = (counter-1)%3;
-        
         // Moving Avg subtract
         mvgAvgSum -= mvgAvg[bufferIndex];
         // Moving Diff subtrack
@@ -158,6 +172,12 @@
         mvgAvgSum += mvgAvg[bufferIndex];
         mvgDiffSum += mvgDiff[bufferIndex];
         
+        bufferIndex += 1;
+        if (bufferIndex == 3) {bufferIndex -= 3;}
+        bufferIndexLast += 1;
+        if (bufferIndexLast == 3) {bufferIndexLast -=3;}
+            
+            
         if ([self detectTick:(int)(counter - lastTick)]) {
             lastMvgMax = mvgMax;
             lastMvgMin = mvgMin;
