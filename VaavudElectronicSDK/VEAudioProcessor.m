@@ -83,19 +83,19 @@ static OSStatus recordingCallback(void *inRefCon,
 //        free(buffer);
 //    });
     
-    if (audioProcessor.delegate) {
-        [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
-    } else {
-        NSLog(@"no audioProcessor delegate");
-    }
+//    if (audioProcessor.delegate) {
+//        [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
+//    } else {
+//        NSLog(@"no audioProcessor delegate");
+//    }
     
-//    dispatch_async(audioProcessor->dispatchQueue, ^(void){
-//        if (audioProcessor.delegate) {
-//            [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
-//        } else {
-//            NSLog(@"no audioProcessor delegate");
-//        }
-//    });
+    dispatch_async(audioProcessor->dispatchQueue, ^(void){
+        if (audioProcessor.delegate) {
+            [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
+        } else {
+            NSLog(@"no audioProcessor delegate");
+        }
+    });
     
     
     return noErr;
@@ -163,6 +163,8 @@ static OSStatus playbackCallback(void *inRefCon,
     self = [super init];
     if (self) {
         dispatchQueue = (dispatch_queue_create("com.vaavud.processTickQueue", DISPATCH_QUEUE_SERIAL));
+        dispatch_set_target_queue(dispatchQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0));
+        
 //        self.delegate = [[SoundProcessor alloc] init];
         [self initializeAudioWithOutput:true];
     }
