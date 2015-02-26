@@ -120,6 +120,7 @@
         free(data);
         
         TPCircularBufferConsume(circBuffer, size);
+//        NSLog(@"fillCount: %i", circBuffer->fillCount);
     } else {
         NSLog(@"buffer is Null");
     }
@@ -208,11 +209,17 @@
     
     if ((stationary && avgDiff < 20) || (rotating && ldiffMax < 2000)) {
         currentVolume += 0.01;
+        if (currentVolume > 1) {
+            currentVolume = 1;
+        }
         [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
         if (LOG_VOLUME) NSLog(@"[VESDK] Volume +: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", currentVolume, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
     else if (ldiffMax > 3800 || (rotating && ldiffMin > 50)) { // ldiffMax > 2700
         currentVolume -= 0.01;
+        if (currentVolume < 0) {
+            currentVolume = 0;
+        }
         [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
         if (LOG_VOLUME) NSLog(@"[VESDK] Volume -: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", currentVolume, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
