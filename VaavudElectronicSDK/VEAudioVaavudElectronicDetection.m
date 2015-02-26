@@ -26,7 +26,8 @@
 @property (nonatomic) BOOL audioRouteChange;
 
 /** The microphone component */
-@property (nonatomic,strong) EZMicrophone *microphone;
+//@property (nonatomic,strong) EZMicrophone *microphone;
+@property (nonatomic,strong) VEAudioProcessor *audioProcessor;
 
 /** The recorder component */
 @property (nonatomic,strong) EZRecorder *recorder;
@@ -36,6 +37,8 @@
 @property (nonatomic) NSUInteger sampleCounter;
 @property (nonatomic) BOOL samplingMicrophoneActice;
 @property (nonatomic) double timer;
+
+
 
 @end
 
@@ -69,9 +72,10 @@
         self.recordingActive = NO;
         
         // Create an instance of the microphone and tell it to use this object as the delegate
-        self.microphone = [EZMicrophone microphoneWithDelegate:self];
-        [self setupMicrophone];
-        [self.microphone setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionMicrophone]];
+//        self.microphone = [EZMicrophone microphoneWithDelegate:self];
+//        [self setupMicrophone];
+//        [self.microphone setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionMicrophone]];
+//        self.audioProcessor = [[VEAudioProcessor alloc] init];
         
         
         self.timer = CACurrentMediaTime();
@@ -94,11 +98,12 @@
     self.audioRouteChange = audioRouteChange;
     
     // start microphone to be able to deterime if Headphone and microphone is available
-    [self.microphone startFetchingAudio];
+//    [self.microphone startFetchingAudio];
+//    [self.audioProcessor start];
 
     // check if headset Out and headset mic is available
     
-    if ([self isHeadphoneOutAvailable] && [self isHeadphoneMicAvailable]) {
+    if (([self isHeadphoneOutAvailable] && [self isHeadphoneMicAvailable]) || YES) {
         //NSLog(@"[VESDK] Device with headphoneOut and microphone connected");
         self.deviceConnected = YES;
         
@@ -159,7 +164,8 @@
              [self.delegate deviceConnectedTypeSleipnir:NO];
         }
         [self updateSleipnirAvailable: NO];
-        [self.microphone stopFetchingAudio];
+//        [self.microphone stopFetchingAudio];
+//        [self.audioProcessor stop];
     }
     
     [self.delegate newRecordingReadyToUpload];
@@ -384,9 +390,9 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 // Starts the internal soundfile recorder
 - (void) startRecording {
     // Create the recorder
-    self.recorder = [EZRecorder recorderWithDestinationURL:[self recordingFilePathURL]
-                                              sourceFormat:self.microphone.audioStreamBasicDescription
-                                       destinationFileType:EZRecorderFileTypeWAV];
+//    self.recorder = [EZRecorder recorderWithDestinationURL:[self recordingFilePathURL]
+//                                              sourceFormat:self.microphone.audioStreamBasicDescription
+//                                       destinationFileType:EZRecorderFileTypeWAV];
     
     self.recordingActive = YES;
 }

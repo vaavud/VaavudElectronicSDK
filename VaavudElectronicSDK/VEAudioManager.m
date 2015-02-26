@@ -12,7 +12,8 @@
 
 @interface VEAudioManager() <EZMicrophoneDelegate, EZOutputDataSource>
 
-@property (nonatomic,strong) EZMicrophone *microphone; /** The microphone component */
+//@property (nonatomic,strong) EZMicrophone *microphone; /** The microphone component */
+//@property (nonatomic,strong) VEAudioProcessor *audioProcessor;
 @property (nonatomic,strong) EZRecorder *recorder; /** The recorder component */
 @property (atomic) BOOL askedToMeasure;
 @property (atomic) BOOL recordingActive;
@@ -43,49 +44,56 @@
     
     self.delegate = delegate;
     self.soundProcessor = [[VESoundProcessingAlgo alloc] initWithDelegate:delegate];
-    [self setupMicrophone];
-    [self setupSoundOutput];
+    self.audioProcessor = [[VEAudioProcessor alloc] init];
+    self.audioProcessor.delegate = self.soundProcessor;
+    
+    
+    [self start];
+//    [self setupMicrophone];
+//    [self setupSoundOutput];
     
     self.askedToMeasure = NO;
     self.algorithmActive = NO;
     self.recordingActive = NO;
     
+//    [self startInternal]; // Temporary
+    
     return self;
 }
 
 - (void)setupMicrophone {
-    // Create an instance of the microphone and tell it to use this object as the delegate
-    self.microphone = [EZMicrophone microphoneWithDelegate:self];
-    [self.microphone setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionMicrophone]];
-    [self.microphone _configureStreamFormatWithSampleRate: sampleFrequency]; // need to set ASBD first
-    
-    
-    // Check the microphone input format
-    if (LOG_AUDIO){
-        NSLog(@"[VESDK] input");
-        [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
-    }
-    if ([self.microphone audioStreamBasicDescription].mSampleRate != [self getAudioStreamBasicDiscriptionMicrophone].mSampleRate) {
-        if(LOG_AUDIO){NSLog(@"[VESDK] Ups wrong sample rate");}
-    }
+//    // Create an instance of the microphone and tell it to use this object as the delegate
+//    self.microphone = [EZMicrophone microphoneWithDelegate:self];
+//    [self.microphone setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionMicrophone]];
+//    [self.microphone _configureStreamFormatWithSampleRate: sampleFrequency]; // need to set ASBD first
+//    
+//    
+//    // Check the microphone input format
+//    if (LOG_AUDIO){
+//        NSLog(@"[VESDK] input");
+//        [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
+//    }
+//    if ([self.microphone audioStreamBasicDescription].mSampleRate != [self getAudioStreamBasicDiscriptionMicrophone].mSampleRate) {
+//        if(LOG_AUDIO){NSLog(@"[VESDK] Ups wrong sample rate");}
+//    }
 }
 
 - (void)setupSoundOutput {
-    // Assign a delegate to the shared instance of the output to provide the output audio data
-    [EZOutput sharedOutput].outputDataSource = self;
-    
-    // set the output format from the audioOutput stream.
-    [[EZOutput sharedOutput] setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionOutput]];
-    
-    if(LOG_AUDIO){
-        NSLog(@"[VESDK] output");
-        [EZAudio printASBD:[[EZOutput sharedOutput] audioStreamBasicDescription]];
-    }
-    
-    double frequency = signalFrequency;
-    double samplerate = sampleFrequency;
-    theta_increment = 2.0*M_PI*frequency/samplerate;
-    amplitude = 1;
+//    // Assign a delegate to the shared instance of the output to provide the output audio data
+//    [EZOutput sharedOutput].outputDataSource = self;
+//    
+//    // set the output format from the audioOutput stream.
+//    [[EZOutput sharedOutput] setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionOutput]];
+//    
+//    if(LOG_AUDIO){
+//        NSLog(@"[VESDK] output");
+//        [EZAudio printASBD:[[EZOutput sharedOutput] audioStreamBasicDescription]];
+//    }
+//    
+//    double frequency = signalFrequency;
+//    double samplerate = sampleFrequency;
+//    theta_increment = 2.0*M_PI*frequency/samplerate;
+//    amplitude = 1;
 }
 
 
@@ -93,7 +101,7 @@
     self.askedToMeasure = YES;
     
     if (!self.algorithmActive) {
-        if (self.delegate.sleipnirAvailable) {
+        if (self.delegate.sleipnirAvailable || YES) {
             [self startInternal];
         }
     }
@@ -113,8 +121,9 @@
 - (void)startInternal {
     self.algorithmActive = YES;
     
-    [self toggleMicrophone: YES];
-    [self toggleOutput: YES];
+//    [self toggleMicrophone: YES];
+//    [self toggleOutput: YES];
+    [self.audioProcessor start];
     
     [self.soundProcessor setVolumeAtSavedLevel];
     
@@ -127,8 +136,9 @@
 - (void)stopInternal {
     self.algorithmActive = NO;
     
-    [self toggleMicrophone:NO];
-    [self toggleOutput:NO];
+//    [self toggleMicrophone:NO];
+//    [self toggleOutput:NO];
+    [self.audioProcessor stop];
     
     dispatch_async(dispatch_get_main_queue(),^{
         [self.delegate vaavudStopMeasuring];
@@ -148,24 +158,24 @@
     }
 }
 
-- (void)toggleOutput:(BOOL)output {
-    if (output) {
-        [EZOutput sharedOutput].outputDataSource = self;
-        [[EZOutput sharedOutput] startPlayback];
-    }
-    else {
-        [[EZOutput sharedOutput] stopPlayback];
-    }
-}
+//- (void)toggleOutput:(BOOL)output {
+//    if (output) {
+//        [EZOutput sharedOutput].outputDataSource = self;
+//        [[EZOutput sharedOutput] startPlayback];
+//    }
+//    else {
+//        [[EZOutput sharedOutput] stopPlayback];
+//    }
+//}
 
-- (void)toggleMicrophone:(BOOL)micOn {
-    if (micOn) {
-        [self.microphone startFetchingAudio];
-    }
-    else {
-        [self.microphone stopFetchingAudio];
-    }
-}
+//- (void)toggleMicrophone:(BOOL)micOn {
+//    if (micOn) {
+//        [self.microphone startFetchingAudio];
+//    }
+//    else {
+//        [self.microphone stopFetchingAudio];
+//    }
+//}
 
 /* delegate method - Feed microphone data to sound-processor and plot */
 #pragma mark - EZMicrophoneDelegate
@@ -210,9 +220,9 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 // Starts the internal soundfile recorder
 - (void)startRecording {
     // Create the recorder
-    self.recorder = [EZRecorder recorderWithDestinationURL:[self recordingFilePathURL]
-                                              sourceFormat:self.microphone.audioStreamBasicDescription
-                                       destinationFileType:EZRecorderFileTypeWAV];
+//    self.recorder = [EZRecorder recorderWithDestinationURL:[self recordingFilePathURL]
+//                                              sourceFormat:self.microphone.audioStreamBasicDescription
+//                                       destinationFileType:EZRecorderFileTypeWAV];
     self.recordingActive = YES;
 }
 
@@ -280,7 +290,7 @@ withNumberOfChannels:(UInt32)numberOfChannels {
 }
 
 - (NSString *)soundInputDescription {
-    return [self ASBDtoString:[self.microphone audioStreamBasicDescription]];
+    return [self ASBDtoString:[self getAudioStreamBasicDiscriptionMicrophone]];
 }
 
 /**

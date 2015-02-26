@@ -41,7 +41,8 @@
 - (void) setAudioPlot:(EZAudioPlotGL *) audioPlot {
     
     if (self.audioManager) {
-        self.audioManager.audioPlot = audioPlot;
+//        self.audioManager.audioPlot = audioPlot;
+        self.audioManager.audioProcessor.audioPlot = audioPlot;
     }
 }
 

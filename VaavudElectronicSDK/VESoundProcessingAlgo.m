@@ -94,6 +94,38 @@
     mvgDropHalfRefresh = YES;
 }
 
+- (void)processBuffer:(TPCircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames {
+    // keep for now to comsume bytes
+    int32_t availableBytes;
+    SInt16 *circBufferTail = TPCircularBufferTail(circBuffer, &availableBytes);
+    
+    if (circBufferTail != NULL) {
+    
+        UInt32 sampleSize = sizeof(SInt16);
+        UInt32 size = MIN(bufferLengthInFrames*sampleSize, availableBytes);
+        UInt32 frames = size/sampleSize;
+        
+        int *data = malloc(sizeof(int)*frames); // should change implementation later dont alocate more memory
+        
+        // iterate over incoming stream an copy to output stream
+        for (int i=0; i < frames; i++) {
+            
+            data[i] = (int) circBufferTail[i] / 32.767 ; // scale to 1000
+            // set data size
+            
+        }
+//        NSLog(@"Value: %i", data[0]);
+        
+        [self newSoundData:data bufferLength:frames];
+        free(data);
+        
+        TPCircularBufferConsume(circBuffer, size);
+    } else {
+        NSLog(@"buffer is Null");
+    }
+}
+
+
 - (void)newSoundData:(int *)data bufferLength:(UInt32)bufferLength {
     // used for stats & volume calibration
     int lDiffMax = 0;

@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <MediaPlayer/MediaPlayer.h>
 #import "VEDirectionDetectionAlgo.h"
+#import "VEAudioProcessor.h"
 
 @protocol SoundProcessingDelegate <NSObject>
 
@@ -17,7 +18,9 @@
 @end
 
 
-@interface VESoundProcessingAlgo : NSObject
+@interface VESoundProcessingAlgo : NSObject <AudioProcessorProtocol>
+
+- (void)processBuffer:(TPCircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
 - (void)newSoundData:(int *)data bufferLength:(UInt32) bufferLength;
 - (id)initWithDelegate:(id<SoundProcessingDelegate, DirectionDetectionDelegate>)delegate;
 - (void)setVolumeAtSavedLevel;
