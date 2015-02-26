@@ -119,6 +119,8 @@
         [self newSoundData:data bufferLength:frames];
         free(data);
         
+        NSLog(@"circBuffer fillCount %i", circBuffer->fillCount);
+        
         TPCircularBufferConsume(circBuffer, size);
 //        NSLog(@"fillCount: %i", circBuffer->fillCount);
     } else {

@@ -5,6 +5,10 @@
 //  Created by Andreas Okholm on 25/02/15.
 //  Copyright (c) 2015 Vaavud. All rights reserved.
 //
+//  Inspiration from: http://www.stefanpopp.de/capture-iphone-microphone/
+//  and: http://atastypixel.com/blog/a-simple-fast-circular-buffer-implementation-for-audio-processing/
+//  and: https://github.com/syedhali/EZAudio
+
 
 #import "VEAudioProcessor.h"
 
@@ -163,7 +167,8 @@ static OSStatus playbackCallback(void *inRefCon,
     self = [super init];
     if (self) {
         dispatchQueue = (dispatch_queue_create("com.vaavud.processTickQueue", DISPATCH_QUEUE_SERIAL));
-        dispatch_set_target_queue(dispatchQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0));
+//        dispatch_set_target_queue(dispatchQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0));
+        dispatch_set_target_queue(dispatchQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
         
 //        self.delegate = [[SoundProcessor alloc] init];
         [self initializeAudioWithOutput:true];
@@ -353,7 +358,7 @@ static OSStatus playbackCallback(void *inRefCon,
     [self prepareIntputBufferWithBufferSize:bufferLengthInFrames];
     [self prepareOutputBuffersWithBufferSize:bufferLengthInFrames andMaxBufferSize:bufferFrameSizeMax];
     
-    TPCircularBufferInit(&cirbuffer, bufferLengthInFrames*10);
+    TPCircularBufferInit(&cirbuffer, bufferLengthInFrames*40);
     
     // Initialize the Audio Unit and cross fingers =)
     status = AudioUnitInitialize(audioUnit);
