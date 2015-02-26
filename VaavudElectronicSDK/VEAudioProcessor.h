@@ -13,19 +13,33 @@
 
 @protocol AudioProcessorProtocol <NSObject>
 
+@optional
 - (void)processBuffer:(TPCircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
+@optional
+- (void)processBufferList:(AudioBufferList *)bufferList withBufferLengthInFrames:(UInt32)bufferLengthInFrames;
+@optional
+- (void)processFloatBuffer:(float *)buffer withBufferLengthInFrames:(UInt32)bufferLengthInFrames;
 
 @end
 
 @interface VEAudioProcessor : NSObject
 
-@property (weak, nonatomic) EZAudioPlotGL *audioPlot;
 @property (nonatomic, strong) id<AudioProcessorProtocol> delegate;
-@property (nonatomic) float gain;
 
 // control object
 -(void)start;
 -(void)startMicrophoneOnly;
 -(void)stop;
+
+- (AudioStreamBasicDescription)inputAudioStreamBasicDescription;
+- (AudioStreamBasicDescription)outputAudioStreamBasicDescription;
+
+/**
+ Nicely logs out the contents of an AudioStreamBasicDescription struct
+ @param 	asbd 	The AudioStreamBasicDescription struct with content to print out
+ */
++(void)printASBD:(AudioStreamBasicDescription)asbd;
+
++ (NSString *)ASBDtoString:(AudioStreamBasicDescription)asbd;
 
 @end

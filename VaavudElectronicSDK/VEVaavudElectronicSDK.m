@@ -12,7 +12,7 @@
 #import "VELocationManager.h"
 #import "VEAudioVaavudElectronicDetection.h"
 
-@interface VEVaavudElectronicSDK() <SoundProcessingDelegate, DirectionDetectionDelegate, AudioManagerDelegate, locationManagerDelegate, AudioVaavudElectronicDetectionDelegate>
+@interface VEVaavudElectronicSDK() <SoundProcessingDelegate, DirectionDetectionDelegate, AudioManagerDelegate, locationManagerDelegate, AudioVaavudElectronicDetectionDelegate, VaavudElectronicMicrophoneOutputDelegate>
 
 @property (strong, atomic) NSMutableArray *VaaElecWindDelegates;
 @property (strong, atomic) NSMutableArray *VaaElecAnalysisDelegates;

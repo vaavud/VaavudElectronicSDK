@@ -12,22 +12,23 @@
 
 @interface VEAudioManager() <EZMicrophoneDelegate, EZOutputDataSource>
 
-//@property (nonatomic,strong) EZMicrophone *microphone; /** The microphone component */
-//@property (nonatomic,strong) VEAudioProcessor *audioProcessor;
-@property (nonatomic,strong) EZRecorder *recorder; /** The recorder component */
+@property (nonatomic,strong) VEAudioProcessor *audioProcessor;
+@property (nonatomic,strong) VERecorder *recorder; /** The recorder component */
 @property (atomic) BOOL askedToMeasure;
 @property (atomic) BOOL recordingActive;
 @property (atomic) BOOL algorithmActive;
 @property (nonatomic, weak) id<AudioManagerDelegate> delegate;
+@property (nonatomic) dispatch_queue_t dispatchQueue;
+@property (nonatomic, strong) VEVaavudElectronicSDK* electronicSDK;
 
 @end
 
 @implementation VEAudioManager {
-    double theta;
-    double theta_increment;
-    double amplitude;
-    int *intArray;
-    float *arrayLeft;
+//    double theta;
+//    double theta_increment;
+//    double amplitude;
+//    int *intArray;
+//    float *arrayLeft;
 }
 
 
@@ -42,15 +43,27 @@
 - (id)initWithDelegate:(id<AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>)delegate {
     self = [super init];
     
+    self.electronicSDK = [VEVaavudElectronicSDK sharedVaavudElectronic];
+    
+    self.dispatchQueue = (dispatch_queue_create("com.vaavud.processTickQueue", DISPATCH_QUEUE_SERIAL));
+    dispatch_set_target_queue(self.dispatchQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
+    
     self.delegate = delegate;
     self.soundProcessor = [[VESoundProcessingAlgo alloc] initWithDelegate:delegate];
     self.audioProcessor = [[VEAudioProcessor alloc] init];
-    self.audioProcessor.delegate = self.soundProcessor;
+    self.audioProcessor.delegate = self;
     
+    // Check the microphone input format
+    if (LOG_AUDIO){
+        NSLog(@"[VESDK] input");
+        [VEAudioProcessor printASBD: [self.audioProcessor inputAudioStreamBasicDescription]];
+    }
     
-    [self start];
-//    [self setupMicrophone];
-//    [self setupSoundOutput];
+    // Check the microphone input format
+    if (LOG_AUDIO){
+        NSLog(@"[VESDK] output");
+        [VEAudioProcessor printASBD: [self.audioProcessor outputAudioStreamBasicDescription]];
+    }
     
     self.askedToMeasure = NO;
     self.algorithmActive = NO;
@@ -61,47 +74,30 @@
     return self;
 }
 
-- (void)setupMicrophone {
-//    // Create an instance of the microphone and tell it to use this object as the delegate
-//    self.microphone = [EZMicrophone microphoneWithDelegate:self];
-//    [self.microphone setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionMicrophone]];
-//    [self.microphone _configureStreamFormatWithSampleRate: sampleFrequency]; // need to set ASBD first
-//    
-//    
-//    // Check the microphone input format
-//    if (LOG_AUDIO){
-//        NSLog(@"[VESDK] input");
-//        [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
-//    }
-//    if ([self.microphone audioStreamBasicDescription].mSampleRate != [self getAudioStreamBasicDiscriptionMicrophone].mSampleRate) {
-//        if(LOG_AUDIO){NSLog(@"[VESDK] Ups wrong sample rate");}
-//    }
+
+- (void)processBuffer:(TPCircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames {
+    dispatch_async(self.dispatchQueue, ^(void){
+        [self.soundProcessor processBuffer:circBuffer withDefaultBufferLengthInFrames:bufferLengthInFrames];
+    });
 }
 
-- (void)setupSoundOutput {
-//    // Assign a delegate to the shared instance of the output to provide the output audio data
-//    [EZOutput sharedOutput].outputDataSource = self;
-//    
-//    // set the output format from the audioOutput stream.
-//    [[EZOutput sharedOutput] setAudioStreamBasicDescription: [self getAudioStreamBasicDiscriptionOutput]];
-//    
-//    if(LOG_AUDIO){
-//        NSLog(@"[VESDK] output");
-//        [EZAudio printASBD:[[EZOutput sharedOutput] audioStreamBasicDescription]];
-//    }
-//    
-//    double frequency = signalFrequency;
-//    double samplerate = sampleFrequency;
-//    theta_increment = 2.0*M_PI*frequency/samplerate;
-//    amplitude = 1;
+- (void)processBufferList:(AudioBufferList *)bufferList withBufferLengthInFrames:(UInt32)bufferLengthInFrames {
+    if (self.recordingActive) {
+        [self.recorder appendDataFromBufferList:bufferList withBufferSize:bufferLengthInFrames];
+    }
 }
 
+- (void)processFloatBuffer:(float *)buffer withBufferLengthInFrames:(UInt32)bufferLengthInFrames {
+    if (self.electronicSDK.microphoneOutputDeletage) {
+        [self.electronicSDK.microphoneOutputDeletage updateBuffer:buffer withBufferSize:bufferLengthInFrames];
+    }
+}
 
 - (void)start {
     self.askedToMeasure = YES;
     
     if (!self.algorithmActive) {
-        if (self.delegate.sleipnirAvailable || YES) {
+        if (self.delegate.sleipnirAvailable) {
             [self startInternal];
         }
     }
@@ -114,17 +110,13 @@
         [self stopInternal];
     }
     
-    [self.soundProcessor returnVolumeToInitialState];;
+    [self.soundProcessor returnVolumeToInitialState];
 }
 
 
 - (void)startInternal {
     self.algorithmActive = YES;
-    
-//    [self toggleMicrophone: YES];
-//    [self toggleOutput: YES];
     [self.audioProcessor start];
-    
     [self.soundProcessor setVolumeAtSavedLevel];
     
      dispatch_async(dispatch_get_main_queue(),^{
@@ -135,9 +127,6 @@
 
 - (void)stopInternal {
     self.algorithmActive = NO;
-    
-//    [self toggleMicrophone:NO];
-//    [self toggleOutput:NO];
     [self.audioProcessor stop];
     
     dispatch_async(dispatch_get_main_queue(),^{
@@ -158,71 +147,52 @@
     }
 }
 
-//- (void)toggleOutput:(BOOL)output {
-//    if (output) {
-//        [EZOutput sharedOutput].outputDataSource = self;
-//        [[EZOutput sharedOutput] startPlayback];
+///* delegate method - Feed microphone data to sound-processor and plot */
+//#pragma mark - EZMicrophoneDelegate
+//// #warning Thread Safety
+//// Note that any callback that provides streamed audio data (like streaming microphone input) happens on a separate audio thread that should not be blocked. When we feed audio data into any of the UI components we need to explicity create a GCD block on the main thread to properly get the UI to work.
+//-(void)microphone:(EZMicrophone *)microphone
+// hasAudioReceived:(float **)buffer
+//   withBufferSize:(UInt32)bufferSize
+//withNumberOfChannels:(UInt32)numberOfChannels {
+//    // Getting audio data as an array of float buffer arrays. What does that mean? Because the audio is coming in as a stereo signal the data is split into a left and right channel. So buffer[0] corresponds to the float* data for the left channel while buffer[1] corresponds to the float* data for the right channel.
+//    
+//    if (intArray == NULL) {
+//        arrayLeft = buffer[0];
+//        
+//        intArray = malloc(sizeof(int) * bufferSize); /* allocate memory for 50 int's */
+//        if (!intArray) { /* If data == 0 after the call to malloc, allocation failed for some reason */
+//            perror("Error allocating memory");
+//            abort();
+//        }
+//        /* at this point, we know that data points to a valid block of memory.
+//         Remember, however, that this memory is not initialized in any way -- it contains garbage.
+//         Let's start by clearing it. */
+//        memset(intArray, 0, sizeof(int)*bufferSize);
+//        /* now our array contains all zeroes. */
 //    }
-//    else {
-//        [[EZOutput sharedOutput] stopPlayback];
+//    
+//    for (int i = 0; i < bufferSize; ++i) {
+//        intArray[i] = (int)(arrayLeft[i]*1000);
 //    }
+//    
+//    [self.soundProcessor newSoundData:intArray bufferLength:bufferSize];
+//    
+//    // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
+//    dispatch_async(dispatch_get_main_queue(),^{
+//        // All the audio plot needs is the buffer data (float*) and the size. Internally the audio plot will handle all the drawing related code, history management, and freeing its own resources. Hence, one badass line of code gets you a pretty plot :)
+//        if (self.audioPlot) {
+//            [self.audioPlot updateBuffer:buffer[0] withBufferSize:bufferSize];
+//        }
+//    });
 //}
-
-//- (void)toggleMicrophone:(BOOL)micOn {
-//    if (micOn) {
-//        [self.microphone startFetchingAudio];
-//    }
-//    else {
-//        [self.microphone stopFetchingAudio];
-//    }
-//}
-
-/* delegate method - Feed microphone data to sound-processor and plot */
-#pragma mark - EZMicrophoneDelegate
-// #warning Thread Safety
-// Note that any callback that provides streamed audio data (like streaming microphone input) happens on a separate audio thread that should not be blocked. When we feed audio data into any of the UI components we need to explicity create a GCD block on the main thread to properly get the UI to work.
--(void)microphone:(EZMicrophone *)microphone
- hasAudioReceived:(float **)buffer
-   withBufferSize:(UInt32)bufferSize
-withNumberOfChannels:(UInt32)numberOfChannels {
-    // Getting audio data as an array of float buffer arrays. What does that mean? Because the audio is coming in as a stereo signal the data is split into a left and right channel. So buffer[0] corresponds to the float* data for the left channel while buffer[1] corresponds to the float* data for the right channel.
-    
-    if (intArray == NULL) {
-        arrayLeft = buffer[0];
-        
-        intArray = malloc(sizeof(int) * bufferSize); /* allocate memory for 50 int's */
-        if (!intArray) { /* If data == 0 after the call to malloc, allocation failed for some reason */
-            perror("Error allocating memory");
-            abort();
-        }
-        /* at this point, we know that data points to a valid block of memory.
-         Remember, however, that this memory is not initialized in any way -- it contains garbage.
-         Let's start by clearing it. */
-        memset(intArray, 0, sizeof(int)*bufferSize);
-        /* now our array contains all zeroes. */
-    }
-    
-    for (int i = 0; i < bufferSize; ++i) {
-        intArray[i] = (int)(arrayLeft[i]*1000);
-    }
-    
-    [self.soundProcessor newSoundData:intArray bufferLength:bufferSize];
-    
-    // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
-    dispatch_async(dispatch_get_main_queue(),^{
-        // All the audio plot needs is the buffer data (float*) and the size. Internally the audio plot will handle all the drawing related code, history management, and freeing its own resources. Hence, one badass line of code gets you a pretty plot :)
-        if (self.audioPlot) {
-            [self.audioPlot updateBuffer:buffer[0] withBufferSize:bufferSize];
-        }
-    });
-}
 
 // Starts the internal soundfile recorder
 - (void)startRecording {
     // Create the recorder
-//    self.recorder = [EZRecorder recorderWithDestinationURL:[self recordingFilePathURL]
-//                                              sourceFormat:self.microphone.audioStreamBasicDescription
-//                                       destinationFileType:EZRecorderFileTypeWAV];
+    self.recorder = [VERecorder recorderWithDestinationURL:[self recordingFilePathURL]
+                                              sourceFormat:[self.audioProcessor inputAudioStreamBasicDescription]
+                                       destinationFileType:VERecorderFileTypeWAV];
     self.recordingActive = YES;
 }
 
@@ -243,59 +213,29 @@ withNumberOfChannels:(UInt32)numberOfChannels {
     return [self recordingFilePathURL];
 }
 
-// delegate method - feed microphone data to recorder (audio file).
--(void)microphone:(EZMicrophone *)microphone
-    hasBufferList:(AudioBufferList *)bufferList
-   withBufferSize:(UInt32)bufferSize
-withNumberOfChannels:(UInt32)numberOfChannels {
-    // Getting audio data as a buffer list that can be directly fed into the EZRecorder. This is happening on the audio thread - any UI updating needs a GCD main queue block. This will keep appending data to the tail of the audio file.
-    if (self.recordingActive) {
-        [self.recorder appendDataFromBufferList:bufferList withBufferSize:bufferSize];
-    }
-}
-
-
-/**
- OUTPUT
- */
-
-// Use the AudioBufferList datasource method to read from an EZAudioFile
-- (void)             output:(EZOutput *)output
- shouldFillAudioBufferList:(AudioBufferList *)audioBufferList
-        withNumberOfFrames:(UInt32)frames
-{
-    // This is a mono tone generator so we only need the first buffer
-	const int channelLeft = 0;
-	const int channelRight = 1;
-    
-    Float32 *bufferLeft = (Float32 *)audioBufferList->mBuffers[channelLeft].mData;
-    Float32 *bufferRight = (Float32 *)audioBufferList->mBuffers[channelRight].mData;
-    
-    // Generate the samples
-	for (UInt32 frame = 0; frame < frames; frame++)
-	{
-		bufferLeft[frame] = sin(theta) * amplitude;
-        bufferRight[frame] = -sin(theta) * amplitude;
-        
-		theta += theta_increment;
-		if (theta > 2.0*M_PI)
-		{
-			theta -= 2.0*M_PI;
-		}
-	}
-}
-
 - (NSString *)soundOutputDescription {
-    return [self ASBDtoString:[[EZOutput sharedOutput] audioStreamBasicDescription]];
+    return [VEAudioProcessor ASBDtoString:[self.audioProcessor outputAudioStreamBasicDescription]];
 }
 
 - (NSString *)soundInputDescription {
-    return [self ASBDtoString:[self getAudioStreamBasicDiscriptionMicrophone]];
+    return [VEAudioProcessor ASBDtoString:[self.audioProcessor inputAudioStreamBasicDescription]];
 }
 
 /**
  EZaudio File Utility functions
  */
+
+#pragma mark - Float Converter Initialization
+-(void) configureFloatConverterWithFrameSize:(UInt32)bufferFrameSize {
+    UInt32 bufferSizeBytes = bufferFrameSize * streamFormat.mBytesPerFrame;
+    converter              = [[AEFloatConverter alloc] initWithSourceFormat:streamFormat];
+    floatBuffers           = (float**)malloc(sizeof(float*)*streamFormat.mChannelsPerFrame);
+    assert(floatBuffers);
+    for ( int i=0; i<streamFormat.mChannelsPerFrame; i++ ) {
+        floatBuffers[i] = (float*)malloc(bufferSizeBytes);
+        assert(floatBuffers[i]);
+    }
+}
 
 - (NSString *)applicationDocumentsDirectory {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
@@ -309,56 +249,4 @@ withNumberOfChannels:(UInt32)numberOfChannels {
                                    kAudioFilePath]];
 }
 
-- (AudioStreamBasicDescription)getAudioStreamBasicDiscriptionOutput {
-    UInt32 bytesPerSample = sizeof(float);
-    AudioStreamBasicDescription stereoStreamFormat = {0};
-    
-    stereoStreamFormat.mFormatID          = kAudioFormatLinearPCM;
-    //    stereoStreamFormat.mFormatFlags       = kAudioFormatFlagsAudioUnitCanonical;
-    stereoStreamFormat.mFormatFlags       = kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved;
-    stereoStreamFormat.mBytesPerPacket    = bytesPerSample;
-    stereoStreamFormat.mBytesPerFrame     = bytesPerSample;
-    stereoStreamFormat.mFramesPerPacket   = 1;
-    stereoStreamFormat.mBitsPerChannel    = 8 * bytesPerSample;
-    stereoStreamFormat.mChannelsPerFrame  = 2;           // 2 indicates stereo
-    stereoStreamFormat.mSampleRate        = sampleFrequency;
-    
-    return stereoStreamFormat;
-}
-
-- (AudioStreamBasicDescription)getAudioStreamBasicDiscriptionMicrophone {
-    UInt32 bytesPerSample = sizeof(float);
-    AudioStreamBasicDescription stereoStreamFormat = {0};
-    
-    stereoStreamFormat.mFormatID          = kAudioFormatLinearPCM;
-    //    stereoStreamFormat.mFormatFlags       = kAudioFormatFlagsAudioUnitCanonical;
-    stereoStreamFormat.mFormatFlags       = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked | kAudioFormatFlagIsNonInterleaved;
-    stereoStreamFormat.mBytesPerPacket    = bytesPerSample;
-    stereoStreamFormat.mBytesPerFrame     = bytesPerSample;
-    stereoStreamFormat.mFramesPerPacket   = 1;
-    stereoStreamFormat.mBitsPerChannel    = 8 * bytesPerSample;
-    stereoStreamFormat.mChannelsPerFrame  = 2;           // 2 indicates stereo
-    stereoStreamFormat.mSampleRate        = sampleFrequency;
-    
-    return stereoStreamFormat;
-}
-
-- (NSString *)ASBDtoString:(AudioStreamBasicDescription)asbd  {
-    NSMutableString *description = [[NSMutableString alloc] init];
-    
-    char formatIDString[5];
-    UInt32 formatID = CFSwapInt32HostToBig(asbd.mFormatID);
-    bcopy (&formatID, formatIDString, 4);
-    formatIDString[4] = '\0';
-    [description appendFormat:@"  Sample Rate:         %10.0f\n",  asbd.mSampleRate];
-    [description appendFormat:@"  Format ID:           %10s\n",    formatIDString];
-    [description appendFormat:@"  Format Flags:        %10X\n",    (unsigned int)asbd.mFormatFlags];
-    [description appendFormat:@"  Bytes per Packet:    %10d\n",    (unsigned int)asbd.mBytesPerPacket];
-    [description appendFormat:@"  Frames per Packet:   %10d\n",    (unsigned int)asbd.mFramesPerPacket];
-    [description appendFormat:@"  Bytes per Frame:     %10d\n",    (unsigned int)asbd.mBytesPerFrame];
-    [description appendFormat:@"  Channels per Frame:  %10d\n",    (unsigned int)asbd.mChannelsPerFrame];
-    [description appendFormat:@"  Bits per Channel:    %10d",      (unsigned int)asbd.mBitsPerChannel];
-    
-    return description;
-}
 @end

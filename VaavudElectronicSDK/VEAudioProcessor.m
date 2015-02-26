@@ -11,6 +11,7 @@
 
 
 #import "VEAudioProcessor.h"
+#import "AEFloatConverter.h"
 
 #define kOutputBus 0
 #define kInputBus 1
@@ -28,11 +29,15 @@
     int outputBufferShift;
     int baseSignalLength;
 //    struct dispatch_queue_s *dispatchQueue;
-    dispatch_queue_t dispatchQueue;
+
+    AEFloatConverter *converter;
+    float           **floatBuffers;
     
     // Audio unit
     AudioComponentInstance audioUnit;
 }
+
+@property BOOL outputActive;
 
 @end
 
@@ -63,43 +68,25 @@ static OSStatus recordingCallback(void *inRefCon,
     status = AudioUnitRender(audioProcessor->audioUnit, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, &bufferList);
     [audioProcessor hasError:status andFile:__FILE__ andLine:__LINE__];
     
-    // copy incoming audio data to the audio buffer
-    TPCircularBufferProduceBytes(&audioProcessor->cirbuffer, bufferList.mBuffers[0].mData, bufferList.mBuffers[0].mDataByteSize);
     
-
+    if ([audioProcessor.delegate respondsToSelector:@selector(processBuffer:withDefaultBufferLengthInFrames:)]) {
+        // copy incoming audio data to the audio buffer
+        TPCircularBufferProduceBytes(&audioProcessor->cirbuffer, bufferList.mBuffers[0].mData, bufferList.mBuffers[0].mDataByteSize);
+        [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
+    }
     
-//    SInt16 *bufferOut = bufferList.mBuffers[0].mData;
-//    float *buffer = (float *) malloc(sizeof(float) * inNumberFrames);
-//    for (int i; i < inNumberFrames; i++) {
-//        buffer[i] = ((float) bufferOut[i]) / 32768.0; /// ((float) 32767.0);
-//    }
-//    
-//    for (int i=0; i < 3; i++) {
-//        NSLog(@"bufferVal[%i]: %f", i, buffer[i]);
-//    }
-//    
-//    
-//    dispatch_async(dispatch_get_main_queue(),^{
-//        // All the audio plot needs is the buffer data (float*) and the size. Internally the audio plot will handle all the drawing related code, history management, and freeing its own resources. Hence, one badass line of code gets you a pretty plot :)
-//        if (audioProcessor.audioPlot) {
-//            [audioProcessor.audioPlot updateBuffer:buffer withBufferSize:inNumberFrames];
-//        }
-//        free(buffer);
-//    });
+    if ([audioProcessor.delegate respondsToSelector:@selector(processBufferList:withBufferLengthInFrames:)]) {
+        [audioProcessor.delegate processBufferList:&bufferList withBufferLengthInFrames:inNumberFrames];
+    }
     
-//    if (audioProcessor.delegate) {
-//        [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
-//    } else {
-//        NSLog(@"no audioProcessor delegate");
-//    }
+    if ([audioProcessor.delegate respondsToSelector:@selector(processFloatBuffer:withBufferLengthInFrames:)]) {
+        AEFloatConverterToFloat(audioProcessor->converter,
+                                &audioProcessor->inputBufferList,
+                                audioProcessor->floatBuffers,
+                                inNumberFrames);
+        [audioProcessor.delegate processFloatBuffer:audioProcessor->floatBuffers[0] withBufferLengthInFrames:inNumberFrames];
+    }
     
-    dispatch_async(audioProcessor->dispatchQueue, ^(void){
-        if (audioProcessor.delegate) {
-            [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
-        } else {
-            NSLog(@"no audioProcessor delegate");
-        }
-    });
     
     
     return noErr;
@@ -129,8 +116,6 @@ static OSStatus playbackCallback(void *inRefCon,
     
     UInt32 sampleSize = sizeof(SInt16);
     
-
-    
     memcpy(bufferLeft, audioProcessor->outputBufferLeft.mData + sampleSize * audioProcessor->outputBufferShiftIndex, ioData->mBuffers[channelLeft].mDataByteSize);
     memcpy(bufferRight, audioProcessor->outputBufferRight.mData + sampleSize * audioProcessor->outputBufferShiftIndex, ioData->mBuffers[channelLeft].mDataByteSize);
     
@@ -140,25 +125,6 @@ static OSStatus playbackCallback(void *inRefCon,
         audioProcessor->outputBufferShiftIndex -= audioProcessor->baseSignalLength;
     }
     
-    
-//    // keep for now to comsume bytes
-//    int32_t availableBytes;
-//    SInt16 *circBufferTail = TPCircularBufferTail(&audioProcessor->cirbuffer, &availableBytes);
-//    
-//    AudioBuffer targetBuffer = ioData->mBuffers[0];
-//    UInt32 size = MIN(targetBuffer.mDataByteSize, availableBytes);
-//    
-//    // iterate over incoming stream an copy to output stream
-//    for (int i=0; i < ioData->mNumberBuffers; i++) {
-//        AudioBuffer targetBuffer = ioData->mBuffers[i];
-//        
-//        // copy buffer to audio buffer which gets played after function return
-//        memcpy(targetBuffer.mData, circBufferTail, size);
-//        
-//        // set data size
-//        targetBuffer.mDataByteSize = size;
-//    }
-    
     return noErr;
 }
 
@@ -166,12 +132,8 @@ static OSStatus playbackCallback(void *inRefCon,
 {
     self = [super init];
     if (self) {
-        dispatchQueue = (dispatch_queue_create("com.vaavud.processTickQueue", DISPATCH_QUEUE_SERIAL));
-//        dispatch_set_target_queue(dispatchQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0));
-        dispatch_set_target_queue(dispatchQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
-        
-//        self.delegate = [[SoundProcessor alloc] init];
-        [self initializeAudioWithOutput:true];
+        self.outputActive = YES;
+        [self initializeAudioWithOutput:self.outputActive];
     }
     return self;
 }
@@ -357,6 +319,7 @@ static OSStatus playbackCallback(void *inRefCon,
     
     [self prepareIntputBufferWithBufferSize:bufferLengthInFrames];
     [self prepareOutputBuffersWithBufferSize:bufferLengthInFrames andMaxBufferSize:bufferFrameSizeMax];
+    [self configureFloatConverterWithFrameSize:bufferLengthInFrames andStreamFormat:audioFormat];
     
     TPCircularBufferInit(&cirbuffer, bufferLengthInFrames*40);
     
@@ -416,11 +379,17 @@ static OSStatus playbackCallback(void *inRefCon,
     free(baseSignal);
 }
 
-
-
 #pragma mark controll stream
 
 - (void)start {
+    
+    if(!self.outputActive) {
+        // always stop before starting to allow for recofigureing
+        [self stop];
+        self.outputActive = YES;
+        [self initializeAudioWithOutput:self.outputActive];
+    }
+    
     // start the audio unit. You should hear something, hopefully :)
     OSStatus status = AudioOutputUnitStart(audioUnit);
     [self hasError:status andFile:__FILE__ andLine:__LINE__];
@@ -428,12 +397,84 @@ static OSStatus playbackCallback(void *inRefCon,
 
 - (void)startMicrophoneOnly {
     
+    if(self.outputActive) {
+        [self stop];
+        self.outputActive = NO;
+        [self initializeAudioWithOutput:self.outputActive];
+    }
+    // start the audio unit. You should hear something, hopefully :)
+    OSStatus status = AudioOutputUnitStart(audioUnit);
+    [self hasError:status andFile:__FILE__ andLine:__LINE__];
+    
 }
 
 - (void)stop {
     // stop the audio unit
     OSStatus status = AudioOutputUnitStop(audioUnit);
     [self hasError:status andFile:__FILE__ andLine:__LINE__];
+}
+
+- (AudioStreamBasicDescription)inputAudioStreamBasicDescription{
+    AudioStreamBasicDescription streamDescription = {0};
+    UInt32 sizeStreamDescription = sizeof(AudioStreamBasicDescription);
+    OSStatus status = AudioUnitGetProperty(audioUnit,kAudioUnitProperty_StreamFormat,kAudioUnitScope_Output,kInputBus,&streamDescription,&sizeStreamDescription);
+    [self hasError:status andFile:__FILE__ andLine:__LINE__];
+    
+    return streamDescription;
+}
+- (AudioStreamBasicDescription)outputAudioStreamBasicDescription{
+    AudioStreamBasicDescription streamDescription = {0};
+    UInt32 sizeStreamDescription = sizeof(AudioStreamBasicDescription);
+    OSStatus status = AudioUnitGetProperty(audioUnit,kAudioUnitProperty_StreamFormat,kAudioUnitScope_Input,kOutputBus,&streamDescription,&sizeStreamDescription);
+    [self hasError:status andFile:__FILE__ andLine:__LINE__];
+    
+    return streamDescription;
+};
+
++(void)printASBD:(AudioStreamBasicDescription)asbd {
+    char formatIDString[5];
+    UInt32 formatID = CFSwapInt32HostToBig(asbd.mFormatID);
+    bcopy (&formatID, formatIDString, 4);
+    formatIDString[4] = '\0';
+    NSLog (@"  Sample Rate:         %10.0f",  asbd.mSampleRate);
+    NSLog (@"  Format ID:           %10s",    formatIDString);
+    NSLog (@"  Format Flags:        %10X",    (unsigned int)asbd.mFormatFlags);
+    NSLog (@"  Bytes per Packet:    %10d",    (unsigned int)asbd.mBytesPerPacket);
+    NSLog (@"  Frames per Packet:   %10d",    (unsigned int)asbd.mFramesPerPacket);
+    NSLog (@"  Bytes per Frame:     %10d",    (unsigned int)asbd.mBytesPerFrame);
+    NSLog (@"  Channels per Frame:  %10d",    (unsigned int)asbd.mChannelsPerFrame);
+    NSLog (@"  Bits per Channel:    %10d",    (unsigned int)asbd.mBitsPerChannel);
+}
+
++ (NSString *)ASBDtoString:(AudioStreamBasicDescription)asbd {
+    NSMutableString *description = [[NSMutableString alloc] init];
+    
+    char formatIDString[5];
+    UInt32 formatID = CFSwapInt32HostToBig(asbd.mFormatID);
+    bcopy (&formatID, formatIDString, 4);
+    formatIDString[4] = '\0';
+    [description appendFormat:@"  Sample Rate:         %10.0f\n",  asbd.mSampleRate];
+    [description appendFormat:@"  Format ID:           %10s\n",    formatIDString];
+    [description appendFormat:@"  Format Flags:        %10X\n",    (unsigned int)asbd.mFormatFlags];
+    [description appendFormat:@"  Bytes per Packet:    %10d\n",    (unsigned int)asbd.mBytesPerPacket];
+    [description appendFormat:@"  Frames per Packet:   %10d\n",    (unsigned int)asbd.mFramesPerPacket];
+    [description appendFormat:@"  Bytes per Frame:     %10d\n",    (unsigned int)asbd.mBytesPerFrame];
+    [description appendFormat:@"  Channels per Frame:  %10d\n",    (unsigned int)asbd.mChannelsPerFrame];
+    [description appendFormat:@"  Bits per Channel:    %10d",      (unsigned int)asbd.mBitsPerChannel];
+    
+    return description;
+}
+
+#pragma mark - Float Converter Initialization
+- (void)configureFloatConverterWithFrameSize:(UInt32)bufferFrameSize andStreamFormat:(AudioStreamBasicDescription)streamFormat {
+    UInt32 bufferSizeBytes = bufferFrameSize * streamFormat.mBytesPerFrame;
+    converter              = [[AEFloatConverter alloc] initWithSourceFormat:streamFormat];
+    floatBuffers           = (float**)malloc(sizeof(float*)*streamFormat.mChannelsPerFrame);
+    assert(floatBuffers);
+    for ( int i=0; i<streamFormat.mChannelsPerFrame; i++ ) {
+        floatBuffers[i] = (float*)malloc(bufferSizeBytes);
+        assert(floatBuffers[i]);
+    }
 }
 
 

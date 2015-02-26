@@ -7,6 +7,7 @@
 //
 #import <AVFoundation/AVFoundation.h>
 #import <Foundation/Foundation.h>
+#import "VEAudioProcessor.h"
 
 @protocol AudioVaavudElectronicDetectionDelegate <NSObject>
 
@@ -43,10 +44,12 @@
 @end
 
 
-@interface VEAudioVaavudElectronicDetection : NSObject
+@interface VEAudioVaavudElectronicDetection : NSObject <AudioProcessorProtocol>
 
 // Initializer
 - (id) initWithDelegate:(id<AudioVaavudElectronicDetectionDelegate>)delegate;
+// protocol
+- (void)processBuffer:(TPCircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
 
 @property (nonatomic, readonly) BOOL sleipnirAvailable;
 

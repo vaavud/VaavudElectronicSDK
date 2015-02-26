@@ -7,8 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "EZAudio.h"
-
 
 @protocol VaavudElectronicWindDelegate <NSObject>
 

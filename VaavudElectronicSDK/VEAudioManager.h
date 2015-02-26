@@ -12,12 +12,11 @@
 
 // Import EZAudio header
 #import "EZAudio.h"
-#import "EZMicrophone+VESDK.h"
 
 #import "VESoundProcessingAlgo.h"
 #import "VEAudioVaavudElectronicDetection.h"
 #import "VEAudioProcessor.h"
-
+#import "VERecorder.h"
 
 @protocol AudioManagerDelegate <NSObject>
 
@@ -28,7 +27,7 @@
 @end
 
 
-@interface VEAudioManager : NSObject
+@interface VEAudioManager : NSObject <AudioProcessorProtocol>
 
 // Initializer
 - (id)initWithDelegate:(id<AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>)delegate;
@@ -61,9 +60,11 @@
 // return the sound input descriotion as NSString
 - (NSString *)soundInputDescription;
 
+//protocol
+- (void)processBuffer:(TPCircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
 
 @property (strong, nonatomic) VESoundProcessingAlgo *soundProcessor;
-@property (strong, nonatomic) VEAudioProcessor * audioProcessor;
+//@property (strong, nonatomic) VEAudioProcessor * audioProcessor;
 @property (weak, nonatomic) EZAudioPlotGL *audioPlot;
 
 @end

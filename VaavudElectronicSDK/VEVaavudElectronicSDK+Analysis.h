@@ -10,25 +10,28 @@
 @protocol VaavudElectronicAnalysisDelegate <NSObject>
 
 @optional
-- (void) newAngularVelocities: (NSArray*) angularVelocities;
-- (void) newTickDetectionErrorCount: (NSNumber *) tickDetectionErrorCount;
-- (void) newVelocityProfileError: (NSNumber *) profileError;
-- (void) newMaxAmplitude: (NSNumber*) amplitude;
-- (void) newRecordingReadyToUpload;
+- (void)newAngularVelocities: (NSArray*) angularVelocities;
+- (void)newTickDetectionErrorCount: (NSNumber *) tickDetectionErrorCount;
+- (void)newVelocityProfileError: (NSNumber *) profileError;
+- (void)newMaxAmplitude: (NSNumber*) amplitude;
+- (void)newRecordingReadyToUpload;
 @end
 
+@protocol VaavudElectronicMicrophoneOutputDelegate <NSObject>
 
+-(void)updateBuffer:(float *)buffer withBufferSize:(UInt32)bufferSize;
+
+@end
 
 @interface VEVaavudElectronicSDK (Analysis)
+
+@property (nonatomic, strong) id <VaavudElectronicMicrophoneOutputDelegate>microphoneOutputDeletage;
 
 /* add listener of analysis information */
 - (void)addAnalysisListener:(id <VaavudElectronicAnalysisDelegate>)delegate;
 
 /* remove listener of analysis information */
 - (void)removeAnalysisListener:(id <VaavudElectronicAnalysisDelegate>)delegate;
-
-// sets the audioPlot to which buffered raw audio values is send for plotting
-- (void)setAudioPlot:(EZAudioPlotGL *) audioPlot;
 
 // Starts the internal soundfile recorder
 - (void)startRecording;
