@@ -282,7 +282,7 @@
             break;
         case 1:
             if (sampleSinceTick < 90) {
-                if (mvgAvgSum < 0.5*lastMvgMin) {
+                if (mvgAvgSum < 0.5*lastMvgMin && mvgAvgSum < -1200) {
                     return true;
                 }
             } else {
