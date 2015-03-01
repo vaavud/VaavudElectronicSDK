@@ -21,7 +21,7 @@
 
 #pragma mark objective-c class
 @interface VEAudioProcessor () {
-    TPCircularBuffer cirbuffer;
+    VECircularBuffer cirbuffer;
     AudioBuffer outputBufferLeft;
     AudioBuffer outputBufferRight;
     AudioBufferList inputBufferList;
@@ -71,7 +71,7 @@ static OSStatus recordingCallback(void *inRefCon,
     
     if ([audioProcessor.delegate respondsToSelector:@selector(processBuffer:withDefaultBufferLengthInFrames:)]) {
         // copy incoming audio data to the audio buffer
-        TPCircularBufferProduceBytes(&audioProcessor->cirbuffer, bufferList.mBuffers[0].mData, bufferList.mBuffers[0].mDataByteSize);
+        VECircularBufferProduceBytes(&audioProcessor->cirbuffer, bufferList.mBuffers[0].mData, bufferList.mBuffers[0].mDataByteSize);
         [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
     }
     
@@ -321,7 +321,7 @@ static OSStatus playbackCallback(void *inRefCon,
     [self prepareOutputBuffersWithBufferSize:bufferLengthInFrames andMaxBufferSize:bufferFrameSizeMax];
     [self configureFloatConverterWithFrameSize:bufferLengthInFrames andStreamFormat:audioFormat];
     
-    TPCircularBufferInit(&cirbuffer, bufferLengthInFrames*40);
+    VECircularBufferInit(&cirbuffer, bufferLengthInFrames*40);
     
     // Initialize the Audio Unit and cross fingers =)
     status = AudioUnitInitialize(audioUnit);
@@ -489,7 +489,7 @@ static OSStatus playbackCallback(void *inRefCon,
 
 - (void)dealloc {
     // Release buffer resources
-    TPCircularBufferCleanup(&cirbuffer);
+    VECircularBufferCleanup(&cirbuffer);
     
     free(outputBufferLeft.mData);
     free(outputBufferRight.mData);

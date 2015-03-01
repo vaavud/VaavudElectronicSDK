@@ -75,7 +75,7 @@
 }
 
 
-- (void)processBuffer:(TPCircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames {
+- (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames {
     dispatch_async(self.dispatchQueue, ^(void){
         [self.soundProcessor processBuffer:circBuffer withDefaultBufferLengthInFrames:bufferLengthInFrames];
     });
@@ -224,18 +224,6 @@
 /**
  EZaudio File Utility functions
  */
-
-#pragma mark - Float Converter Initialization
--(void) configureFloatConverterWithFrameSize:(UInt32)bufferFrameSize {
-    UInt32 bufferSizeBytes = bufferFrameSize * streamFormat.mBytesPerFrame;
-    converter              = [[AEFloatConverter alloc] initWithSourceFormat:streamFormat];
-    floatBuffers           = (float**)malloc(sizeof(float*)*streamFormat.mChannelsPerFrame);
-    assert(floatBuffers);
-    for ( int i=0; i<streamFormat.mChannelsPerFrame; i++ ) {
-        floatBuffers[i] = (float*)malloc(bufferSizeBytes);
-        assert(floatBuffers[i]);
-    }
-}
 
 - (NSString *)applicationDocumentsDirectory {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);

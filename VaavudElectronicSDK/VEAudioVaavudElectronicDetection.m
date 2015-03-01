@@ -266,11 +266,11 @@
 
 
 
-- (void)processBuffer:(TPCircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames {
+- (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames {
     
     if (self.samplingMicrophoneActice) {
         int32_t bytesAvaliable;
-        SInt16 *bufferArray = TPCircularBufferTail(circBuffer, &bytesAvaliable);
+        SInt16 *bufferArray = VECircularBufferTail(circBuffer, &bytesAvaliable);
         
         
 //        if (self.sampleCounter > 10) {

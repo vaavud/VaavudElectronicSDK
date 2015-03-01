@@ -61,7 +61,7 @@
 - (NSString *)soundInputDescription;
 
 //protocol
-- (void)processBuffer:(TPCircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
+- (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
 
 @property (strong, nonatomic) VESoundProcessingAlgo *soundProcessor;
 //@property (strong, nonatomic) VEAudioProcessor * audioProcessor;

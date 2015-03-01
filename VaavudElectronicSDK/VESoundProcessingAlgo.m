@@ -98,12 +98,12 @@
     mvgDropHalfRefresh = YES;
 }
 
-- (void)processBuffer:(TPCircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames {
+- (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames {
     
     NSDate *methodStart = [NSDate date];
     // keep for now to comsume bytes
     int32_t availableBytes;
-    SInt16 *circBufferTail = TPCircularBufferTail(circBuffer, &availableBytes);
+    SInt16 *circBufferTail = VECircularBufferTail(circBuffer, &availableBytes);
     
     if (circBufferTail != NULL) {
         UInt32 sampleSize = sizeof(SInt16);
@@ -128,7 +128,7 @@
             NSLog(@"circBuffer fillCount %i", circBuffer->fillCount);
         }
         
-        TPCircularBufferConsume(circBuffer, size);
+        VECircularBufferConsume(circBuffer, size);
 //        NSLog(@"fillCount: %i", circBuffer->fillCount);
     } else {
         NSLog(@"buffer is Null");

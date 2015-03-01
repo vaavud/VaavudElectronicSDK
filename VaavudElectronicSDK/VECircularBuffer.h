@@ -1,8 +1,8 @@
 //
-//  TPCircularBuffer.h
-//  Circular/Ring buffer implementation
+//  VECircularBuffer.h
+//  Circular/Ring buffer implementation // CHANGED "NAMESPACE" from TP to VE to ensure no conflicts
 //
-//  https://github.com/michaeltyson/TPCircularBuffer
+//  https://github.com/michaeltyson/VECircularBuffer
 //
 //  Created by Michael Tyson on 10/12/2011.
 //
@@ -39,8 +39,8 @@
 //  3. This notice may not be removed or altered from any source distribution.
 //
 
-#ifndef TPCircularBuffer_h
-#define TPCircularBuffer_h
+#ifndef VECircularBuffer_h
+#define VECircularBuffer_h
 
 #include <libkern/OSAtomic.h>
 #include <string.h>
@@ -56,7 +56,7 @@ typedef struct {
     int32_t           tail;
     int32_t           head;
     volatile int32_t  fillCount;
-} TPCircularBuffer;
+} VECircularBuffer;
 
 /*!
  * Initialise buffer
@@ -68,14 +68,14 @@ typedef struct {
  * @param buffer Circular buffer
  * @param length Length of buffer
  */
-bool  TPCircularBufferInit(TPCircularBuffer *buffer, int32_t length);
+bool  VECircularBufferInit(VECircularBuffer *buffer, int32_t length);
 
 /*!
  * Cleanup buffer
  *
  *  Releases buffer resources.
  */
-void  TPCircularBufferCleanup(TPCircularBuffer *buffer);
+void  VECircularBufferCleanup(VECircularBuffer *buffer);
 
 /*!
  * Clear buffer
@@ -85,7 +85,7 @@ void  TPCircularBufferCleanup(TPCircularBuffer *buffer);
  *  This is safe for use by consumer while producer is accessing 
  *  buffer.
  */
-void  TPCircularBufferClear(TPCircularBuffer *buffer);
+void  VECircularBufferClear(VECircularBuffer *buffer);
 
 // Reading (consuming)
 
@@ -99,7 +99,7 @@ void  TPCircularBufferClear(TPCircularBuffer *buffer);
  * @param availableBytes On output, the number of bytes ready for reading
  * @return Pointer to the first bytes ready for reading, or NULL if buffer is empty
  */
-static __inline__ __attribute__((always_inline)) void* TPCircularBufferTail(TPCircularBuffer *buffer, int32_t* availableBytes) {
+static __inline__ __attribute__((always_inline)) void* VECircularBufferTail(VECircularBuffer *buffer, int32_t* availableBytes) {
     *availableBytes = buffer->fillCount;
     if ( *availableBytes == 0 ) return NULL;
     return (void*)((char*)buffer->buffer + buffer->tail);
@@ -113,16 +113,16 @@ static __inline__ __attribute__((always_inline)) void* TPCircularBufferTail(TPCi
  * @param buffer Circular buffer
  * @param amount Number of bytes to consume
  */
-static __inline__ __attribute__((always_inline)) void TPCircularBufferConsume(TPCircularBuffer *buffer, int32_t amount) {
+static __inline__ __attribute__((always_inline)) void VECircularBufferConsume(VECircularBuffer *buffer, int32_t amount) {
     buffer->tail = (buffer->tail + amount) % buffer->length;
     OSAtomicAdd32Barrier(-amount, &buffer->fillCount);
     assert(buffer->fillCount >= 0);
 }
 
 /*!
- * Version of TPCircularBufferConsume without the memory barrier, for more optimal use in single-threaded contexts
+ * Version of VECircularBufferConsume without the memory barrier, for more optimal use in single-threaded contexts
  */
-static __inline__ __attribute__((always_inline)) void TPCircularBufferConsumeNoBarrier(TPCircularBuffer *buffer, int32_t amount) {
+static __inline__ __attribute__((always_inline)) void VECircularBufferConsumeNoBarrier(VECircularBuffer *buffer, int32_t amount) {
     buffer->tail = (buffer->tail + amount) % buffer->length;
     buffer->fillCount -= amount;
     assert(buffer->fillCount >= 0);
@@ -138,7 +138,7 @@ static __inline__ __attribute__((always_inline)) void TPCircularBufferConsumeNoB
  * @param availableBytes On output, the number of bytes ready for writing
  * @return Pointer to the first bytes ready for writing, or NULL if buffer is full
  */
-static __inline__ __attribute__((always_inline)) void* TPCircularBufferHead(TPCircularBuffer *buffer, int32_t* availableBytes) {
+static __inline__ __attribute__((always_inline)) void* VECircularBufferHead(VECircularBuffer *buffer, int32_t* availableBytes) {
     *availableBytes = (buffer->length - buffer->fillCount);
     if ( *availableBytes == 0 ) return NULL;
     return (void*)((char*)buffer->buffer + buffer->head);
@@ -154,16 +154,16 @@ static __inline__ __attribute__((always_inline)) void* TPCircularBufferHead(TPCi
  * @param buffer Circular buffer
  * @param amount Number of bytes to produce
  */
-static __inline__ __attribute__((always_inline)) void TPCircularBufferProduce(TPCircularBuffer *buffer, int32_t amount) {
+static __inline__ __attribute__((always_inline)) void VECircularBufferProduce(VECircularBuffer *buffer, int32_t amount) {
     buffer->head = (buffer->head + amount) % buffer->length;
     OSAtomicAdd32Barrier(amount, &buffer->fillCount);
     assert(buffer->fillCount <= buffer->length);
 }
 
 /*!
- * Version of TPCircularBufferProduce without the memory barrier, for more optimal use in single-threaded contexts
+ * Version of VECircularBufferProduce without the memory barrier, for more optimal use in single-threaded contexts
  */
-static __inline__ __attribute__((always_inline)) void TPCircularBufferProduceNoBarrier(TPCircularBuffer *buffer, int32_t amount) {
+static __inline__ __attribute__((always_inline)) void VECircularBufferProduceNoBarrier(VECircularBuffer *buffer, int32_t amount) {
     buffer->head = (buffer->head + amount) % buffer->length;
     buffer->fillCount += amount;
     assert(buffer->fillCount <= buffer->length);
@@ -179,12 +179,12 @@ static __inline__ __attribute__((always_inline)) void TPCircularBufferProduceNoB
  * @param len Number of bytes in source buffer
  * @return true if bytes copied, false if there was insufficient space
  */
-static __inline__ __attribute__((always_inline)) bool TPCircularBufferProduceBytes(TPCircularBuffer *buffer, const void* src, int32_t len) {
+static __inline__ __attribute__((always_inline)) bool VECircularBufferProduceBytes(VECircularBuffer *buffer, const void* src, int32_t len) {
     int32_t space;
-    void *ptr = TPCircularBufferHead(buffer, &space);
+    void *ptr = VECircularBufferHead(buffer, &space);
     if ( space < len ) return false;
     memcpy(ptr, src, len);
-    TPCircularBufferProduce(buffer, len);
+    VECircularBufferProduce(buffer, len);
     return true;
 }
 

@@ -49,7 +49,7 @@
 // Initializer
 - (id) initWithDelegate:(id<AudioVaavudElectronicDetectionDelegate>)delegate;
 // protocol
-- (void)processBuffer:(TPCircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
+- (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
 
 @property (nonatomic, readonly) BOOL sleipnirAvailable;
 

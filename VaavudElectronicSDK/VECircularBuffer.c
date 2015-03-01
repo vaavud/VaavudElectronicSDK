@@ -1,8 +1,8 @@
 //
-//  TPCircularBuffer.c
+//  VECircularBuffer.c
 //  Circular/Ring buffer implementation
 //
-//  https://github.com/michaeltyson/TPCircularBuffer
+//  https://github.com/michaeltyson/VECircularBuffer
 //
 //  Created by Michael Tyson on 10/12/2011.
 //
@@ -27,7 +27,7 @@
 //  3. This notice may not be removed or altered from any source distribution.
 //
 
-#include "TPCircularBuffer.h"
+#include "VECircularBuffer.h"
 #include <mach/mach.h>
 #include <stdio.h>
 
@@ -40,7 +40,7 @@ static inline bool _reportResult(kern_return_t result, const char *operation, co
     return true;
 }
 
-bool TPCircularBufferInit(TPCircularBuffer *buffer, int32_t length) {
+bool VECircularBufferInit(VECircularBuffer *buffer, int32_t length) {
 
     // Keep trying until we get our buffer, needed to handle race conditions
     int retries = 3;
@@ -123,14 +123,14 @@ bool TPCircularBufferInit(TPCircularBuffer *buffer, int32_t length) {
     return false;
 }
 
-void TPCircularBufferCleanup(TPCircularBuffer *buffer) {
+void VECircularBufferCleanup(VECircularBuffer *buffer) {
     vm_deallocate(mach_task_self(), (vm_address_t)buffer->buffer, buffer->length * 2);
-    memset(buffer, 0, sizeof(TPCircularBuffer));
+    memset(buffer, 0, sizeof(VECircularBuffer));
 }
 
-void TPCircularBufferClear(TPCircularBuffer *buffer) {
+void VECircularBufferClear(VECircularBuffer *buffer) {
     int32_t fillCount;
-    if ( TPCircularBufferTail(buffer, &fillCount) ) {
-        TPCircularBufferConsume(buffer, fillCount);
+    if ( VECircularBufferTail(buffer, &fillCount) ) {
+        VECircularBufferConsume(buffer, fillCount);
     }
 }

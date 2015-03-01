@@ -20,7 +20,7 @@
 
 @interface VESoundProcessingAlgo : NSObject <AudioProcessorProtocol>
 
-- (void)processBuffer:(TPCircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
+- (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
 - (void)newSoundData:(int *)data bufferLength:(UInt32) bufferLength;
 - (id)initWithDelegate:(id<SoundProcessingDelegate, DirectionDetectionDelegate>)delegate;
 - (void)setVolumeAtSavedLevel;

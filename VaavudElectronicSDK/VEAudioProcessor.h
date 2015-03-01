@@ -9,12 +9,12 @@
 #import <Foundation/Foundation.h>
 #import <AudioToolbox/AudioToolbox.h>
 #import <AVFoundation/AVFoundation.h>
-#import "TPCircularBuffer.h"
+#import "VECircularBuffer.h"
 
 @protocol AudioProcessorProtocol <NSObject>
 
 @optional
-- (void)processBuffer:(TPCircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
+- (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
 @optional
 - (void)processBufferList:(AudioBufferList *)bufferList withBufferLengthInFrames:(UInt32)bufferLengthInFrames;
 @optional

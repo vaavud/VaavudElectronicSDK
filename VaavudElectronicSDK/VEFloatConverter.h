@@ -1,5 +1,5 @@
 //
-//  AEFloatConverter.h
+//  VEFloatConverter.h
 //  The Amazing Audio Engine
 //
 //  Created by Michael Tyson on 25/10/2012.
@@ -36,7 +36,7 @@ extern "C" {
  *  Use this class to easily convert arbitrary audio formats to floating point
  *  for use with utilities like the Accelerate framework.
  */
-@interface AEFloatConverter : NSObject
+@interface VEFloatConverter : NSObject
 
 /*!
  * Initialize
@@ -59,7 +59,7 @@ extern "C" {
  * @param frames            The number of frames to convert.
  * @return YES on success; NO on failure
  */
-BOOL AEFloatConverterToFloat(AEFloatConverter* converter, AudioBufferList *sourceBuffer, float * const * targetBuffers, UInt32 frames);
+BOOL VEFloatConverterToFloat(VEFloatConverter* converter, AudioBufferList *sourceBuffer, float * const * targetBuffers, UInt32 frames);
 
 /*!
  * Convert audio to floating-point, in a buffer list
@@ -74,7 +74,7 @@ BOOL AEFloatConverterToFloat(AEFloatConverter* converter, AudioBufferList *sourc
  * @param frames            The number of frames to convert.
  * @return YES on success; NO on failure
  */
-BOOL AEFloatConverterToFloatBufferList(AEFloatConverter* converter, AudioBufferList *sourceBuffer,  AudioBufferList *targetBuffer, UInt32 frames);
+BOOL VEFloatConverterToFloatBufferList(VEFloatConverter* converter, AudioBufferList *sourceBuffer,  AudioBufferList *targetBuffer, UInt32 frames);
 
 /*!
  * Convert audio from floating-point
@@ -90,7 +90,7 @@ BOOL AEFloatConverterToFloatBufferList(AEFloatConverter* converter, AudioBufferL
  * @param frames            The number of frames to convert.
  * @return YES on success; NO on failure
  */
-BOOL AEFloatConverterFromFloat(AEFloatConverter* converter, float * const * sourceBuffers, AudioBufferList *targetBuffer, UInt32 frames);
+BOOL VEFloatConverterFromFloat(VEFloatConverter* converter, float * const * sourceBuffers, AudioBufferList *targetBuffer, UInt32 frames);
 
 /*!
  * Convert audio from floating-point, in a buffer list
@@ -105,7 +105,7 @@ BOOL AEFloatConverterFromFloat(AEFloatConverter* converter, float * const * sour
  * @param frames            The number of frames to convert.
  * @return YES on success; NO on failure
  */
-BOOL AEFloatConverterFromFloatBufferList(AEFloatConverter* converter, AudioBufferList *sourceBuffer, AudioBufferList *targetBuffer, UInt32 frames);
+BOOL VEFloatConverterFromFloatBufferList(VEFloatConverter* converter, AudioBufferList *sourceBuffer, AudioBufferList *targetBuffer, UInt32 frames);
 
 /*!
  * The AudioStreamBasicDescription representing the converted floating-point format
