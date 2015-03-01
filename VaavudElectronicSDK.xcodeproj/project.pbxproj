@@ -40,7 +40,6 @@
 		D7D9997419B3AD3B0099FB8F /* VEVaavudElectronicSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D9997319B3AD3B0099FB8F /* VEVaavudElectronicSDK.m */; };
 		D7D9997B19B3AD3B0099FB8F /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D9997A19B3AD3B0099FB8F /* XCTest.framework */; };
 		D7D9997C19B3AD3B0099FB8F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D9996C19B3AD3B0099FB8F /* Foundation.framework */; };
-		D7D9997E19B3AD3B0099FB8F /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D9997D19B3AD3B0099FB8F /* UIKit.framework */; };
 		D7D9998119B3AD3B0099FB8F /* libVaavudElectronicSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D9996919B3AD3B0099FB8F /* libVaavudElectronicSDK.a */; };
 		D7D9998719B3AD3B0099FB8F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D7D9998519B3AD3B0099FB8F /* InfoPlist.strings */; };
 		D7D9998919B3AD3B0099FB8F /* VaavudElectronicSDKTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D9998819B3AD3B0099FB8F /* VaavudElectronicSDKTests.m */; };
@@ -112,7 +111,6 @@
 		D7D9997319B3AD3B0099FB8F /* VEVaavudElectronicSDK.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VEVaavudElectronicSDK.m; sourceTree = "<group>"; };
 		D7D9997919B3AD3B0099FB8F /* VaavudElectronicSDKTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VaavudElectronicSDKTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D7D9997A19B3AD3B0099FB8F /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
-		D7D9997D19B3AD3B0099FB8F /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
 		D7D9998419B3AD3B0099FB8F /* VaavudElectronicSDKTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "VaavudElectronicSDKTests-Info.plist"; sourceTree = "<group>"; };
 		D7D9998619B3AD3B0099FB8F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		D7D9998819B3AD3B0099FB8F /* VaavudElectronicSDKTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VaavudElectronicSDKTests.m; sourceTree = "<group>"; };
@@ -147,7 +145,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D7D9997B19B3AD3B0099FB8F /* XCTest.framework in Frameworks */,
-				D7D9997E19B3AD3B0099FB8F /* UIKit.framework in Frameworks */,
 				D7D9997C19B3AD3B0099FB8F /* Foundation.framework in Frameworks */,
 				D7D9998119B3AD3B0099FB8F /* libVaavudElectronicSDK.a in Frameworks */,
 			);
@@ -216,7 +213,6 @@
 				D706293219B3BEBE00E6879A /* CoreLocation.framework */,
 				D7D9996C19B3AD3B0099FB8F /* Foundation.framework */,
 				D7D9997A19B3AD3B0099FB8F /* XCTest.framework */,
-				D7D9997D19B3AD3B0099FB8F /* UIKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

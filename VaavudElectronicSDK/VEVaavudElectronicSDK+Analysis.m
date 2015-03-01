@@ -10,7 +10,13 @@
 
 @implementation VEVaavudElectronicSDK (Analysis)
 
+- (id<VaavudElectronicMicrophoneOutputDelegate>)microphoneOutputDeletage {
+    return self.microphoneOutputDeletage;
+}
 
+- (void)setMicrophoneOutputDeletage:(id<VaavudElectronicMicrophoneOutputDelegate>)microphoneOutputDeletage {
+    self.microphoneOutputDeletage = microphoneOutputDeletage;
+}
 
 /* add listener of heading and windspeed information */
 - (void) addAnalysisListener:(id <VaavudElectronicAnalysisDelegate>) delegate {

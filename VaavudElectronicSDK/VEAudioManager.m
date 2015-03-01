@@ -10,7 +10,7 @@
 
 #import "VEAudioManager.h"
 
-@interface VEAudioManager() <EZMicrophoneDelegate, EZOutputDataSource>
+@interface VEAudioManager()
 
 @property (nonatomic,strong) VEAudioProcessor *audioProcessor;
 @property (nonatomic,strong) VERecorder *recorder; /** The recorder component */
@@ -19,17 +19,10 @@
 @property (atomic) BOOL algorithmActive;
 @property (nonatomic, weak) id<AudioManagerDelegate> delegate;
 @property (nonatomic) dispatch_queue_t dispatchQueue;
-@property (nonatomic, strong) VEVaavudElectronicSDK* electronicSDK;
 
 @end
 
-@implementation VEAudioManager {
-//    double theta;
-//    double theta_increment;
-//    double amplitude;
-//    int *intArray;
-//    float *arrayLeft;
-}
+@implementation VEAudioManager
 
 
 #pragma mark - Initialization
@@ -43,7 +36,7 @@
 - (id)initWithDelegate:(id<AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>)delegate {
     self = [super init];
     
-    self.electronicSDK = [VEVaavudElectronicSDK sharedVaavudElectronic];
+//    self.electronicSDK = [VEVaavudElectronicSDK sharedVaavudElectronic];
     
     self.dispatchQueue = (dispatch_queue_create("com.vaavud.processTickQueue", DISPATCH_QUEUE_SERIAL));
     dispatch_set_target_queue(self.dispatchQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
@@ -88,9 +81,9 @@
 }
 
 - (void)processFloatBuffer:(float *)buffer withBufferLengthInFrames:(UInt32)bufferLengthInFrames {
-    if (self.electronicSDK.microphoneOutputDeletage) {
-        [self.electronicSDK.microphoneOutputDeletage updateBuffer:buffer withBufferSize:bufferLengthInFrames];
-    }
+//    if ([VEVaavudElectronicSDK sharedVaavudElectronic].microphoneOutputDeletage) {
+//        [[VEVaavudElectronicSDK sharedVaavudElectronic].microphoneOutputDeletage updateBuffer:buffer withBufferSize:bufferLengthInFrames];
+//    }
 }
 
 - (void)start {

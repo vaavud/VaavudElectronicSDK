@@ -7,6 +7,8 @@
 //
 
 #import "VEDirectionDetectionAlgo.h"
+#import <QuartzCore/QuartzCore.h>
+
 #define TEETH_PR_REV 15
 #define SAMPLE_BUFFER_SIZE 40
 #define UPDATE_INTERVAL 0.2 // 5 times a second
