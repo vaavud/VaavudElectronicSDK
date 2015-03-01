@@ -8,6 +8,7 @@
 
 #import "VELocationManager.h"
 #import <CoreLocation/CoreLocation.h>
+#import <UIKit/UIKit.h>
 
 @interface VELocationManager() <CLLocationManagerDelegate>
 
