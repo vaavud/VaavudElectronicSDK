@@ -19,9 +19,7 @@
 #define REQUIRED_CALIBRATION_TICKS 1500
 #define DIRECTION_OFFSET 10.0
 
-
 @interface VEDirectionDetectionAlgo() {
-    
     unsigned int totalTickCounter;
     unsigned int teethIndex;
     unsigned int tickCounterSinceStart;
@@ -53,7 +51,6 @@
     int tickDetectionErrorCount;
     double tickLengthRelativePrTeethSum[TEETH_PR_REV];
     int tickLengthRelativePrTeethCounter[TEETH_PR_REV];
-    
 }
 
 @property (strong, nonatomic) id<DirectionDetectionDelegate> dirDelegate;
@@ -62,7 +59,6 @@
 
 
 @implementation VEDirectionDetectionAlgo
-
 
 float compensation[TEETH_PR_REV] = {1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,0.774193548387097};
 
@@ -81,16 +77,16 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     self = [super init];
     self.dirDelegate = delegate;
     nextRefreshTime = CACurrentMediaTime();
-    startLocated = false;
-    initializeExponentialFilter = true;
+    startLocated = NO;
+    initializeExponentialFilter = YES;
     
-    calibrationMode = false;
+    calibrationMode = NO;
     
     float stdTickSize = 23.5;
     
     tickEdgeAngle[0] = 0;
-    for (int i = 1; i < TEETH_PR_REV-1; i++) {
-        tickEdgeAngle[i] = (int) (stdTickSize*i); // shift array one to the right
+    for (int i = 1; i < TEETH_PR_REV - 1; i++) {
+        tickEdgeAngle[i] = (int)(stdTickSize*i); // shift array one to the right
     }
     
     tickEdgeAngle[TEETH_PR_REV - 1] = (int)(360 - stdTickSize);
@@ -113,31 +109,22 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     
     float tickLengthCompensated = tickLength*compensation[teethIndex];
     
-    if (tickLengthCompensated > 0.8 * lastTickLengthCompensated && tickLengthCompensated < 1.2 * lastTickLengthCompensated) {
+    if (tickLengthCompensated > 0.8 * lastTickLengthCompensated && tickLengthCompensated < 1.2*lastTickLengthCompensated) {
         [self processValidTick:tickLength];
     }
     else {
-        
-        if (LOG_TICK_DETECTION) NSLog(@"[VESDK] Out of ratio: %f, teeth: %03d, ticks: %03d, tickLength: %03d", tickLengthCompensated / ((float) lastTickLengthCompensated), teethIndex, tickCounterSinceStart, tickLength);
+        if (LOG_TICK_DETECTION) NSLog(@"[VESDK] Out of ratio: %f, teeth: %03d, ticks: %03d, tickLength: %03d", tickLengthCompensated/((float)lastTickLengthCompensated), teethIndex, tickCounterSinceStart, tickLength);
         [self resetDirectionAlgorithm];
         
         tickDetectionErrorCount++;
         dispatch_async(dispatch_get_main_queue(),^{
-            [self.dirDelegate newTickDetectionErrorCount:[NSNumber numberWithInteger:tickDetectionErrorCount]];
+            [self.dirDelegate newTickDetectionErrorCount:@(tickDetectionErrorCount)];
         });
-        
-        
     }
     
     lastTickLengthCompensated = tickLengthCompensated;
     
-    if (teethIndex == TEETH_PR_REV-1) {
-        return YES;
-    }
-    else {
-        return NO;
-    }
-    
+    return (teethIndex == TEETH_PR_REV - 1);
 }
 
 - (void) resetDirectionAlgorithm {
@@ -148,13 +135,12 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     tickLengthOneRotation = 0;
     tickLengthOneRotationLast = 0;
     tickCounterSinceStart = 0;
-    startLocated = false;
-    initializeExponentialFilter = false;
+    startLocated = NO;
+    initializeExponentialFilter = NO;
 }
 
-
 - (void)processValidTick:(int)tickLength {
-    tickCounterSinceStart ++;
+    tickCounterSinceStart++;
     
     // update tickLenghtOneRotation
     
@@ -178,7 +164,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         if (calibrationTickSlowdownCounter > 200 && tickLengthOneRotation > 750 && initializeExponentialFilter) {
             // Filter Calibration
             [self initializeExponentialFilter];
-            initializeExponentialFilter = false;
+            initializeExponentialFilter = NO;
             
             // Mean Calibration
             for (int i = 0; i < TEETH_PR_REV; i++) {
@@ -192,22 +178,19 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
             [self updateExponentialFilter];
             
             // Average Calibration
-            double tickLengthRelative = tickLengthBuffer[teethProcessIndex] * TEETH_PR_REV / (double) tickLengthOneRotation;
+            double tickLengthRelative = tickLengthBuffer[teethProcessIndex]*TEETH_PR_REV/(double)tickLengthOneRotation;
             tickLengthRelativePrTeethSum[teethProcessIndex] += tickLengthRelative;
             tickLengthRelativePrTeethCounter[teethProcessIndex] += 1;
             
-            calibrationTickCounter++;
+            ++calibrationTickCounter;
             
             if (calibrationTickCounter == REQUIRED_CALIBRATION_TICKS) {
                 [self endCalibration];
                 [self printMeanFilter];
-                dispatch_async(dispatch_get_main_queue(),^{
-                    [self.dirDelegate calibrationPercentageComplete:@(calibrationTickCounter/(float)REQUIRED_CALIBRATION_TICKS)];
-                });
             }
             
             // update results
-            if (CACurrentMediaTime() > nextRefreshTime) {
+            if (CACurrentMediaTime() > nextRefreshTime || calibrationTickCounter == REQUIRED_CALIBRATION_TICKS) {
                 dispatch_async(dispatch_get_main_queue(),^{
                     [self.dirDelegate calibrationPercentageComplete:@(calibrationTickCounter/(float)REQUIRED_CALIBRATION_TICKS)];
                 });
@@ -268,7 +251,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     
     if (samples > 1.2*lastTickLength && samples < 1.4*lastTickLength) {
         if (startCounter == 2*TEETH_PR_REV) {
-            startLocated = true;
+            startLocated = YES;
             lastTickLengthCompensated = samples*compensation[TEETH_PR_REV - 1];
             if (LOG_TICK_DETECTION) NSLog(@"[VESDK] Start: Ratio: %f", samples/((float)lastTickLength));
             startCounter = 0;
@@ -338,7 +321,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
 
 - (void)iterateAngle:(float *)mvgRelativeSpeedPercent {
     if (iteratorAngleCounter == 5) {
-        [self checkOppositeAngle: mvgRelativeSpeedPercent];
+        [self checkOppositeAngle:mvgRelativeSpeedPercent];
         iteratorAngleCounter = 0;
     }
     
@@ -409,8 +392,6 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     float angleHighSum = 0.0;
     
     for (int i = 0; i < TEETH_PR_REV; i++) {
-    //for (int i = 0; i < TEETH_PR_REV; i++) {
-        
         int signalExpectedIndexLow = tickEdgeAngle[i] - angleLow;
         if (signalExpectedIndexLow < 0)
             signalExpectedIndexLow += 360;
@@ -432,32 +413,26 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     }
 }
 
-
-
-+ (float *) getFitCurve {
++ (float *)getFitCurve {
     return fitcurve;
 }
 
-- (int *) getEdgeAngles {
+- (int *)getEdgeAngles {
     return tickEdgeAngle;
 }
 
-
-
 // start calibration mode
--(void) startCalibration {
-    calibrationMode = true;
+-(void)startCalibration {
+    calibrationMode = YES;
     [self resetDirectionAlgorithm];
     calibrationTickCounter = 0;
     calibrationTickSlowdownCounter = 0;
-    initializeExponentialFilter = true;
-    
+    initializeExponentialFilter = YES;
 }
 
 // end calibbration mode
--(void) endCalibration {
-    calibrationMode = false;
-    
+-(void)endCalibration {
+    calibrationMode = NO;
     
     if (calibrationTickCounter >= REQUIRED_CALIBRATION_TICKS) {
         // Exp Filter
@@ -481,43 +456,39 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         }
         [compensationString appendString: [NSString stringWithFormat:@"%f]", compensation[TEETH_PR_REV-1]]];
         
-        if(LOG) NSLog(@"ExpFilter: %@", compensationString);
+        if (LOG) NSLog(@"ExpFilter: %@", compensationString);
     }
     
     [self resetDirectionAlgorithm];
     
-    initializeExponentialFilter = true;
-    
-    
+    initializeExponentialFilter = YES;
 }
 
-
-- (void) printMeanFilter {
+- (void)printMeanFilter {
     // Exp Filter
     float compensationSum = 0;
     
     float tickLengthRelativePrTeethAvg[TEETH_PR_REV];
     
-    
     for (int i = 0; i < TEETH_PR_REV; i++) {
-        tickLengthRelativePrTeethAvg[i] =tickLengthRelativePrTeethSum[i]/ (float) tickLengthRelativePrTeethCounter[i];
+        tickLengthRelativePrTeethAvg[i] = tickLengthRelativePrTeethSum[i]/(float) tickLengthRelativePrTeethCounter[i];
         compensationSum += 1/tickLengthRelativePrTeethAvg[i];
     }
     
-    float compensationAdjust = (compensationSum - TEETH_PR_REV) / TEETH_PR_REV;
+    float compensationAdjust = (compensationSum - TEETH_PR_REV)/TEETH_PR_REV;
     for (int i = 0; i < TEETH_PR_REV; i++) {
         compensation[i] = 1/tickLengthRelativePrTeethAvg[i] - compensationAdjust;
     }
     
     NSMutableString *compensationString = [NSMutableString stringWithString:@"["];
     
-    for (int i = 0; i < TEETH_PR_REV -1 ; i++) {
-        [compensationString appendString: [NSString stringWithFormat:@"%f,", compensation[i]]];
+    for (int i = 0; i < TEETH_PR_REV - 1 ; i++) {
+        [compensationString appendFormat:@"%f,", compensation[i]];
     }
-    [compensationString appendString: [NSString stringWithFormat:@"%f]", compensation[TEETH_PR_REV-1]]];
     
-    if(LOG) NSLog(@"MeanFilter: %@", compensationString);
-
+    [compensationString appendFormat:@"%f]", compensation[TEETH_PR_REV - 1]];
+    
+    if (LOG) NSLog(@"MeanFilter: %@", compensationString);
 }
 
 @end
