@@ -81,7 +81,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
         // do nothing
         [self.VaaElecWindDelegates removeObject:delegate];
     } else {
-        NSLog(@"trying to remove delegate, which does not excists");
+        NSLog(@"trying to remove delegate, which does not exists");
     }
 }
 

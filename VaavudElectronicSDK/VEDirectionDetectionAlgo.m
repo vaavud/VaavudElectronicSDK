@@ -127,7 +127,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     return (teethIndex == TEETH_PR_REV - 1);
 }
 
-- (void) resetDirectionAlgorithm {
+- (void)resetDirectionAlgorithm {
     // reset buffers
     for (int i = 0; i < TEETH_PR_REV; i++) {
         tickLengthBuffer[i] = 0;
@@ -227,7 +227,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
 }
 
 - (void)initializeExponentialFilter {
-    for (int i=0; i< TEETH_PR_REV; i++) {
+    for (int i = 0; i < TEETH_PR_REV; i++) {
         expTickLengthRelativePrTeeth[i] = tickLengthBuffer[i]*TEETH_PR_REV/(float)tickLengthOneRotation;
     }
 }
@@ -289,7 +289,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     
     for (int i = 0; i < TEETH_PR_REV; i++) {
         tickLengthRelativePrTeethCompensated[i] = (expTickLengthRelativePrTeeth[i]*compensation[i] - 1)*(-100); // - compensationS12[i]; // - compentationT1Ispo[i];
-        [angularVelocities addObject: [NSNumber numberWithFloat: tickLengthRelativePrTeethCompensated[i]]];
+        [angularVelocities addObject:@(tickLengthRelativePrTeethCompensated[i])];
     }
     
     // Calculate velocity for last revolution
