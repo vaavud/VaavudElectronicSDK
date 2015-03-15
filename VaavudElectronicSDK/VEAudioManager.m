@@ -36,8 +36,6 @@
 - (id)initWithDelegate:(id<AudioManagerDelegate, SoundProcessingDelegate, DirectionDetectionDelegate>)delegate {
     self = [super init];
     
-//    self.electronicSDK = [VEVaavudElectronicSDK sharedVaavudElectronic];
-    
     self.dispatchQueue = (dispatch_queue_create("com.vaavud.processTickQueue", DISPATCH_QUEUE_SERIAL));
     dispatch_set_target_queue(self.dispatchQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
     
@@ -61,9 +59,7 @@
     self.askedToMeasure = NO;
     self.algorithmActive = NO;
     self.recordingActive = NO;
-    
-//    [self startInternal]; // Temporary
-    
+        
     return self;
 }
 
@@ -81,9 +77,9 @@
 }
 
 - (void)processFloatBuffer:(float *)buffer withBufferLengthInFrames:(UInt32)bufferLengthInFrames {
-//    if ([VEVaavudElectronicSDK sharedVaavudElectronic].microphoneOutputDeletage) {
-//        [[VEVaavudElectronicSDK sharedVaavudElectronic].microphoneOutputDeletage updateBuffer:buffer withBufferSize:bufferLengthInFrames];
-//    }
+//    dispatch_async(dispatch_get_main_queue(),^{
+//        [self.microphoneOutputDeletage updateBuffer:buffer withBufferSize:bufferLengthInFrames]; // migth be nil
+//    });
 }
 
 - (void)start {

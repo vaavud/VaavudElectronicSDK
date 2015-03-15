@@ -43,14 +43,18 @@
     }
 }
 
-
-- (void) setAudioPlot:(EZAudioPlotGL *) audioPlot {
-    
-    if (self.audioManager) {
-        self.audioManager.audioPlot = audioPlot;
-//        self.audioManager.audioProcessor.audioPlot = audioPlot;
-    }
+- (void)setMicrophoneFloatRawListener:(id <VaavudElectronicMicrophoneOutputDelegate>)microphoneOutputDeletage{
+    self.audioManager.microphoneOutputDeletage = microphoneOutputDeletage;
 }
+
+
+//- (void) setAudioPlot:(EZAudioPlotGL *) audioPlot {
+//    
+//    if (self.audioManager) {
+////        self.audioManager.audioPlot = audioPlot;
+////        self.audioManager.audioProcessor.audioPlot = audioPlot;
+//    }
+//}
 
 
 // Starts the internal soundfile recorder

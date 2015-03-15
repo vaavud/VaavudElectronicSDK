@@ -25,13 +25,14 @@
 
 @interface VEVaavudElectronicSDK (Analysis)
 
-@property (nonatomic, strong) id <VaavudElectronicMicrophoneOutputDelegate>microphoneOutputDeletage;
-
 /* add listener of analysis information */
 - (void)addAnalysisListener:(id <VaavudElectronicAnalysisDelegate>)delegate;
 
 /* remove listener of analysis information */
 - (void)removeAnalysisListener:(id <VaavudElectronicAnalysisDelegate>)delegate;
+
+// set
+- (void)setMicrophoneFloatRawListener:(id <VaavudElectronicMicrophoneOutputDelegate>)microphoneOutputDeletage;
 
 // Starts the internal soundfile recorder
 - (void)startRecording;
