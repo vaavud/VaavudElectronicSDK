@@ -362,8 +362,10 @@ static OSStatus playbackCallback(void *inRefCon,
     
     SInt16 *baseSignal = malloc(baseSignalLength * bytesPerSample);
     
+    float signalOffAngle = M_PI/4;
+    
     for(int i=0; i<baseSignalLength; i++){
-        baseSignal[i] = (SInt16) (32767*sin(i / (float) baseSignalLength * M_PI*2));
+        baseSignal[i] = (SInt16) (32767*sin(i / (float) baseSignalLength * M_PI*2 + signalOffAngle));
         NSLog(@"baseSignal[%i] = %i", i, baseSignal[i]);
     }
     

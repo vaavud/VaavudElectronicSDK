@@ -255,7 +255,7 @@
     // check if volume is at maximum.
     MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
     originalVolume = musicPlayer.volume;
-    musicPlayer.volume = currentVolume; // device volume will be changed to stored
+//    musicPlayer.volume = currentVolume; // device volume will be changed to stored // commented out due to -10876 audio render error
     if (LOG_AUDIO) NSLog(@"[VESDK] Loaded volume from user defaults and set to %f", currentVolume);
 }
 
