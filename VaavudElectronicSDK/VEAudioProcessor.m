@@ -11,7 +11,7 @@
 
 
 #import "VEAudioProcessor.h"
-#import "AEFloatConverter.h"
+#import "VEFloatConverter.h"
 
 #define kOutputBus 0
 #define kInputBus 1
@@ -30,7 +30,7 @@
     int baseSignalLength;
 //    struct dispatch_queue_s *dispatchQueue;
 
-    AEFloatConverter *converter;
+    VEFloatConverter *converter;
     float           **floatBuffers;
     
     // Audio unit
@@ -79,13 +79,14 @@ static OSStatus recordingCallback(void *inRefCon,
         [audioProcessor.delegate processBufferList:&bufferList withBufferLengthInFrames:inNumberFrames];
     }
     
-//    if ([audioProcessor.delegate respondsToSelector:@selector(processFloatBuffer:withBufferLengthInFrames:)]) {
-//        AEFloatConverterToFloat(audioProcessor->converter,
-//                                &audioProcessor->inputBufferList,
-//                                audioProcessor->floatBuffers,
-//                                inNumberFrames);
-//        [audioProcessor.delegate processFloatBuffer:audioProcessor->floatBuffers[0] withBufferLengthInFrames:inNumberFrames];
-//    }
+    if ([audioProcessor.delegate respondsToSelector:@selector(processFloatBuffer:withBufferLengthInFrames:)]) {
+        VEFloatConverterToFloat(audioProcessor->converter,
+                                &audioProcessor->inputBufferList,
+                                audioProcessor->floatBuffers,
+                                inNumberFrames);
+        // inNumberFrames changed to 256
+        [audioProcessor.delegate processFloatBuffer:audioProcessor->floatBuffers[0] withBufferLengthInFrames:256];
+    }
     
     
     
@@ -468,7 +469,7 @@ static OSStatus playbackCallback(void *inRefCon,
 #pragma mark - Float Converter Initialization
 - (void)configureFloatConverterWithFrameSize:(UInt32)bufferFrameSize andStreamFormat:(AudioStreamBasicDescription)streamFormat {
     UInt32 bufferSizeBytes = bufferFrameSize * streamFormat.mBytesPerFrame;
-    converter              = [[AEFloatConverter alloc] initWithSourceFormat:streamFormat];
+    converter              = [[VEFloatConverter alloc] initWithSourceFormat:streamFormat];
     floatBuffers           = (float**)malloc(sizeof(float*)*streamFormat.mChannelsPerFrame);
     assert(floatBuffers);
     for ( int i=0; i<streamFormat.mChannelsPerFrame; i++ ) {
@@ -482,6 +483,7 @@ static OSStatus playbackCallback(void *inRefCon,
 
 -(void)hasError:(int)statusCode andFile:(char*)file andLine:(int)line {
     if (statusCode) {
+        NSLog(@"danm an error");
         printf("Error Code responded %d in file %s on line %d\n", statusCode, file, line);
         exit(-1);
     }

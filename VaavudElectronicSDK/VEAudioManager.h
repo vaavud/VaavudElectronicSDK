@@ -64,7 +64,7 @@
 - (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
 
 @property (strong, nonatomic) VESoundProcessingAlgo *soundProcessor;
-@property (nonatomic) id <VaavudElectronicMicrophoneOutputDelegate> microphoneOutputDeletage;
+@property (weak, nonatomic) id <VaavudElectronicMicrophoneOutputDelegate> microphoneOutputDeletage;
 
 
 

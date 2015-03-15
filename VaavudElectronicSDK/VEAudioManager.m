@@ -77,9 +77,7 @@
 }
 
 - (void)processFloatBuffer:(float *)buffer withBufferLengthInFrames:(UInt32)bufferLengthInFrames {
-//    dispatch_async(dispatch_get_main_queue(),^{
-//        [self.microphoneOutputDeletage updateBuffer:buffer withBufferSize:bufferLengthInFrames]; // migth be nil
-//    });
+    [self.microphoneOutputDeletage updateBuffer:buffer withBufferSize:bufferLengthInFrames]; // migth be nil
 }
 
 - (void)start {
