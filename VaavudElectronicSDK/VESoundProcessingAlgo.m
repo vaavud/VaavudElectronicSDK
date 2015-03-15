@@ -214,7 +214,7 @@
         }
     }
     
-    if (calibrationCounter == CALIBRATE_AUDIO_EVERY_X_BUFFER) {
+    if (calibrationCounter == CALIBRATE_AUDIO_EVERY_X_BUFFER && bufferLength > 0) {
         [self adjustVolumeDiffMax:lDiffMax diffMin:lDiffMin avgDiff:(int)(lDiffSum/bufferLength) avgMax:avgMax avgMin:avgMin];
         calibrationCounter= 0;
         // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
