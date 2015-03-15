@@ -79,13 +79,13 @@ static OSStatus recordingCallback(void *inRefCon,
         [audioProcessor.delegate processBufferList:&bufferList withBufferLengthInFrames:inNumberFrames];
     }
     
-    if ([audioProcessor.delegate respondsToSelector:@selector(processFloatBuffer:withBufferLengthInFrames:)]) {
-        AEFloatConverterToFloat(audioProcessor->converter,
-                                &audioProcessor->inputBufferList,
-                                audioProcessor->floatBuffers,
-                                inNumberFrames);
-        [audioProcessor.delegate processFloatBuffer:audioProcessor->floatBuffers[0] withBufferLengthInFrames:inNumberFrames];
-    }
+//    if ([audioProcessor.delegate respondsToSelector:@selector(processFloatBuffer:withBufferLengthInFrames:)]) {
+//        AEFloatConverterToFloat(audioProcessor->converter,
+//                                &audioProcessor->inputBufferList,
+//                                audioProcessor->floatBuffers,
+//                                inNumberFrames);
+//        [audioProcessor.delegate processFloatBuffer:audioProcessor->floatBuffers[0] withBufferLengthInFrames:inNumberFrames];
+//    }
     
     
     
