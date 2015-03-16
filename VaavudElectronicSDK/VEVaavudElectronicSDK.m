@@ -12,7 +12,7 @@
 #import "VESummeryGenerator.h"
 #import "VELocationManager.h"
 
-@interface VEVaavudElectronicSDK() <SoundProcessingDelegate, DirectionDetectionDelegate, AudioManagerDelegate, locationManagerDelegate, VEAudioIODelegate>
+@interface VEVaavudElectronicSDK() <VEAudioProcessingDelegate, DirectionDetectionDelegate, VEAudioIODelegate, locationManagerDelegate>
 
 @property (strong, atomic) NSMutableArray *VaaElecWindDelegates;
 @property (strong, atomic) NSMutableArray *VaaElecAnalysisDelegates;
@@ -22,6 +22,8 @@
 @property (strong, nonatomic) VESummeryGenerator *summeryGenerator;
 @property (strong, nonatomic) VELocationManager *locationManager;
 @property (strong, atomic) NSNumber *currentHeading;
+
+@property (weak, nonatomic) id<VaavudElectronicMicrophoneOutputDelegate> microphoneOutputDeletage;
 
 @end
 
@@ -49,10 +51,13 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     self.VaaElecAnalysisDelegates = [[NSMutableArray alloc] initWithCapacity:3];
     self.summeryGenerator = [[VESummeryGenerator alloc] init];
     self.locationManager = [[VELocationManager alloc] initWithDelegate:self];
+    self.rawProcessor = [[VEAudioProcessingRaw alloc] initWithDelegate:self];
+    self.tickProcessor = [[VEAudioProcessingTick alloc] initWithDelegate:self];
     
-    self.rawProcessor = [[VEAudioProcessingRaw alloc] initWithDelegate:self]; // self?
-
+    self.rawProcessor.processorTick = self.tickProcessor;
+    
     self.audioIO = [[VEAudioIO alloc] init];
+    self.audioIO.delegate = self;
 }
 
 + (id)allocWithZone:(NSZone *)zone {
@@ -202,18 +207,19 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 }
 
 /* start the audio input/output and starts sending data */
-- (void)start {
-//    [self.audioIO start];
+- (void)startSleipnir {
+    [self.audioIO start];
     
     if ([self.locationManager isHeadingAvailable]) {
         [self.locationManager start];
     } else {
         // Do nothing - heading will not be updated
+        if (LOG) NSLog(@"There is no heading avaliable");
     }
 }
 
 /* start the audio input/output and starts sending data */
-- (void)stop {
+- (void)stopSleipnir {
     [self.audioIO stop];
     [self.locationManager stop];
 }
@@ -236,5 +242,12 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     [self.tickProcessor resetCalibration];
 }
 
+- (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames {
+    [self.rawProcessor processBuffer:circBuffer withDefaultBufferLengthInFrames:bufferLengthInFrames];
+}
+
+- (void)processFloatBuffer:(float *)buffer withBufferLengthInFrames:(UInt32)bufferLengthInFrames {
+    [self.microphoneOutputDeletage updateBuffer:buffer withBufferSize:bufferLengthInFrames];
+}
 
 @end

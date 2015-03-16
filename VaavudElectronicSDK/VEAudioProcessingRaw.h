@@ -11,20 +11,17 @@
 #import "VEAudioProcessingTick.h"
 #import "VEAudioIO.h"
 
-@protocol SoundProcessingDelegate <NSObject>
-
-- (void) newMaxAmplitude: (NSNumber*) amplitude;
-
+@protocol VEAudioProcessingDelegate <NSObject>
+- (void)newMaxAmplitude:(NSNumber*) amplitude; // Analysis
 @end
 
-
-@interface VEAudioProcessingRaw : NSObject <AudioProcessorProtocol>
+@interface VEAudioProcessingRaw : NSObject
 
 - (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
 - (void)newSoundData:(int *)data bufferLength:(UInt32) bufferLength;
-- (id)initWithDelegate:(id<SoundProcessingDelegate, DirectionDetectionDelegate>)delegate;
+- (id)initWithDelegate:(id<VEAudioProcessingDelegate>)delegate;
 - (void)setVolumeAtSavedLevel;
 - (void)returnVolumeToInitialState;
 
-@property (strong, nonatomic) VEAudioProcessingTick *dirDetectionAlgo;
+@property (weak, nonatomic) VEAudioProcessingTick *processorTick;
 @end

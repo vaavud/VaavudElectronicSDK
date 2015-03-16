@@ -39,7 +39,7 @@
     AudioComponentInstance audioUnit;
 }
 
-@property BOOL audioUnitInitialized;
+@property (atomic) BOOL audioBuffersInitialized;
 
 // from audioManager
 @property (nonatomic,strong) VERecorder *recorder; /** The recorder component */
@@ -64,7 +64,7 @@
         self.dispatchQueue = (dispatch_queue_create("com.vaavud.processTickQueue", DISPATCH_QUEUE_SERIAL));
         dispatch_set_target_queue(self.dispatchQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
         
-        self.audioUnitInitialized = NO;
+        self.audioBuffersInitialized = NO;
         self.askedToMeasure = NO;
         self.algorithmActive = NO;
         self.recordingActive = NO;
@@ -122,8 +122,6 @@ static OSStatus recordingCallback(void *inRefCon,
         // inNumberFrames changed to 256
         [audioProcessor.delegate processFloatBuffer:audioProcessor->floatBuffers[0] withBufferLengthInFrames:256];
     }
-
-    
     return noErr;
 }
 
@@ -162,6 +160,8 @@ static OSStatus playbackCallback(void *inRefCon,
 
 -(void)initializeAudioWithOutput:(BOOL)outputFlag
 {
+    NSLog(@"Initialized with output: %i", outputFlag);
+    
     OSStatus status;
     
     // We define the audio component
@@ -209,7 +209,7 @@ static OSStatus playbackCallback(void *inRefCon,
      We want 16 bits, 2 bytes per packet/frames at 44.1khz Mono in, Stero Out
      */
     UInt32 bytesPerSample = sizeof(SInt16);
-    NSLog(@"Size of Int16: %i", (unsigned int) bytesPerSample);
+//    NSLog(@"Size of Int16: %i", (unsigned int) bytesPerSample);
     
     AudioStreamBasicDescription audioFormat;
     audioFormat.mSampleRate			= SAMPLE_RATE;
@@ -325,25 +325,28 @@ static OSStatus playbackCallback(void *inRefCon,
     }
     NSLog(@"sampleRate: %f", [AVAudioSession sharedInstance].sampleRate );
     
-    
-    UInt32 preferedSampleSize = 1024;
-    
-    [[AVAudioSession sharedInstance] setPreferredIOBufferDuration:preferedSampleSize/SAMPLE_RATE error:&audioSessionError];
-    if (audioSessionError) {
-        NSLog(@"Error setting preferredIOBufferDuration for audio session: %@", audioSessionError.description);
+    if (!self.audioBuffersInitialized) {
+        
+        UInt32 preferedSampleSize = 1024;
+        
+        [[AVAudioSession sharedInstance] setPreferredIOBufferDuration:preferedSampleSize/SAMPLE_RATE error:&audioSessionError];
+        if (audioSessionError) {
+            NSLog(@"Error setting preferredIOBufferDuration for audio session: %@", audioSessionError.description);
+        }
+        NSLog(@"bufferDuration! Will be wrong having just changed value: %f", [AVAudioSession sharedInstance].IOBufferDuration );
+        
+        UInt32 bufferLengthInFrames = preferedSampleSize; //round([AVAudioSession sharedInstance].sampleRate * [AVAudioSession sharedInstance].IOBufferDuration) IOBufferDuration is not updated instantly and will be wrong changing setting;
+        
+        NSLog(@"framesize:%u", (unsigned int)bufferLengthInFrames);
+        
+        
+        [self prepareIntputBufferWithBufferSize:bufferLengthInFrames];
+        [self prepareOutputBuffersWithBufferSize:bufferLengthInFrames andMaxBufferSize:bufferFrameSizeMax];
+        [self configureFloatConverterWithFrameSize:bufferLengthInFrames andStreamFormat:audioFormat];
+        
+        VECircularBufferInit(&cirbuffer, bufferLengthInFrames*40);
+        self.audioBuffersInitialized = YES;
     }
-    NSLog(@"bufferDuration! Will be wrong having just changed value: %f", [AVAudioSession sharedInstance].IOBufferDuration );
-    
-    UInt32 bufferLengthInFrames = preferedSampleSize; //round([AVAudioSession sharedInstance].sampleRate * [AVAudioSession sharedInstance].IOBufferDuration) IOBufferDuration is not updated instantly and will be wrong changing setting;
-    
-    NSLog(@"framesize:%u", (unsigned int)bufferLengthInFrames);
-    
-    
-    [self prepareIntputBufferWithBufferSize:bufferLengthInFrames];
-    [self prepareOutputBuffersWithBufferSize:bufferLengthInFrames andMaxBufferSize:bufferFrameSizeMax];
-    [self configureFloatConverterWithFrameSize:bufferLengthInFrames andStreamFormat:audioFormat];
-    
-    VECircularBufferInit(&cirbuffer, bufferLengthInFrames*40);
     
     // Initialize the Audio Unit and cross fingers =)
     status = AudioUnitInitialize(audioUnit);

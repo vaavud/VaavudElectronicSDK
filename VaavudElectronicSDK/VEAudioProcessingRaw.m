@@ -32,7 +32,7 @@
     float currentVolume, originalVolume;
 }
 
-@property (strong, nonatomic) id<SoundProcessingDelegate, DirectionDetectionDelegate>delegate;
+@property (strong, nonatomic) id<VEAudioProcessingDelegate> delegate;
 
 @end
 
@@ -47,7 +47,7 @@
     return nil;
 }
 
-- (id)initWithDelegate:(id<SoundProcessingDelegate, DirectionDetectionDelegate>)delegate {
+- (id)initWithDelegate:(id<VEAudioProcessingDelegate, DirectionDetectionDelegate>)delegate {
     self = [super init];
     
     counter = 0;
@@ -74,9 +74,7 @@
     mvgDropHalf = 0;
     mvgDropHalfRefresh = YES;
     
-    self.dirDetectionAlgo = [[VEAudioProcessingTick alloc] initWithDelegate:delegate];
     self.delegate = delegate;
-    
     return self;
 }
 
@@ -193,7 +191,7 @@
             mvgState = 0;
             diffState = 0;
             
-            longTick = [self.dirDetectionAlgo newTick:(int)(counter - lastTick)];
+            longTick = [self.processorTick newTick:(int)(counter - lastTick)];
             lastTick = counter;
         }
         

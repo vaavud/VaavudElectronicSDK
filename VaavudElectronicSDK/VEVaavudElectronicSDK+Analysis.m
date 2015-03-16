@@ -10,13 +10,10 @@
 
 @implementation VEVaavudElectronicSDK (Analysis)
 
-- (id<VaavudElectronicMicrophoneOutputDelegate>)microphoneOutputDeletage {
-    return self.microphoneOutputDeletage;
+- (void)setMicrophoneFloatRawListener:(id <VaavudElectronicMicrophoneOutputDelegate>)microphoneOutputDeletage{
+    self.audioIO.microphoneOutputDeletage = microphoneOutputDeletage;
 }
 
-- (void)setMicrophoneOutputDeletage:(id<VaavudElectronicMicrophoneOutputDelegate>)microphoneOutputDeletage {
-    self.microphoneOutputDeletage = microphoneOutputDeletage;
-}
 
 /* add listener of heading and windspeed information */
 - (void) addAnalysisListener:(id <VaavudElectronicAnalysisDelegate>) delegate {
@@ -42,19 +39,6 @@
         NSLog(@"[SDK] trying to remove delegate, which does not excists");
     }
 }
-
-- (void)setMicrophoneFloatRawListener:(id <VaavudElectronicMicrophoneOutputDelegate>)microphoneOutputDeletage{
-    self.audioIO.microphoneOutputDeletage = microphoneOutputDeletage;
-}
-
-
-//- (void) setAudioPlot:(EZAudioPlotGL *) audioPlot {
-//    
-//    if (self.audioManager) {
-////        self.audioManager.audioPlot = audioPlot;
-////        self.audioManager.audioProcessor.audioPlot = audioPlot;
-//    }
-//}
 
 
 // Starts the internal soundfile recorder

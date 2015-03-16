@@ -16,7 +16,11 @@
 /**
  @param available is true if the Sliepnir wind meter is available to start measureing.
  */
-- (void) sleipnirAvailabliltyDidChange: (BOOL) available;
+- (void)sleipnirAvailabliltyDidChange: (BOOL) available;
+- (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
+- (void)processFloatBuffer:(float *)buffer withBufferLengthInFrames:(UInt32)bufferLengthInFrames;
+
+
 @end
 
 @protocol AudioManagerDelegate <NSObject>
@@ -28,19 +32,19 @@
 @end
 
 
-@protocol AudioProcessorProtocol <NSObject>
-
-- (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
-- (void)processBufferList:(AudioBufferList *)bufferList withBufferLengthInFrames:(UInt32)bufferLengthInFrames;
-- (void)processFloatBuffer:(float *)buffer withBufferLengthInFrames:(UInt32)bufferLengthInFrames;
-
-@end
+//@protocol AudioProcessorProtocol <NSObject>
+//
+//- (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
+//- (void)processBufferList:(AudioBufferList *)bufferList withBufferLengthInFrames:(UInt32)bufferLengthInFrames;
+//- (void)processFloatBuffer:(float *)buffer withBufferLengthInFrames:(UInt32)bufferLengthInFrames;
+//
+//@end
 
 @interface VEAudioIO : NSObject
 
 @property (atomic) BOOL sleipnirAvailable;
-@property (nonatomic, strong) id<AudioProcessorProtocol> delegate;
-@property (weak, nonatomic) id <VaavudElectronicMicrophoneOutputDelegate> microphoneOutputDeletage;
+@property (weak, nonatomic) id<VEAudioIODelegate> delegate;
+@property (weak, nonatomic) id<VaavudElectronicMicrophoneOutputDelegate> microphoneOutputDeletage;
 
 
 // Starts Playback and Recording when Vaavud becomes available
