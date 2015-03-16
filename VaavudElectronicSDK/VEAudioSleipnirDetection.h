@@ -46,7 +46,7 @@
 
 // Initializer
 - (id) initWithDelegate:(id<VEAudioSleipnirDetectionDelegate>)delegate;
-// protocol
+
 - (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
 
 @property (nonatomic, readonly) BOOL sleipnirAvailable;

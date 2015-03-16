@@ -26,7 +26,6 @@
 @property (nonatomic) BOOL audioRouteChange;
 
 /** The microphone component */
-//@property (nonatomic,strong) EZMicrophone *microphone;
 @property (nonatomic,strong) VEAudioIO *audioProcessor;
 
 /** The recorder component */
@@ -37,8 +36,6 @@
 @property (nonatomic) NSUInteger sampleCounter;
 @property (nonatomic) BOOL samplingMicrophoneActice;
 @property (nonatomic) double timer;
-
-
 
 @end
 
@@ -119,26 +116,6 @@
     }
     
 }
-
-
-///*
-// Setup microphone details
-// */
-//
-//- (void) setupMicrophone {
-//    // SETUP microphone buffer settings and start microphone
-//    
-//    float bufferDuration = (float) BufferLength / sampleFrequency;
-//    
-//    NSError* err;
-//    [[AVAudioSession sharedInstance] setPreferredIOBufferDuration:bufferDuration error:&err];
-//    
-//    if (err) {
-//        [NSException raise:@"VAEAudioException" format: @"Could not set prefered IOBuffer durration on AVAudioSession. %@", err.description];
-//    }
-////    [EZAudio printASBD: [self.microphone audioStreamBasicDescription]];
-//    
-//}
 
 
 /*

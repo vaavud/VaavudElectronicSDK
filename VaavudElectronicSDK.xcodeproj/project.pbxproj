@@ -153,7 +153,7 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		D72343271A9F8888007A937B /* Algorithm */ = {
+		D72343271A9F8888007A937B /* AudioProcessing */ = {
 			isa = PBXGroup;
 			children = (
 				D7D999AA19B3AF450099FB8F /* VEAudioSleipnirDetection.h */,
@@ -168,7 +168,7 @@
 				D7D9999D19B3AF290099FB8F /* VEAudioProcessingSpeedDirection.m */,
 				D72343281A9F88B0007A937B /* External */,
 			);
-			name = Algorithm;
+			name = AudioProcessing;
 			sourceTree = "<group>";
 		};
 		D72343281A9F88B0007A937B /* External */ = {
@@ -220,7 +220,7 @@
 		D7D9996E19B3AD3B0099FB8F /* VaavudElectronicSDK */ = {
 			isa = PBXGroup;
 			children = (
-				D72343271A9F8888007A937B /* Algorithm */,
+				D72343271A9F8888007A937B /* AudioProcessing */,
 				D7D999A619B3AF450099FB8F /* VESummeryGenerator.h */,
 				D7D999A719B3AF450099FB8F /* VESummeryGenerator.m */,
 				D7D999A819B3AF450099FB8F /* VELocationManager.h */,

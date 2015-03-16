@@ -28,7 +28,6 @@
     int outputBufferShiftIndex;
     int outputBufferShift;
     int baseSignalLength;
-//    struct dispatch_queue_s *dispatchQueue;
 
     VEFloatConverter *converter;
     float           **floatBuffers;
@@ -50,23 +49,17 @@ static OSStatus recordingCallback(void *inRefCon,
                                   UInt32 inBusNumber,
                                   UInt32 inNumberFrames,
                                   AudioBufferList *ioData) {
-    
-    
-    
     // a variable where we check the status
     OSStatus status;
     
-    /**
-     This is the reference to the object who owns the callback.
-     */
+    // This is the reference to the object who owns the callback
     VEAudioIO *audioProcessor = (__bridge VEAudioIO*) inRefCon;
     
     AudioBufferList bufferList = audioProcessor->inputBufferList;
     
     // render input and check for error
-//    NSLog(@"inNumberOfFrames: %i", (unsigned int)inNumberFrames);
     status = AudioUnitRender(audioProcessor->audioUnit, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, &bufferList);
-    [audioProcessor hasError:status andFile:__FILE__ andLine:__LINE__];
+    [audioProcessor hasError:status andFile:__FILE__ andLine:__LINE__]; // concider ignoring errors, Errors might happen when changing volume
     
     
     if ([audioProcessor.delegate respondsToSelector:@selector(processBuffer:withDefaultBufferLengthInFrames:)]) {
@@ -88,8 +81,6 @@ static OSStatus recordingCallback(void *inRefCon,
         [audioProcessor.delegate processFloatBuffer:audioProcessor->floatBuffers[0] withBufferLengthInFrames:256];
     }
     
-    
-    
     return noErr;
 }
 
@@ -102,13 +93,9 @@ static OSStatus playbackCallback(void *inRefCon,
                                  UInt32 inNumberFrames,
                                  AudioBufferList *ioData) {
     
-    /**
-     This is the reference to the object who owns the callback.
-     */
-    //    AudioProcessor *audioProcessor = (AudioProcessor*) inRefCon;
+    // This is the reference to the object who owns the callback.
     VEAudioIO *audioProcessor = (__bridge VEAudioIO*)inRefCon;
     
-    // This is a mono tone generator so we only need the first buffer
     const int channelLeft = 0;
     const int channelRight = 1;
     

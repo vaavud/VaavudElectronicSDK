@@ -10,15 +10,12 @@
 
 
 @protocol DirectionDetectionDelegate
-
 - (void) newSpeed: (NSNumber*) speed;
 - (void) newAngularVelocities: (NSArray*) angularVelocities;
 - (void) newWindAngleLocal:(NSNumber*) angle;
 - (void) calibrationPercentageComplete: (NSNumber*) percentage;
 - (void) newTickDetectionErrorCount: (NSNumber *) tickDetectionErrorCount;
 - (void) newVelocityProfileError: (NSNumber *) profileError;
-
-
 @end
 
 
@@ -26,6 +23,7 @@
 
 - (BOOL) newTick:(int)tickLength; // return true if next tick is long
 - (id) initWithDelegate:(id<DirectionDetectionDelegate>)delegate;
+
 + (float *) getFitCurve;
 - (int *) getEdgeAngles;
 
