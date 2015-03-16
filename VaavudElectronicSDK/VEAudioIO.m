@@ -120,7 +120,8 @@ static OSStatus recordingCallback(void *inRefCon,
                                 audioProcessor->floatBuffers,
                                 inNumberFrames);
         // inNumberFrames changed to 256
-        [audioProcessor.delegate processFloatBuffer:audioProcessor->floatBuffers[0] withBufferLengthInFrames:256];
+//        [audioProcessor.microphoneOutputDeletage processFloatBuffer:audioProcessor->floatBuffers[0] withBufferLengthInFrames:256];
+        [audioProcessor.microphoneOutputDeletage updateBuffer:audioProcessor->floatBuffers[0] withBufferSize:256];
     }
     return noErr;
 }

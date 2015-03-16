@@ -67,8 +67,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 }
 
 - (BOOL)sleipnirAvailable {
-//    return self.audioIO.sleipnirAvailable;
-    return true;
+    return self.audioIO.sleipnirAvailable;
 }
 
 /* add listener of heading and windspeed information */

@@ -18,8 +18,6 @@
  */
 - (void)sleipnirAvailabliltyDidChange: (BOOL) available;
 - (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
-- (void)processFloatBuffer:(float *)buffer withBufferLengthInFrames:(UInt32)bufferLengthInFrames;
-
 
 @end
 
