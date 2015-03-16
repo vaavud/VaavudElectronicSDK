@@ -14,7 +14,6 @@
 - (void)newTickDetectionErrorCount: (NSNumber *) tickDetectionErrorCount;
 - (void)newVelocityProfileError: (NSNumber *) profileError;
 - (void)newMaxAmplitude: (NSNumber*) amplitude;
-- (void)newRecordingReadyToUpload;
 @end
 
 @protocol VaavudElectronicMicrophoneOutputDelegate <NSObject>

@@ -43,24 +43,6 @@
 - (void)sleipnirAvailabliltyChanged:(BOOL)available;
 
 /**
- Called when a device (jack-plug) is inserted into the jack-plug
- @param available is true if the Sliepnir wind meter is available to start measureing.
- */
-- (void)deviceConnectedTypeSleipnir:(BOOL)sleipnir;
-
-/**
- Called when a device is removed from the jack-plug
- @param sleipnir is true if it were a Sliepnir wind meter that were disconnected.
- */
-- (void)deviceDisconnectedTypeSleipnir:(BOOL)sleipnir;
-
-/**
- Called when a audio route changes and a new device is pluged in,
- starts checkking if it's a sleipnir.
- */
-- (void)deviceConnectedChecking;
-
-/**
  If SDK is asked start before device is avilable it will automatically start.
  is called when the algorithm start measureing and will deliver callbacks.
  */

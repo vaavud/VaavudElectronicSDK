@@ -44,7 +44,7 @@
 }
 
 - (void)setMicrophoneFloatRawListener:(id <VaavudElectronicMicrophoneOutputDelegate>)microphoneOutputDeletage{
-    self.audioManager.microphoneOutputDeletage = microphoneOutputDeletage;
+    self.audioIO.microphoneOutputDeletage = microphoneOutputDeletage;
 }
 
 
@@ -59,24 +59,24 @@
 
 // Starts the internal soundfile recorder
 - (void) startRecording {
-    [self.audioManager startRecording];
+    [self.audioIO startRecording];
     [self.summeryGenerator startRecording];
 }
 
 // Ends the internal soundfile recorder
 - (void) endRecording {
-    [self.audioManager endRecording];
+    [self.audioIO endRecording];
     [self.summeryGenerator endRecording];
 }
 
 // returns true if recording is active
 - (BOOL) isRecording {
-    return [self.audioManager isRecording];
+    return [self.audioIO isRecording];
 }
 
 // returns the local path of the recording
 - (NSURL*) recordingPath {
-    return [self.audioManager recordingPath];
+    return [self.audioIO recordingPath];
 }
 
 // returns the local path of the summeryfile
@@ -90,12 +90,12 @@
 
 // returns the fitcurve used in the directionAlgorithm
 - (float *) getFitCurve {
-    return [VEAudioProcessingSpeedDirection getFitCurve];
+    return [VEAudioProcessingTick getFitCurve];
 }
 
 // returns the EdgeAngles for the samples
 - (int *) getEdgeAngles {
-    return [self.audioManager.soundProcessor.dirDetectionAlgo getEdgeAngles];
+    return [self.tickProcessor getEdgeAngles];
 }
 
 - (void) generateSummaryFile {
@@ -107,11 +107,11 @@
 }
 
 - (NSString*) soundOutputDescription {
-    return [self.audioManager soundOutputDescription];
+    return [self.audioIO soundOutputDescription];
 }
 
 - (NSString*) soundInputDescription {
-    return [self.audioManager soundInputDescription];
+    return [self.audioIO soundInputDescription];
 }
 
 @end

@@ -12,6 +12,9 @@
 
 #import "VEAudioIO.h"
 #import "VEFloatConverter.h"
+#import "VERecorder.h"
+
+#define kAudioFilePath @"tempRawAudioFile.wav"
 
 #define kOutputBus 0
 #define kInputBus 1
@@ -36,11 +39,48 @@
     AudioComponentInstance audioUnit;
 }
 
-@property BOOL outputActive;
+@property BOOL audioUnitInitialized;
+
+// from audioManager
+@property (nonatomic,strong) VERecorder *recorder; /** The recorder component */
+@property (atomic) BOOL askedToMeasure;
+@property (atomic) BOOL recordingActive;
+@property (atomic) BOOL algorithmActive;
+@property (nonatomic) dispatch_queue_t dispatchQueue;
+
+// from detection
+@property (atomic) BOOL deviceConnected;
 
 @end
 
 @implementation VEAudioIO
+
+-(VEAudioIO*)init // dont do anything on init
+{
+    self = [super init];
+    if (self) {
+
+        //from audio Manger
+        self.dispatchQueue = (dispatch_queue_create("com.vaavud.processTickQueue", DISPATCH_QUEUE_SERIAL));
+        dispatch_set_target_queue(self.dispatchQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
+        
+        self.audioUnitInitialized = NO;
+        self.askedToMeasure = NO;
+        self.algorithmActive = NO;
+        self.recordingActive = NO;
+        self.sleipnirAvailable = NO;
+        
+        // from detection
+        // register for notification for chances in audio routing (inserting/removing jack plut)
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioRouteChangeListenerCallback:)
+                                                     name:AVAudioSessionRouteChangeNotification
+                                                   object:nil];
+        
+        
+        self.sleipnirAvailable = [self checkDeviceAvailability];
+    }
+    return self;
+}
 
 #pragma mark Recording callback
 static OSStatus recordingCallback(void *inRefCon,
@@ -62,17 +102,19 @@ static OSStatus recordingCallback(void *inRefCon,
     [audioProcessor hasError:status andFile:__FILE__ andLine:__LINE__]; // concider ignoring errors, Errors might happen when changing volume
     
     
-    if ([audioProcessor.delegate respondsToSelector:@selector(processBuffer:withDefaultBufferLengthInFrames:)]) {
-        // copy incoming audio data to the audio buffer
-        VECircularBufferProduceBytes(&audioProcessor->cirbuffer, bufferList.mBuffers[0].mData, bufferList.mBuffers[0].mDataByteSize);
+    // copy incoming audio data to the audio buffer
+    VECircularBufferProduceBytes(&audioProcessor->cirbuffer, bufferList.mBuffers[0].mData, bufferList.mBuffers[0].mDataByteSize);
+    dispatch_async(audioProcessor.dispatchQueue, ^(void){
         [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
+    });
+
+    
+    if (audioProcessor.recordingActive) {
+        [audioProcessor.recorder appendDataFromBufferList:&bufferList withBufferSize:inNumberFrames];
     }
     
-    if ([audioProcessor.delegate respondsToSelector:@selector(processBufferList:withBufferLengthInFrames:)]) {
-        [audioProcessor.delegate processBufferList:&bufferList withBufferLengthInFrames:inNumberFrames];
-    }
     
-    if ([audioProcessor.delegate respondsToSelector:@selector(processFloatBuffer:withBufferLengthInFrames:)]) {
+    if (audioProcessor.microphoneOutputDeletage) {
         VEFloatConverterToFloat(audioProcessor->converter,
                                 &audioProcessor->inputBufferList,
                                 audioProcessor->floatBuffers,
@@ -80,6 +122,7 @@ static OSStatus recordingCallback(void *inRefCon,
         // inNumberFrames changed to 256
         [audioProcessor.delegate processFloatBuffer:audioProcessor->floatBuffers[0] withBufferLengthInFrames:256];
     }
+
     
     return noErr;
 }
@@ -116,15 +159,6 @@ static OSStatus playbackCallback(void *inRefCon,
     return noErr;
 }
 
--(VEAudioIO*)init
-{
-    self = [super init];
-    if (self) {
-        self.outputActive = YES;
-        [self initializeAudioWithOutput:self.outputActive];
-    }
-    return self;
-}
 
 -(void)initializeAudioWithOutput:(BOOL)outputFlag
 {
@@ -315,7 +349,7 @@ static OSStatus playbackCallback(void *inRefCon,
     status = AudioUnitInitialize(audioUnit);
     [self hasError:status andFile:__FILE__ andLine:__LINE__];
     
-    NSLog(@"Started");
+    NSLog(@"initialized");
     
 }
 
@@ -373,36 +407,47 @@ static OSStatus playbackCallback(void *inRefCon,
 
 - (void)start {
     
-    if(!self.outputActive) {
-        // always stop before starting to allow for recofigureing
-        [self stop];
-        self.outputActive = YES;
-        [self initializeAudioWithOutput:self.outputActive];
-    }
+    self.askedToMeasure = YES;
     
-    // start the audio unit. You should hear something, hopefully :)
-    OSStatus status = AudioOutputUnitStart(audioUnit);
-    [self hasError:status andFile:__FILE__ andLine:__LINE__];
+    if (!self.algorithmActive && self.sleipnirAvailable) {
+        
+        [self initializeAudioWithOutput:YES];
+        
+        // Check the microphone input format
+        if (LOG_AUDIO){
+            NSLog(@"[VESDK] input");
+            [VEAudioIO printASBD: [self inputAudioStreamBasicDescription]];
+        }
+        
+        // Check the microphone input format
+        if (LOG_AUDIO){
+            NSLog(@"[VESDK] output");
+            [VEAudioIO printASBD: [self outputAudioStreamBasicDescription]];
+        }
+        
+        // start the audio unit. You should hear something, hopefully :)
+        OSStatus status = AudioOutputUnitStart(audioUnit);
+        [self hasError:status andFile:__FILE__ andLine:__LINE__];
+        
+        self.algorithmActive = YES;
+    }
 }
 
-- (void)startMicrophoneOnly {
-    
-    if(self.outputActive) {
-        [self stop];
-        self.outputActive = NO;
-        [self initializeAudioWithOutput:self.outputActive];
-    }
-    // start the audio unit. You should hear something, hopefully :)
-    OSStatus status = AudioOutputUnitStart(audioUnit);
-    [self hasError:status andFile:__FILE__ andLine:__LINE__];
-    
-}
 
 - (void)stop {
-    // stop the audio unit
-    OSStatus status = AudioOutputUnitStop(audioUnit);
-    [self hasError:status andFile:__FILE__ andLine:__LINE__];
+    
+    self.askedToMeasure = NO;
+    
+    if (self.algorithmActive) {
+        self.algorithmActive = NO;
+        
+        // stop the audio unit
+        OSStatus status = AudioOutputUnitStop(audioUnit);
+        [self hasError:status andFile:__FILE__ andLine:__LINE__];
+    }
+    
 }
+
 
 - (AudioStreamBasicDescription)inputAudioStreamBasicDescription{
     AudioStreamBasicDescription streamDescription = {0};
@@ -487,6 +532,153 @@ static OSStatus playbackCallback(void *inRefCon,
     free(inputBufferList.mBuffers[0].mData);
 }
 
+
+
+// Starts the internal soundfile recorder
+- (void)startRecording {
+    // Create the recorder
+    self.recorder = [VERecorder recorderWithDestinationURL:[self recordingFilePathURL]
+                                              sourceFormat:[self inputAudioStreamBasicDescription]
+                                       destinationFileType:VERecorderFileTypeWAV];
+    self.recordingActive = YES;
+}
+
+// Ends the internal soundfile recorder
+- (void)endRecording {
+    self.recordingActive = NO;
+    [self.recorder closeAudioFile];
+    self.recorder = nil;
+}
+
+// returns true if recording is active
+- (BOOL)isRecording {
+    return self.recordingActive;
+}
+
+// returns the local path of the recording
+- (NSURL *)recordingPath {
+    return [self recordingFilePathURL];
+}
+
+- (NSString *)soundOutputDescription {
+    return [VEAudioIO ASBDtoString:[self outputAudioStreamBasicDescription]];
+}
+
+- (NSString *)soundInputDescription {
+    return [VEAudioIO ASBDtoString:[self inputAudioStreamBasicDescription]];
+}
+
+/**
+ EZaudio File Utility functions
+ */
+
+- (NSString *)applicationDocumentsDirectory {
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
+    return basePath;
+}
+
+-(NSURL *)recordingFilePathURL {
+    return [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%@",
+                                   [self applicationDocumentsDirectory],
+                                   kAudioFilePath]];
+}
+
+
+
+
+- (BOOL) checkDeviceAvailability{
+    
+    [self initializeAudioWithOutput:YES];
+    // start the audio unit. You should hear something, hopefully :)
+    OSStatus status = AudioOutputUnitStart(audioUnit);
+    [self hasError:status andFile:__FILE__ andLine:__LINE__];
+    
+    BOOL available = ([self isHeadphoneOutAvailable] && [self isHeadphoneMicAvailable]) ? YES : NO;
+    
+    // stop the audio unit
+    status = AudioOutputUnitStop(audioUnit);
+    [self hasError:status andFile:__FILE__ andLine:__LINE__];
+    
+    return available;
+}
+
+
+
+- (void)audioRouteChangeListenerCallback:(NSNotification*)notification
+{
+    NSDictionary *interuptionDict = notification.userInfo;
+    
+    NSInteger routeChangeReason = [[interuptionDict valueForKey:AVAudioSessionRouteChangeReasonKey] integerValue];
+    
+    
+    switch (routeChangeReason) {
+            
+        case AVAudioSessionRouteChangeReasonOldDeviceUnavailable: {
+            
+            NSLog(@"[VESDK] AVAudioSessionRouteChangeReasonOldDeviceUnavailable");
+            
+            [self isHeadphoneMicAvailable];
+            [self isHeadphoneOutAvailable];
+            
+            if (self.sleipnirAvailable) {
+                self.sleipnirAvailable = NO;
+                
+                dispatch_async(dispatch_get_main_queue(),^{
+                    self.sleipnirAvailable = YES;
+                });
+            }
+            break;
+        }
+        case AVAudioSessionRouteChangeReasonNewDeviceAvailable: {
+            NSLog(@"[VESDK] AVAudioSessionRouteChangeReasonNewDeviceAvailable");
+            
+            if (!self.sleipnirAvailable) {
+                dispatch_async(dispatch_get_main_queue(),^{
+                    if ([self checkDeviceAvailability]) {
+                        self.sleipnirAvailable = YES;
+                    }
+                });
+            }
+            break;
+        }
+        default: {
+            //NSLog(@"default audio stuff");
+        }
+    }
+}
+
+- (BOOL) isHeadphoneOutAvailable {
+    //   Microphone should be on before running script
+    AVAudioSessionRouteDescription *audioRoute = [[AVAudioSession sharedInstance] currentRoute];
+    for (AVAudioSessionPortDescription* desc in [audioRoute outputs]) {
+        if ([[desc portType] isEqualToString:AVAudioSessionPortHeadphones]) {
+            return YES;
+        }
+    }
+    NSLog(@"[VESDK] headphoneOut not Available");
+    return NO;
+    
+}
+
+
+- (BOOL) isHeadphoneMicAvailable {
+    
+    // For some reason Microphone needs to be active to determine audio route properly.
+    // It works fine the first time the app is started without....
+    
+    //   Microphone should be on before running script
+    AVAudioSessionRouteDescription *audioRoute = [[AVAudioSession sharedInstance] currentRoute];
+    for (AVAudioSessionPortDescription* desc in [audioRoute inputs]) {
+        if ([[desc portType] isEqualToString:AVAudioSessionPortHeadsetMic]) {
+            return YES;
+        }
+        
+    }
+    //[self.microphone stopFetchingAudio];
+    NSLog(@"[VESDK] microphone not availiable");
+    return NO;
+}
 
 @end
 

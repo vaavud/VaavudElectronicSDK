@@ -6,20 +6,21 @@
 //  Copyright (c) 2014 Vaavud. All rights reserved.
 //
 
-#import "VEAudioManager.h"
-#import "VEAudioProcessingSpeedDirection.h"
+#import "VEAudioIO.h"
+#import "VEAudioProcessingRaw.h"
+#import "VEAudioProcessingTick.h"
 #import "VESummeryGenerator.h"
 #import "VELocationManager.h"
-#import "VEAudioSleipnirDetection.h"
 
-@interface VEVaavudElectronicSDK() <SoundProcessingDelegate, DirectionDetectionDelegate, AudioManagerDelegate, locationManagerDelegate, VEAudioSleipnirDetectionDelegate>
+@interface VEVaavudElectronicSDK() <SoundProcessingDelegate, DirectionDetectionDelegate, AudioManagerDelegate, locationManagerDelegate, VEAudioIODelegate>
 
 @property (strong, atomic) NSMutableArray *VaaElecWindDelegates;
 @property (strong, atomic) NSMutableArray *VaaElecAnalysisDelegates;
-@property (strong, nonatomic) VEAudioManager *audioManager;
+@property (strong, nonatomic) VEAudioIO *audioIO;
+@property (strong, nonatomic) VEAudioProcessingRaw *rawProcessor;
+@property (strong, nonatomic) VEAudioProcessingTick *tickProcessor;
 @property (strong, nonatomic) VESummeryGenerator *summeryGenerator;
 @property (strong, nonatomic) VELocationManager *locationManager;
-@property (strong, nonatomic) VEAudioSleipnirDetection *AVElectronicDetection;
 @property (strong, atomic) NSNumber *currentHeading;
 
 @end
@@ -46,10 +47,12 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 - (void)initSingleton {
     self.VaaElecWindDelegates = [[NSMutableArray alloc] initWithCapacity:3];
     self.VaaElecAnalysisDelegates = [[NSMutableArray alloc] initWithCapacity:3];
-    self.audioManager = [[VEAudioManager alloc] initWithDelegate:self];
     self.summeryGenerator = [[VESummeryGenerator alloc] init];
     self.locationManager = [[VELocationManager alloc] initWithDelegate:self];
-    self.AVElectronicDetection = [[VEAudioSleipnirDetection alloc] initWithDelegate:self];
+    
+    self.rawProcessor = [[VEAudioProcessingRaw alloc] initWithDelegate:self]; // self?
+
+    self.audioIO = [[VEAudioIO alloc] init];
 }
 
 + (id)allocWithZone:(NSZone *)zone {
@@ -59,7 +62,8 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 }
 
 - (BOOL)sleipnirAvailable {
-    return self.AVElectronicDetection.sleipnirAvailable;
+//    return self.audioIO.sleipnirAvailable;
+    return true;
 }
 
 /* add listener of heading and windspeed information */
@@ -164,36 +168,10 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     }
 }
 
-- (void)sleipnirAvailabliltyChanged:(BOOL)available {
-    [self.audioManager sleipnirAvailabliltyChanged:available];
-    
+- (void)sleipnirAvailabliltyDidChange:(BOOL)available {
     for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(sleipnirAvailabliltyChanged:)]) {
             [delegate sleipnirAvailabliltyChanged:available];
-        }
-    }
-}
-
-- (void)deviceConnectedTypeSleipnir:(BOOL)sleipnir {
-    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(deviceConnectedTypeSleipnir:)]) {
-            [delegate deviceConnectedTypeSleipnir:sleipnir];
-        }
-    }
-}
-
-- (void)deviceDisconnectedTypeSleipnir:(BOOL)sleipnir {
-    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(deviceDisconnectedTypeSleipnir:)]) {
-            [delegate deviceDisconnectedTypeSleipnir:sleipnir];
-        }
-    }
-}
-
-- (void)deviceConnectedChecking {
-    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(deviceConnectedChecking)]) {
-            [delegate deviceConnectedChecking];
         }
     }
 }
@@ -215,15 +193,6 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     }
 }
 
-
-- (void)newRecordingReadyToUpload {
-    for (id<VaavudElectronicAnalysisDelegate>delegate in self.VaaElecAnalysisDelegates) {
-        if ([delegate respondsToSelector:@selector(newRecordingReadyToUpload)]){
-            [delegate newRecordingReadyToUpload];
-        }
-    }
-}
-
 - (void)calibrationPercentageComplete:(NSNumber *)percentage {
     for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(calibrationPercentageComplete:)]) {
@@ -234,7 +203,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 
 /* start the audio input/output and starts sending data */
 - (void)start {
-    [self.audioManager start];
+//    [self.audioIO start];
     
     if ([self.locationManager isHeadingAvailable]) {
         [self.locationManager start];
@@ -245,7 +214,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 
 /* start the audio input/output and starts sending data */
 - (void)stop {
-    [self.audioManager stop];
+    [self.audioIO stop];
     [self.locationManager stop];
 }
 
@@ -255,16 +224,16 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 
 // start calibration mode
 - (void)startCalibration {
-    [self.audioManager.soundProcessor.dirDetectionAlgo startCalibration];
+    [self.tickProcessor startCalibration];
 }
 
 // end calibbration mode
 -(void)endCalibration {
-    [self.audioManager.soundProcessor.dirDetectionAlgo endCalibration];
+    [self.tickProcessor endCalibration];
 }
 
 - (void)resetCalibration {
-    [self.audioManager.soundProcessor.dirDetectionAlgo resetCalibration];
+    [self.tickProcessor resetCalibration];
 }
 
 

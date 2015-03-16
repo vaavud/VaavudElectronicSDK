@@ -1,30 +1,39 @@
 //
-//  soundProcessing.h
+//  DirectionDetectionAlgo.h
 //  VaavudElectronicsTest
 //
-//  Created by Andreas Okholm on 09/06/14.
+//  Created by Andreas Okholm on 11/06/14.
 //  Copyright (c) 2014 Vaavud. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
-#import <MediaPlayer/MediaPlayer.h>
-#import "VEAudioProcessingSpeedDirection.h"
-#import "VEAudioIO.h"
 
-@protocol SoundProcessingDelegate <NSObject>
 
-- (void) newMaxAmplitude: (NSNumber*) amplitude;
-
+@protocol DirectionDetectionDelegate
+- (void) newSpeed: (NSNumber*) speed;
+- (void) newAngularVelocities: (NSArray*) angularVelocities;
+- (void) newWindAngleLocal:(NSNumber*) angle;
+- (void) calibrationPercentageComplete: (NSNumber*) percentage;
+- (void) newTickDetectionErrorCount: (NSNumber *) tickDetectionErrorCount;
+- (void) newVelocityProfileError: (NSNumber *) profileError;
 @end
 
 
-@interface VEAudioProcessingTick : NSObject <AudioProcessorProtocol>
+@interface VEAudioProcessingTick : NSObject
 
-- (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
-- (void)newSoundData:(int *)data bufferLength:(UInt32) bufferLength;
-- (id)initWithDelegate:(id<SoundProcessingDelegate, DirectionDetectionDelegate>)delegate;
-- (void)setVolumeAtSavedLevel;
-- (void)returnVolumeToInitialState;
+- (BOOL) newTick:(int)tickLength; // return true if next tick is long
+- (id) initWithDelegate:(id<DirectionDetectionDelegate>)delegate;
 
-@property (strong, nonatomic) VEAudioProcessingSpeedDirection *dirDetectionAlgo;
++ (float *) getFitCurve;
+- (int *) getEdgeAngles;
+
+// start calibration mode
+-(void) startCalibration;
+
+// end calibbration mode
+-(void) endCalibration;
+
+// reset calibration
+- (void)resetCalibration;
+
 @end
