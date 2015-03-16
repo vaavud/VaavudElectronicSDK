@@ -12,7 +12,7 @@
 
 @interface VEAudioManager()
 
-@property (nonatomic,strong) VEAudioProcessor *audioProcessor;
+@property (nonatomic,strong) VEAudioIO *audioProcessor;
 @property (nonatomic,strong) VERecorder *recorder; /** The recorder component */
 @property (atomic) BOOL askedToMeasure;
 @property (atomic) BOOL recordingActive;
@@ -41,19 +41,19 @@
     
     self.delegate = delegate;
     self.soundProcessor = [[VESoundProcessingAlgo alloc] initWithDelegate:delegate];
-    self.audioProcessor = [[VEAudioProcessor alloc] init];
+    self.audioProcessor = [[VEAudioIO alloc] init];
     self.audioProcessor.delegate = self;
     
     // Check the microphone input format
     if (LOG_AUDIO){
         NSLog(@"[VESDK] input");
-        [VEAudioProcessor printASBD: [self.audioProcessor inputAudioStreamBasicDescription]];
+        [VEAudioIO printASBD: [self.audioProcessor inputAudioStreamBasicDescription]];
     }
     
     // Check the microphone input format
     if (LOG_AUDIO){
         NSLog(@"[VESDK] output");
-        [VEAudioProcessor printASBD: [self.audioProcessor outputAudioStreamBasicDescription]];
+        [VEAudioIO printASBD: [self.audioProcessor outputAudioStreamBasicDescription]];
     }
     
     self.askedToMeasure = NO;
@@ -201,11 +201,11 @@
 }
 
 - (NSString *)soundOutputDescription {
-    return [VEAudioProcessor ASBDtoString:[self.audioProcessor outputAudioStreamBasicDescription]];
+    return [VEAudioIO ASBDtoString:[self.audioProcessor outputAudioStreamBasicDescription]];
 }
 
 - (NSString *)soundInputDescription {
-    return [VEAudioProcessor ASBDtoString:[self.audioProcessor inputAudioStreamBasicDescription]];
+    return [VEAudioIO ASBDtoString:[self.audioProcessor inputAudioStreamBasicDescription]];
 }
 
 /**

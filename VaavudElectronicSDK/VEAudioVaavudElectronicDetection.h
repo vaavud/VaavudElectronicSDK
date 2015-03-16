@@ -7,13 +7,11 @@
 //
 #import <AVFoundation/AVFoundation.h>
 #import <Foundation/Foundation.h>
-#import "VEAudioProcessor.h"
+#import "VEAudioIO.h"
 
 @protocol AudioVaavudElectronicDetectionDelegate <NSObject>
 
-
 /**
- 
  @param available is true if the Sliepnir wind meter is available to start measureing.
  */
 - (void) sleipnirAvailabliltyChanged: (BOOL) available;

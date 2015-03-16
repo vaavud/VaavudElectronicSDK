@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <MediaPlayer/MediaPlayer.h>
 #import "VEDirectionDetectionAlgo.h"
-#import "VEAudioProcessor.h"
+#import "VEAudioIO.h"
 
 @protocol SoundProcessingDelegate <NSObject>
 

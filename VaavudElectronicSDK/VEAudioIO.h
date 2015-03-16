@@ -22,7 +22,7 @@
 
 @end
 
-@interface VEAudioProcessor : NSObject
+@interface VEAudioIO : NSObject
 
 @property (nonatomic, strong) id<AudioProcessorProtocol> delegate;
 

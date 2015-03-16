@@ -27,7 +27,7 @@
 
 /** The microphone component */
 //@property (nonatomic,strong) EZMicrophone *microphone;
-@property (nonatomic,strong) VEAudioProcessor *audioProcessor;
+@property (nonatomic,strong) VEAudioIO *audioProcessor;
 
 /** The recorder component */
 @property (nonatomic,strong) VERecorder *recorder;
@@ -72,7 +72,7 @@
         self.recordingActive = NO;
         
         // Create an instance of the microphone and tell it to use this object as the delegate
-        self.audioProcessor = [[VEAudioProcessor alloc] init];
+        self.audioProcessor = [[VEAudioIO alloc] init];
         self.audioProcessor.delegate = self;
         
         

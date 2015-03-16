@@ -10,7 +10,7 @@
 //  and: https://github.com/syedhali/EZAudio
 
 
-#import "VEAudioProcessor.h"
+#import "VEAudioIO.h"
 #import "VEFloatConverter.h"
 
 #define kOutputBus 0
@@ -20,7 +20,7 @@
 #define SAMPLE_RATE 44100.00
 
 #pragma mark objective-c class
-@interface VEAudioProcessor () {
+@interface VEAudioIO () {
     VECircularBuffer cirbuffer;
     AudioBuffer outputBufferLeft;
     AudioBuffer outputBufferRight;
@@ -41,7 +41,7 @@
 
 @end
 
-@implementation VEAudioProcessor
+@implementation VEAudioIO
 
 #pragma mark Recording callback
 static OSStatus recordingCallback(void *inRefCon,
@@ -59,7 +59,7 @@ static OSStatus recordingCallback(void *inRefCon,
     /**
      This is the reference to the object who owns the callback.
      */
-    VEAudioProcessor *audioProcessor = (__bridge VEAudioProcessor*) inRefCon;
+    VEAudioIO *audioProcessor = (__bridge VEAudioIO*) inRefCon;
     
     AudioBufferList bufferList = audioProcessor->inputBufferList;
     
@@ -106,7 +106,7 @@ static OSStatus playbackCallback(void *inRefCon,
      This is the reference to the object who owns the callback.
      */
     //    AudioProcessor *audioProcessor = (AudioProcessor*) inRefCon;
-    VEAudioProcessor *audioProcessor = (__bridge VEAudioProcessor*)inRefCon;
+    VEAudioIO *audioProcessor = (__bridge VEAudioIO*)inRefCon;
     
     // This is a mono tone generator so we only need the first buffer
     const int channelLeft = 0;
@@ -129,7 +129,7 @@ static OSStatus playbackCallback(void *inRefCon,
     return noErr;
 }
 
--(VEAudioProcessor*)init
+-(VEAudioIO*)init
 {
     self = [super init];
     if (self) {

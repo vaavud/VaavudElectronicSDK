@@ -15,7 +15,7 @@
 
 #import "VESoundProcessingAlgo.h"
 #import "VEAudioVaavudElectronicDetection.h"
-#import "VEAudioProcessor.h"
+#import "VEAudioIO.h"
 #import "VERecorder.h"
 
 @protocol AudioManagerDelegate <NSObject>
@@ -65,10 +65,5 @@
 
 @property (strong, nonatomic) VESoundProcessingAlgo *soundProcessor;
 @property (weak, nonatomic) id <VaavudElectronicMicrophoneOutputDelegate> microphoneOutputDeletage;
-
-
-
-//@property (strong, nonatomic) VEAudioProcessor * audioProcessor;
-//@property (weak, nonatomic) EZAudioPlotGL *audioPlot;
 
 @end
