@@ -6,12 +6,12 @@
 //  Copyright (c) 2014 Vaavud. All rights reserved.
 //
 
-#import "VESoundProcessingAlgo.h"
-#import "VEDirectionDetectionAlgo.h"
+#import "VEAudioProcessingTick.h"
+#import "VEAudioProcessingSpeedDirection.h"
 
 #define CALIBRATE_AUDIO_EVERY_X_BUFFER 20
 
-@interface VESoundProcessingAlgo() {
+@interface VEAudioProcessingTick() {
     int mvgAvg[3];
     int mvgAvgSum;
     int bufferIndex;
@@ -36,7 +36,7 @@
 
 @end
 
-@implementation VESoundProcessingAlgo
+@implementation VEAudioProcessingTick
 
 
 #pragma mark - Initialization
@@ -74,7 +74,7 @@
     mvgDropHalf = 0;
     mvgDropHalfRefresh = YES;
     
-    self.dirDetectionAlgo = [[VEDirectionDetectionAlgo alloc] initWithDelegate:delegate];
+    self.dirDetectionAlgo = [[VEAudioProcessingSpeedDirection alloc] initWithDelegate:delegate];
     self.delegate = delegate;
     
     return self;

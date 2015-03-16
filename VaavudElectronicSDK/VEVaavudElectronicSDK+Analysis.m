@@ -90,7 +90,7 @@
 
 // returns the fitcurve used in the directionAlgorithm
 - (float *) getFitCurve {
-    return [VEDirectionDetectionAlgo getFitCurve];
+    return [VEAudioProcessingSpeedDirection getFitCurve];
 }
 
 // returns the EdgeAngles for the samples

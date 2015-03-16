@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Vaavud. All rights reserved.
 //
 
-#import "VEDirectionDetectionAlgo.h"
+#import "VEAudioProcessingSpeedDirection.h"
 #import <QuartzCore/QuartzCore.h>
 
 #define TEETH_PR_REV 15
@@ -22,7 +22,7 @@
 #define REQUIRED_CALIBRATION_TICKS 600
 
 
-@interface VEDirectionDetectionAlgo() {
+@interface VEAudioProcessingSpeedDirection() {
     
     unsigned int totalTickCounter;
     unsigned int teethIndex;
@@ -63,7 +63,7 @@
 @end
 
 
-@implementation VEDirectionDetectionAlgo
+@implementation VEAudioProcessingSpeedDirection
 
 
 float compensation[TEETH_PR_REV] = {1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,0.774193548387097};

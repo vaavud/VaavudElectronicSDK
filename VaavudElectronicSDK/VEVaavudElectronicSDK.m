@@ -7,19 +7,19 @@
 //
 
 #import "VEAudioManager.h"
-#import "VEDirectionDetectionAlgo.h"
+#import "VEAudioProcessingSpeedDirection.h"
 #import "VESummeryGenerator.h"
 #import "VELocationManager.h"
-#import "VEAudioVaavudElectronicDetection.h"
+#import "VEAudioSleipnirDetection.h"
 
-@interface VEVaavudElectronicSDK() <SoundProcessingDelegate, DirectionDetectionDelegate, AudioManagerDelegate, locationManagerDelegate, AudioVaavudElectronicDetectionDelegate>
+@interface VEVaavudElectronicSDK() <SoundProcessingDelegate, DirectionDetectionDelegate, AudioManagerDelegate, locationManagerDelegate, VEAudioSleipnirDetectionDelegate>
 
 @property (strong, atomic) NSMutableArray *VaaElecWindDelegates;
 @property (strong, atomic) NSMutableArray *VaaElecAnalysisDelegates;
 @property (strong, nonatomic) VEAudioManager *audioManager;
 @property (strong, nonatomic) VESummeryGenerator *summeryGenerator;
 @property (strong, nonatomic) VELocationManager *locationManager;
-@property (strong, nonatomic) VEAudioVaavudElectronicDetection *AVElectronicDetection;
+@property (strong, nonatomic) VEAudioSleipnirDetection *AVElectronicDetection;
 @property (strong, atomic) NSNumber *currentHeading;
 
 @end
@@ -49,7 +49,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     self.audioManager = [[VEAudioManager alloc] initWithDelegate:self];
     self.summeryGenerator = [[VESummeryGenerator alloc] init];
     self.locationManager = [[VELocationManager alloc] initWithDelegate:self];
-    self.AVElectronicDetection = [[VEAudioVaavudElectronicDetection alloc] initWithDelegate:self];
+    self.AVElectronicDetection = [[VEAudioSleipnirDetection alloc] initWithDelegate:self];
 }
 
 + (id)allocWithZone:(NSZone *)zone {

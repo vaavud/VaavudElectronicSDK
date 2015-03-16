@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <MediaPlayer/MediaPlayer.h>
-#import "VEDirectionDetectionAlgo.h"
+#import "VEAudioProcessingSpeedDirection.h"
 #import "VEAudioIO.h"
 
 @protocol SoundProcessingDelegate <NSObject>
@@ -18,7 +18,7 @@
 @end
 
 
-@interface VESoundProcessingAlgo : NSObject <AudioProcessorProtocol>
+@interface VEAudioProcessingTick : NSObject <AudioProcessorProtocol>
 
 - (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
 - (void)newSoundData:(int *)data bufferLength:(UInt32) bufferLength;
@@ -26,5 +26,5 @@
 - (void)setVolumeAtSavedLevel;
 - (void)returnVolumeToInitialState;
 
-@property (strong, nonatomic) VEDirectionDetectionAlgo *dirDetectionAlgo;
+@property (strong, nonatomic) VEAudioProcessingSpeedDirection *dirDetectionAlgo;
 @end

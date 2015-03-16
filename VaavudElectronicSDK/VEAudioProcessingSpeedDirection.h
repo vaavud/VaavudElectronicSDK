@@ -22,7 +22,7 @@
 @end
 
 
-@interface VEDirectionDetectionAlgo : NSObject
+@interface VEAudioProcessingSpeedDirection : NSObject
 
 - (BOOL) newTick:(int)tickLength; // return true if next tick is long
 - (id) initWithDelegate:(id<DirectionDetectionDelegate>)delegate;

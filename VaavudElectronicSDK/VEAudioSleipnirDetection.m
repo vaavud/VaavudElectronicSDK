@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Vaavud. All rights reserved.
 //
 
-#import "VEAudioVaavudElectronicDetection.h"
+#import "VEAudioSleipnirDetection.h"
 #import "VEAudioManager.h"
 #import <Accelerate/Accelerate.h>
 
@@ -18,9 +18,9 @@
 
 #define kAudioFilePath @"tempRawAudioFile.wav"
 
-@interface VEAudioVaavudElectronicDetection() <EZMicrophoneDelegate>
+@interface VEAudioSleipnirDetection() <EZMicrophoneDelegate>
 
-@property id<AudioVaavudElectronicDetectionDelegate> delegate;
+@property id<VEAudioSleipnirDetectionDelegate> delegate;
 @property (atomic, readwrite) BOOL sleipnirAvailable;
 @property (atomic) BOOL deviceConnected;
 @property (nonatomic) BOOL audioRouteChange;
@@ -42,7 +42,7 @@
 
 @end
 
-@implementation VEAudioVaavudElectronicDetection {
+@implementation VEAudioSleipnirDetection {
     float micSignal[NFFT];
     int micSignalIndex;
 }
@@ -58,7 +58,7 @@
 /*
   Initializer - setup and starts device detection
  */
-- (id) initWithDelegate:(id<AudioVaavudElectronicDetectionDelegate>)delegate {
+- (id) initWithDelegate:(id<VEAudioSleipnirDetectionDelegate>)delegate {
     self = [super init];
     if (self) {
         // register for notification for chances in audio routing (inserting/removing jack plut)

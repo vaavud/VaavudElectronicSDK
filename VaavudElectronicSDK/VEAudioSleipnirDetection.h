@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "VEAudioIO.h"
 
-@protocol AudioVaavudElectronicDetectionDelegate <NSObject>
+@protocol VEAudioSleipnirDetectionDelegate <NSObject>
 
 /**
  @param available is true if the Sliepnir wind meter is available to start measureing.
@@ -42,10 +42,10 @@
 @end
 
 
-@interface VEAudioVaavudElectronicDetection : NSObject <AudioProcessorProtocol>
+@interface VEAudioSleipnirDetection : NSObject <AudioProcessorProtocol>
 
 // Initializer
-- (id) initWithDelegate:(id<AudioVaavudElectronicDetectionDelegate>)delegate;
+- (id) initWithDelegate:(id<VEAudioSleipnirDetectionDelegate>)delegate;
 // protocol
 - (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
 

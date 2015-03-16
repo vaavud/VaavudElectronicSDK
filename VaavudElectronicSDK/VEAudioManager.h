@@ -13,8 +13,8 @@
 // Import EZAudio header
 #import "EZAudio.h"
 
-#import "VESoundProcessingAlgo.h"
-#import "VEAudioVaavudElectronicDetection.h"
+#import "VEAudioProcessingTick.h"
+#import "VEAudioSleipnirDetection.h"
 #import "VEAudioIO.h"
 #import "VERecorder.h"
 
@@ -63,7 +63,7 @@
 //protocol
 - (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
 
-@property (strong, nonatomic) VESoundProcessingAlgo *soundProcessor;
+@property (strong, nonatomic) VEAudioProcessingTick *soundProcessor;
 @property (weak, nonatomic) id <VaavudElectronicMicrophoneOutputDelegate> microphoneOutputDeletage;
 
 @end

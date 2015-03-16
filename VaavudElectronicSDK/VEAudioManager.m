@@ -40,7 +40,7 @@
     dispatch_set_target_queue(self.dispatchQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
     
     self.delegate = delegate;
-    self.soundProcessor = [[VESoundProcessingAlgo alloc] initWithDelegate:delegate];
+    self.soundProcessor = [[VEAudioProcessingTick alloc] initWithDelegate:delegate];
     self.audioProcessor = [[VEAudioIO alloc] init];
     self.audioProcessor.delegate = self;
     
