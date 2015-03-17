@@ -13,6 +13,7 @@
 
 @protocol VEAudioProcessingDelegate <NSObject>
 - (void)newMaxAmplitude:(NSNumber*) amplitude; // Analysis
+- (void)adjustVolume:(float) adjustment;
 @end
 
 @interface VEAudioProcessingRaw : NSObject
@@ -20,8 +21,7 @@
 - (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
 - (void)newSoundData:(int *)data bufferLength:(UInt32) bufferLength;
 - (id)initWithDelegate:(id<VEAudioProcessingDelegate>)delegate;
-- (void)setVolumeAtSavedLevel;
-- (void)returnVolumeToInitialState;
 
 @property (weak, nonatomic) VEAudioProcessingTick *processorTick;
+
 @end

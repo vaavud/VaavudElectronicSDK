@@ -223,6 +223,11 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     [self.locationManager stop];
 }
 
+//
+- (void)adjustVolume:(float)adjustment {
+    [self.audioIO adjustVolumeLevelAmout:adjustment];
+}
+
 - (NSNumber *)frequencyToWindspeed:(NSNumber *)frequency {
     return @(frequency.floatValue*0.325 + 0.2);
 }

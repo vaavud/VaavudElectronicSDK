@@ -71,6 +71,7 @@
 // return the sound input descriotion as NSString
 - (NSString *)soundInputDescription;
 
+- (void)adjustVolumeLevelAmout:(float)adjustment;
 //- (AudioStreamBasicDescription)inputAudioStreamBasicDescription;
 //
 //- (AudioStreamBasicDescription)outputAudioStreamBasicDescription;

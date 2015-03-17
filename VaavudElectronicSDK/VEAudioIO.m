@@ -9,7 +9,8 @@
 //  and: http://atastypixel.com/blog/a-simple-fast-circular-buffer-implementation-for-audio-processing/
 //  and: https://github.com/syedhali/EZAudio
 
-
+//#import <Foundation/Foundation.h>
+#import <MediaPlayer/MediaPlayer.h>
 #import "VEAudioIO.h"
 #import "VEFloatConverter.h"
 #import "VERecorder.h"
@@ -37,6 +38,8 @@
     
     // Audio unit
     AudioComponentInstance audioUnit;
+    
+    float currentVolume, originalVolume;
 }
 
 @property (atomic) BOOL audioBuffersInitialized;
@@ -434,6 +437,8 @@ static OSStatus playbackCallback(void *inRefCon,
         [self hasError:status andFile:__FILE__ andLine:__LINE__];
         
         self.algorithmActive = YES;
+        
+        [self setVolumeAtSavedLevel];
     }
 }
 
@@ -448,6 +453,8 @@ static OSStatus playbackCallback(void *inRefCon,
         // stop the audio unit
         OSStatus status = AudioOutputUnitStop(audioUnit);
         [self hasError:status andFile:__FILE__ andLine:__LINE__];
+        
+        [self setVolumeToInitialState];
     }
     
 }
@@ -682,6 +689,41 @@ static OSStatus playbackCallback(void *inRefCon,
     //[self.microphone stopFetchingAudio];
     NSLog(@"[VESDK] microphone not availiable");
     return NO;
+}
+
+- (void)adjustVolumeLevelAmout:(float) adjustment {
+    currentVolume += adjustment;
+    
+    if (currentVolume < 0) {
+        currentVolume = 0;
+    }
+    if (currentVolume > 1) {
+        currentVolume = 1;
+    }
+    [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
+    if (LOG_AUDIO) NSLog(@"[VESDK] new volume %f", currentVolume);
+}
+
+- (void)setVolumeAtSavedLevel {
+    currentVolume = [[NSUserDefaults standardUserDefaults] floatForKey:@"VOLUME"];
+    if (currentVolume == 0) {
+        currentVolume = 1.0;
+    }
+    // check if volume is at maximum.
+    MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
+    originalVolume = musicPlayer.volume;
+    musicPlayer.volume = currentVolume; // device volume will be changed to stored // commented out due to -10876 audio render error
+    if (LOG_AUDIO) NSLog(@"[VESDK] Loaded volume from user defaults and set to %f", currentVolume);
+}
+
+- (void)setVolumeToInitialState {
+    [[NSUserDefaults standardUserDefaults] setFloat:currentVolume forKey:@"VOLUME"];
+    if (LOG_AUDIO) NSLog(@"[VESDK] Saved volume: %f to user defaults", currentVolume);
+    
+    MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
+    musicPlayer.volume = originalVolume;
+    if (LOG_AUDIO) NSLog(@"[VESDK] Returned volume to original setting: %f", originalVolume);
+    
 }
 
 @end

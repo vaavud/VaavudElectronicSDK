@@ -29,7 +29,6 @@
     bool mvgDropHalfRefresh, longTick;
     
     int calibrationCounter;
-    float currentVolume, originalVolume;
 }
 
 @property (strong, nonatomic) id<VEAudioProcessingDelegate> delegate;
@@ -225,46 +224,16 @@
 
 -(void)adjustVolumeDiffMax:(int)ldiffMax diffMin:(int)ldiffMin avgDiff:(int)avgDiff avgMax:(int)avgMax avgMin:(int)avgMin {
     BOOL rotating = avgMax > 2000 && avgMin < -2000;
-    BOOL stationary = avgMax < 2 && avgMin > -2;
+    BOOL stationary = avgMax < 4 && avgMin > -4;
     
     if ((stationary && avgDiff < 20) || (rotating && ldiffMax < 2000)) {
-        currentVolume += 0.01;
-        if (currentVolume > 1) {
-            currentVolume = 1;
-        }
-        [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
-        if (LOG_VOLUME) NSLog(@"[VESDK] Volume +: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", currentVolume, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
+        [self.delegate adjustVolume:0.01];
+        if (LOG_VOLUME) NSLog(@"[VESDK] Volume +: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", 0.01, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
     else if (ldiffMax > 3800 || (rotating && ldiffMin > 50)) { // ldiffMax > 2700
-        currentVolume -= 0.01;
-        if (currentVolume < 0) {
-            currentVolume = 0;
-        }
-        [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
-        if (LOG_VOLUME) NSLog(@"[VESDK] Volume -: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", currentVolume, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
+        [self.delegate adjustVolume:-0.01];
+        if (LOG_VOLUME) NSLog(@"[VESDK] Volume -: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", 0.01, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
-}
-
-- (void)setVolumeAtSavedLevel {
-    currentVolume = [[NSUserDefaults standardUserDefaults] floatForKey:@"VOLUME"];
-    if (currentVolume == 0) {
-        currentVolume = 1.0;
-    }
-    // check if volume is at maximum.
-    MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
-    originalVolume = musicPlayer.volume;
-//    musicPlayer.volume = currentVolume; // device volume will be changed to stored // commented out due to -10876 audio render error
-    if (LOG_AUDIO) NSLog(@"[VESDK] Loaded volume from user defaults and set to %f", currentVolume);
-}
-
-- (void)returnVolumeToInitialState {
-    [[NSUserDefaults standardUserDefaults] setFloat:currentVolume forKey:@"VOLUME"];
-    if (LOG_AUDIO) NSLog(@"[VESDK] Saved volume: %f to user defaults", currentVolume);
-    
-    MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
-    musicPlayer.volume = originalVolume;
-    if (LOG_AUDIO) NSLog(@"[VESDK] Returned volume to original setting: %f", originalVolume);
-    
 }
 
 - (BOOL)detectTick:(int)sampleSinceTick {
