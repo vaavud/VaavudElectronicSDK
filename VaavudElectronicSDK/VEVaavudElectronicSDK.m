@@ -225,7 +225,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 
 //
 - (void)adjustVolume:(float)adjustment {
-    [self.audioIO adjustVolumeLevelAmout:adjustment];
+    [self.audioIO adjustVolumeLevelAmount:adjustment];
 }
 
 - (NSNumber *)frequencyToWindspeed:(NSNumber *)frequency {

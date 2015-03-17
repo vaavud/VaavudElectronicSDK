@@ -102,7 +102,7 @@
     int32_t availableBytes;
     SInt16 *circBufferTail = VECircularBufferTail(circBuffer, &availableBytes);
     
-    if (circBufferTail != NULL) {
+    if (circBufferTail != NULL && circBuffer->fillCount > bufferLengthInFrames) {
         UInt32 sampleSize = sizeof(SInt16);
         UInt32 size = MIN(bufferLengthInFrames*sampleSize, availableBytes);
         UInt32 frames = size/sampleSize;
@@ -111,13 +111,8 @@
         
         // iterate over incoming stream an copy to output stream
         for (int i=0; i < frames; i++) {
-            
             data[i] = (int) circBufferTail[i] / 32.767 ; // scale to 1000
-            // set data size
-            
         }
-//        NSLog(@"Value: %i", data[0]);
-        
         [self newSoundData:data bufferLength:frames];
         free(data);
         
@@ -128,18 +123,14 @@
         VECircularBufferConsume(circBuffer, size);
 //        NSLog(@"fillCount: %i", circBuffer->fillCount);
     } else {
-        NSLog(@"buffer is Null");
+        NSLog(@"buffer is Null or not filled");
     }
-    
-    /* ... Do whatever you need to do ... */
     
     NSDate *methodFinish = [NSDate date];
     NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
     if (executionTime*1000 > 10) {
         NSLog(@"executionTime = %f ms", executionTime*1000);
     }
-//    NSLog(@"executionTime = %f ms", executionTime*1000);
-
 }
 
 

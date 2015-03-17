@@ -71,17 +71,7 @@
 // return the sound input descriotion as NSString
 - (NSString *)soundInputDescription;
 
-- (void)adjustVolumeLevelAmout:(float)adjustment;
-//- (AudioStreamBasicDescription)inputAudioStreamBasicDescription;
-//
-//- (AudioStreamBasicDescription)outputAudioStreamBasicDescription;
-
-/**
- Nicely logs out the contents of an AudioStreamBasicDescription struct
- @param 	asbd 	The AudioStreamBasicDescription struct with content to print out
- */
-+ (void)printASBD:(AudioStreamBasicDescription)asbd;
-
-+ (NSString *)ASBDtoString:(AudioStreamBasicDescription)asbd;
+// turns up or down the volume by a certain amount (0.0 - 1.0)
+- (void)adjustVolumeLevelAmount:(float)adjustment;
 
 @end

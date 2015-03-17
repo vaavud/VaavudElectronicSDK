@@ -66,7 +66,7 @@
         //from audio Manger
         self.dispatchQueue = (dispatch_queue_create("com.vaavud.processTickQueue", DISPATCH_QUEUE_SERIAL));
         dispatch_set_target_queue(self.dispatchQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
-        
+       
         self.audioBuffersInitialized = NO;
         self.askedToMeasure = NO;
         self.algorithmActive = NO;
@@ -79,8 +79,7 @@
                                                      name:AVAudioSessionRouteChangeNotification
                                                    object:nil];
         
-        
-        self.sleipnirAvailable = [self checkDeviceAvailability];
+        [self checkDeviceAvailability];
     }
     return self;
 }
@@ -102,31 +101,35 @@ static OSStatus recordingCallback(void *inRefCon,
     
     // render input and check for error
     status = AudioUnitRender(audioProcessor->audioUnit, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, &bufferList);
-    [audioProcessor hasError:status andFile:__FILE__ andLine:__LINE__]; // concider ignoring errors, Errors might happen when changing volume
+//    [audioProcessor hasError:status andFile:__FILE__ andLine:__LINE__]; // concider ignoring errors, Errors might happen when changing volume
     
-    
-    // copy incoming audio data to the audio buffer
-    VECircularBufferProduceBytes(&audioProcessor->cirbuffer, bufferList.mBuffers[0].mData, bufferList.mBuffers[0].mDataByteSize);
-    dispatch_async(audioProcessor.dispatchQueue, ^(void){
-        [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
-    });
+    if (!status) {
+        // copy incoming audio data to the audio buffer
+        VECircularBufferProduceBytes(&audioProcessor->cirbuffer, bufferList.mBuffers[0].mData, bufferList.mBuffers[0].mDataByteSize);
+        dispatch_async(audioProcessor.dispatchQueue, ^(void){
+            [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
+        });
+        
+        if (audioProcessor.recordingActive) {
+            [audioProcessor.recorder appendDataFromBufferList:&bufferList withBufferSize:inNumberFrames];
+        }
+        
+        
+        if (audioProcessor.microphoneOutputDeletage) {
+            VEFloatConverterToFloat(audioProcessor->converter,
+                                    &audioProcessor->inputBufferList,
+                                    audioProcessor->floatBuffers,
+                                    inNumberFrames);
+            // inNumberFrames changed to 256
+            //        [audioProcessor.microphoneOutputDeletage processFloatBuffer:audioProcessor->floatBuffers[0] withBufferLengthInFrames:256];
+            [audioProcessor.microphoneOutputDeletage updateBuffer:audioProcessor->floatBuffers[0] withBufferSize:256];
+        }
 
-    
-    if (audioProcessor.recordingActive) {
-        [audioProcessor.recorder appendDataFromBufferList:&bufferList withBufferSize:inNumberFrames];
     }
-    
-    
-    if (audioProcessor.microphoneOutputDeletage) {
-        VEFloatConverterToFloat(audioProcessor->converter,
-                                &audioProcessor->inputBufferList,
-                                audioProcessor->floatBuffers,
-                                inNumberFrames);
-        // inNumberFrames changed to 256
-//        [audioProcessor.microphoneOutputDeletage processFloatBuffer:audioProcessor->floatBuffers[0] withBufferLengthInFrames:256];
-        [audioProcessor.microphoneOutputDeletage updateBuffer:audioProcessor->floatBuffers[0] withBufferSize:256];
+    else {
+        if (LOG_AUDIO) NSLog(@"Error Code responded %d in file %s on line %d\n",(int)status , __FILE__, __LINE__);
     }
-    return noErr;
+    return status; //    return noErr;
 }
 
 #pragma mark Playback callback
@@ -413,11 +416,27 @@ static OSStatus playbackCallback(void *inRefCon,
 #pragma mark controll stream
 
 - (void)start {
-    
     self.askedToMeasure = YES;
+    [self checkStartStop];
+}
+
+
+- (void)stop {
+    self.askedToMeasure = NO;
+    [self checkStartStop];
+}
+
+- (void)checkStartStop {
     
-    if (!self.algorithmActive && self.sleipnirAvailable) {
+    if (!self.askedToMeasure && self.algorithmActive) {
+        self.algorithmActive = NO;
         
+        OSStatus status = AudioOutputUnitStop(audioUnit); // stop the audio unit
+        [self hasError:status andFile:__FILE__ andLine:__LINE__];
+        [self setVolumeToInitialState];
+    }
+    
+    if (self.askedToMeasure && self.sleipnirAvailable) {
         [self initializeAudioWithOutput:YES];
         
         // Check the microphone input format
@@ -432,31 +451,25 @@ static OSStatus playbackCallback(void *inRefCon,
             [VEAudioIO printASBD: [self outputAudioStreamBasicDescription]];
         }
         
-        // start the audio unit. You should hear something, hopefully :)
-        OSStatus status = AudioOutputUnitStart(audioUnit);
+        OSStatus status = AudioOutputUnitStart(audioUnit);  // start the audio unit. You should hear something, hopefully :)
         [self hasError:status andFile:__FILE__ andLine:__LINE__];
         
         self.algorithmActive = YES;
-        
         [self setVolumeAtSavedLevel];
     }
+    
 }
 
-
-- (void)stop {
-    
-    self.askedToMeasure = NO;
-    
-    if (self.algorithmActive) {
-        self.algorithmActive = NO;
+- (void)sleipnirIsAvaliable:(BOOL)avaliable {
+    if (self.sleipnirAvailable != avaliable) {
+        self.sleipnirAvailable = avaliable;
         
-        // stop the audio unit
-        OSStatus status = AudioOutputUnitStop(audioUnit);
-        [self hasError:status andFile:__FILE__ andLine:__LINE__];
+        [self checkStartStop];
         
-        [self setVolumeToInitialState];
+        dispatch_async(dispatch_get_main_queue(),^{
+            [self.delegate sleipnirAvailabliltyDidChange:avaliable];
+        });
     }
-    
 }
 
 
@@ -528,7 +541,6 @@ static OSStatus playbackCallback(void *inRefCon,
 
 -(void)hasError:(int)statusCode andFile:(char*)file andLine:(int)line {
     if (statusCode) {
-        NSLog(@"danm an error");
         printf("Error Code responded %d in file %s on line %d\n", statusCode, file, line);
         exit(-1);
     }
@@ -542,8 +554,6 @@ static OSStatus playbackCallback(void *inRefCon,
     free(outputBufferRight.mData);
     free(inputBufferList.mBuffers[0].mData);
 }
-
-
 
 // Starts the internal soundfile recorder
 - (void)startRecording {
@@ -589,67 +599,44 @@ static OSStatus playbackCallback(void *inRefCon,
     return basePath;
 }
 
--(NSURL *)recordingFilePathURL {
+- (NSURL *)recordingFilePathURL {
     return [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%@",
                                    [self applicationDocumentsDirectory],
                                    kAudioFilePath]];
 }
 
 
-
-
-- (BOOL) checkDeviceAvailability{
+- (void)checkDeviceAvailability {
     
     [self initializeAudioWithOutput:YES];
     // start the audio unit. You should hear something, hopefully :)
     OSStatus status = AudioOutputUnitStart(audioUnit);
     [self hasError:status andFile:__FILE__ andLine:__LINE__];
     
-    BOOL available = ([self isHeadphoneOutAvailable] && [self isHeadphoneMicAvailable]) ? YES : NO;
-    
-    // stop the audio unit
-    status = AudioOutputUnitStop(audioUnit);
-    [self hasError:status andFile:__FILE__ andLine:__LINE__];
-    
-    return available;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        BOOL available = ([self isHeadphoneOutAvailable] && [self isHeadphoneMicAvailable]);
+        // stop the audio unit
+        OSStatus status = AudioOutputUnitStop(audioUnit);
+        [self hasError:status andFile:__FILE__ andLine:__LINE__];
+        
+        [self sleipnirIsAvaliable:available];
+    });
 }
 
-
-
-- (void)audioRouteChangeListenerCallback:(NSNotification*)notification
-{
+- (void)audioRouteChangeListenerCallback:(NSNotification*)notification {
     NSDictionary *interuptionDict = notification.userInfo;
-    
     NSInteger routeChangeReason = [[interuptionDict valueForKey:AVAudioSessionRouteChangeReasonKey] integerValue];
     
-    
     switch (routeChangeReason) {
-            
         case AVAudioSessionRouteChangeReasonOldDeviceUnavailable: {
-            
             NSLog(@"[VESDK] AVAudioSessionRouteChangeReasonOldDeviceUnavailable");
-            
-            [self isHeadphoneMicAvailable];
-            [self isHeadphoneOutAvailable];
-            
-            if (self.sleipnirAvailable) {
-                self.sleipnirAvailable = NO;
-                
-                dispatch_async(dispatch_get_main_queue(),^{
-                    self.sleipnirAvailable = YES;
-                });
-            }
+                [self sleipnirIsAvaliable:NO];
             break;
         }
         case AVAudioSessionRouteChangeReasonNewDeviceAvailable: {
             NSLog(@"[VESDK] AVAudioSessionRouteChangeReasonNewDeviceAvailable");
-            
             if (!self.sleipnirAvailable) {
-                dispatch_async(dispatch_get_main_queue(),^{
-                    if ([self checkDeviceAvailability]) {
-                        self.sleipnirAvailable = YES;
-                    }
-                });
+                [self checkDeviceAvailability];
             }
             break;
         }
@@ -667,9 +654,8 @@ static OSStatus playbackCallback(void *inRefCon,
             return YES;
         }
     }
-    NSLog(@"[VESDK] headphoneOut not Available");
+    if (LOG_AUDIO) NSLog(@"[VESDK] headphoneOut not Available");
     return NO;
-    
 }
 
 
@@ -684,14 +670,12 @@ static OSStatus playbackCallback(void *inRefCon,
         if ([[desc portType] isEqualToString:AVAudioSessionPortHeadsetMic]) {
             return YES;
         }
-        
     }
-    //[self.microphone stopFetchingAudio];
-    NSLog(@"[VESDK] microphone not availiable");
+    if (LOG_AUDIO) NSLog(@"[VESDK] microphone not availiable");
     return NO;
 }
 
-- (void)adjustVolumeLevelAmout:(float) adjustment {
+- (void)adjustVolumeLevelAmount:(float) adjustment {
     currentVolume += adjustment;
     
     if (currentVolume < 0) {
