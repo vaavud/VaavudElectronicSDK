@@ -10,7 +10,7 @@
 #import "VEAudioProcessingTick.h"
 
 #define CALIBRATE_AUDIO_EVERY_X_BUFFER 20
-#define EXECUTION_METRIX_EVERY 100
+#define EXECUTION_METRIX_EVERY 200
 
 @interface VEAudioProcessingRaw() {
     int mvgAvg[3];

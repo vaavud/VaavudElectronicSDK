@@ -107,13 +107,28 @@ static OSStatus recordingCallback(void *inRefCon,
         }
         
         if (audioProcessor.microphoneOutputDeletage) {
-            VEFloatConverterToFloat(audioProcessor->converter,
-                                    &audioProcessor->inputBufferList,
-                                    audioProcessor->floatBuffers,
-                                    inNumberFrames);
-            // inNumberFrames changed to 256
-            //        [audioProcessor.microphoneOutputDeletage processFloatBuffer:audioProcessor->floatBuffers[0] withBufferLengthInFrames:256];
-            [audioProcessor.microphoneOutputDeletage updateBuffer:audioProcessor->floatBuffers[0] withBufferSize:256];
+            
+            int floatFramesOutput = 256; // smaller than inNumberOfFrames
+            
+            AudioBufferList bufferForFloatPlot;
+            
+            bufferForFloatPlot.mNumberBuffers = 1;
+            bufferForFloatPlot.mBuffers[0].mNumberChannels = 1;
+            bufferForFloatPlot.mBuffers[0].mData = malloc( floatFramesOutput * sizeof(SInt16));
+            bufferForFloatPlot.mBuffers[0].mDataByteSize = floatFramesOutput * sizeof(SInt16);
+            
+            memcpy(bufferForFloatPlot.mBuffers[0].mData, bufferList.mBuffers[0].mData, floatFramesOutput * sizeof(SInt16));
+            
+            dispatch_async(dispatch_get_main_queue(),^{
+                VEFloatConverterToFloat(audioProcessor->converter,
+                                        &bufferForFloatPlot,
+                                        audioProcessor->floatBuffers,
+                                        floatFramesOutput);
+                
+                
+                [audioProcessor.microphoneOutputDeletage updateBuffer:audioProcessor->floatBuffers[0] withBufferSize:floatFramesOutput];
+                free(bufferForFloatPlot.mBuffers[0].mData);
+            });
         }
 
     }
