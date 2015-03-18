@@ -97,6 +97,10 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     }
     
     tickEdgeAngle[TEETH_PR_REV - 1] = (int)(360-stdTickSize);
+    
+    NSData *compensationData = [[NSUserDefaults standardUserDefaults] dataForKey:@"COMPENSATION"];
+    memcpy(&compensation, compensationData.bytes, compensationData.length);
+    [self printCompensationString];
     return self;
 }
 
@@ -116,7 +120,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     }
     else {
         if(LOG_TICK_DETECTION) NSLog(@"[VESDK] Out of ratio: %f, teeth: %03d, ticks: %03d, tickLength: %03d", tickLengthCompensated / ((float) lastTickLengthCompensated), teethIndex, tickCounterSinceStart, tickLength);
-        [self resetDirectionAlgorithm];
+        [self resetDetectionAlgorithm];
         
         tickDetectionErrorCount++;
         dispatch_async(dispatch_get_main_queue(),^{
@@ -135,7 +139,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     
 }
 
-- (void)resetDirectionAlgorithm {
+- (void)resetDetectionAlgorithm {
     // reset buffers
     for (int i = 0; i < TEETH_PR_REV; i++) {
         tickLengthBuffer[i] = 0;
@@ -144,7 +148,6 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     tickLengthOneRotationLast = 0;
     tickCounterSinceStart = 0;
     startLocated = NO;
-    exponentialFilterInitialzed = NO;
 }
 
 
@@ -296,7 +299,8 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     NSMutableArray *angularVelocities = [[NSMutableArray alloc] initWithCapacity:TEETH_PR_REV];
     
     for (int i = 0; i < TEETH_PR_REV; i++) {
-        tickLengthRelativePrTeethCompensated[i] = (expTickLengthRelativePrTeeth[i] * compensation[i] -1) * (-100);
+        float tickLengthRelativePrTeeth = calibrationMode ? tickLengthRelativePrTeethSum[i]/(float)tickLengthRelativePrTeethCounter[i] : expTickLengthRelativePrTeeth[i];
+        tickLengthRelativePrTeethCompensated[i] = (tickLengthRelativePrTeeth*compensation[i] -1) * (-100);
         [angularVelocities addObject: [NSNumber numberWithFloat: tickLengthRelativePrTeethCompensated[i]]];
     }
     
@@ -417,42 +421,22 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
 
 // start calibration mode
 -(void) startCalibration {
-    calibrationMode = true;
-    [self resetDirectionAlgorithm];
+    [self resetCalibration];
+    [self resetDetectionAlgorithm];
+    exponentialFilterInitialzed = NO;
     calibrationTickCounter = 0;
     calibrationTickSlowdownCounter = 0;
+    calibrationMode = true;
 }
 
 // end calibbration mode
 -(void) endCalibration {
     calibrationMode = false;
-    
-    
     if (calibrationTickCounter >= REQUIRED_CALIBRATION_TICKS) {
-//        // Exp Filter
-//        double compensationSum = 0;
-//        
-//        for (int i = 0; i < TEETH_PR_REV; i++) {
-//            compensationSum += expTickLengthRelativePrTeeth[i];
-//        }
-//        
-//        double adjustmentRatio = TEETH_PR_REV / compensationSum;
-//        
-//        
-//        for (int i = 0; i < TEETH_PR_REV; i++) {
-//            compensation[i] = 1/(expTickLengthRelativePrTeeth[i]*adjustmentRatio);
-//        }
-//        NSMutableString *compensationString = [NSMutableString stringWithString:@"["];
-//        
-//        for (int i = 0; i < TEETH_PR_REV -1 ; i++) {
-//            [compensationString appendString: [NSString stringWithFormat:@"%f,", compensation[i]]];
-//        }
-//        [compensationString appendString: [NSString stringWithFormat:@"%f]", compensation[TEETH_PR_REV-1]]];
-//        
-//        NSLog(@"ExpFilter: %@", compensationString);
         [self calculateMeanFilter];
     }
-    [self resetDirectionAlgorithm];
+    [self resetDetectionAlgorithm];
+    exponentialFilterInitialzed = NO;
 }
 
 
@@ -470,19 +454,30 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         compensation[i] = 1/(tickLengthRelativePrTeethAvg[i]*adjustmentRatio);
     }
     
-    NSMutableString *compensationString = [NSMutableString stringWithString:@"["];
-    for (int i = 0; i < TEETH_PR_REV -1 ; i++) {
-        [compensationString appendString: [NSString stringWithFormat:@"%f,", compensation[i]]];
-    }
-    [compensationString appendString: [NSString stringWithFormat:@"%f]", compensation[TEETH_PR_REV-1]]];
-    
-    if (LOG) NSLog(@"MeanFilter: %@", compensationString);
+    [self saveCompensation];
+    [self printCompensationString];
 }
 
 - (void)resetCalibration {
     for (int i = 0; i < TEETH_PR_REV; i++) {
         compensation[i] = compensationOriginal[i];
     }
+    [self saveCompensation];
+    [self printCompensationString];
 }
 
+- (void)saveCompensation {
+    NSData *compensationData = [NSData dataWithBytes:&compensation length:TEETH_PR_REV*sizeof(float)];
+    [[NSUserDefaults standardUserDefaults] setObject:compensationData forKey:@"COMPENSATION"];
+}
+
+- (void)printCompensationString {
+    NSMutableString *compensationString = [NSMutableString stringWithString:@"["];
+    for (int i = 0; i < TEETH_PR_REV -1 ; i++) {
+        [compensationString appendString: [NSString stringWithFormat:@"%f,", compensation[i]]];
+    }
+    [compensationString appendString: [NSString stringWithFormat:@"%f]", compensation[TEETH_PR_REV-1]]];
+    
+    if (LOG_TICK_DETECTION) NSLog(@"MeanFilter: %@", compensationString);
+}
 @end
