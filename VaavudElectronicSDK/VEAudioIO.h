@@ -16,8 +16,9 @@
 /**
  @param available is true if the Sliepnir wind meter is available to start measureing.
  */
-- (void)sleipnirAvailabliltyDidChange: (BOOL) available;
+- (void)sleipnirAvailabliltyDidChange:(BOOL)available;
 - (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
+- (void)algorithmAudioActive:(BOOL)active;
 
 @end
 

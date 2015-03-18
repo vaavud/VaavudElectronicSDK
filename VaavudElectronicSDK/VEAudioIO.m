@@ -428,15 +428,18 @@ static OSStatus playbackCallback(void *inRefCon,
 
 - (void)checkStartStop {
     
-    if (!self.askedToMeasure && self.algorithmActive) {
+    if (self.algorithmActive && (!self.sleipnirAvailable || !self.askedToMeasure)) {
         self.algorithmActive = NO;
         
         OSStatus status = AudioOutputUnitStop(audioUnit); // stop the audio unit
         [self hasError:status andFile:__FILE__ andLine:__LINE__];
+        if (LOG_AUDIO) NSLog(@"Stoped AudioUnit");
+        [self.delegate algorithmAudioActive:NO];
         [self setVolumeToInitialState];
     }
     
-    if (self.askedToMeasure && self.sleipnirAvailable) {
+    if (!self.algorithmActive && (self.sleipnirAvailable && self.askedToMeasure)) {
+        self.algorithmActive = YES;
         [self initializeAudioWithOutput:YES];
         
         // Check the microphone input format
@@ -453,8 +456,8 @@ static OSStatus playbackCallback(void *inRefCon,
         
         OSStatus status = AudioOutputUnitStart(audioUnit);  // start the audio unit. You should hear something, hopefully :)
         [self hasError:status andFile:__FILE__ andLine:__LINE__];
-        
-        self.algorithmActive = YES;
+        if (LOG_AUDIO) NSLog(@"Started AudioUnit");
+        [self.delegate algorithmAudioActive:YES];
         [self setVolumeAtSavedLevel];
     }
     

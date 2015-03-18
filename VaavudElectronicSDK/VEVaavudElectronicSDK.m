@@ -181,22 +181,6 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 }
 
 
-- (void)vaavudStartedMeasuring {
-    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(sleipnirStartedMeasuring)]) {
-            [delegate sleipnirStartedMeasuring];
-        }
-    }
-}
-
-- (void)vaavudStopMeasuring {
-    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(sleipnirStoppedMeasuring)]) {
-            [delegate sleipnirStoppedMeasuring];
-        }
-    }
-}
-
 - (void)calibrationPercentageComplete:(NSNumber *)percentage {
     for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(calibrationPercentageComplete:)]) {
@@ -206,7 +190,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 }
 
 /* start the audio input/output and starts sending data */
-- (void)startSleipnir {
+- (void)start {
     [self.audioIO start];
     
     if ([self.locationManager isHeadingAvailable]) {
@@ -218,7 +202,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 }
 
 /* start the audio input/output and starts sending data */
-- (void)stopSleipnir {
+- (void)stop {
     [self.audioIO stop];
     [self.locationManager stop];
 }
@@ -252,6 +236,24 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 
 - (void)processFloatBuffer:(float *)buffer withBufferLengthInFrames:(UInt32)bufferLengthInFrames {
     [self.microphoneOutputDeletage updateBuffer:buffer withBufferSize:bufferLengthInFrames];
+}
+
+- (void)algorithmAudioActive:(BOOL)active {
+    if (active) {
+        for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
+            if ([delegate respondsToSelector:@selector(sleipnirStartedMeasuring)]) {
+                [delegate sleipnirStartedMeasuring];
+            }
+        }
+    }
+    else {
+        for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
+            if ([delegate respondsToSelector:@selector(sleipnirStoppedMeasuring)]) {
+                [delegate sleipnirStoppedMeasuring];
+            }
+        }
+
+    }
 }
 
 @end

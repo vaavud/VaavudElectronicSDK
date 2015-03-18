@@ -77,10 +77,10 @@
 
 /* start the audio input/output (and location,heading) and starts sending data */
 // If Vaavud Electronic is not inserted nothing will happen.
-- (void)startSleipnir;
+- (void)start;
 
 /* stop the audio input/output (and location, heading) and stop sending data */
-- (void)stopSleipnir;
+- (void)stop;
 
 // start calibration mode
 - (void)startCalibration;
