@@ -18,7 +18,7 @@
 
 @interface VEAudioProcessingRaw : NSObject
 
-- (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
+- (void)checkAndProcess:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
 - (void)newSoundData:(int *)data bufferLength:(UInt32) bufferLength;
 - (id)initWithDelegate:(id<VEAudioProcessingDelegate>)delegate;
 

@@ -22,23 +22,6 @@
 
 @end
 
-@protocol AudioManagerDelegate <NSObject>
-
-- (void)vaavudStartedMeasuring;
-- (void)vaavudStopMeasuring;
-- (BOOL)sleipnirAvailable;
-
-@end
-
-
-//@protocol AudioProcessorProtocol <NSObject>
-//
-//- (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
-//- (void)processBufferList:(AudioBufferList *)bufferList withBufferLengthInFrames:(UInt32)bufferLengthInFrames;
-//- (void)processFloatBuffer:(float *)buffer withBufferLengthInFrames:(UInt32)bufferLengthInFrames;
-//
-//@end
-
 @interface VEAudioIO : NSObject
 
 @property (atomic) BOOL sleipnirAvailable;

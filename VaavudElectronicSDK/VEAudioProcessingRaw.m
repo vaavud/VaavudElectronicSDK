@@ -32,6 +32,7 @@
 }
 
 @property (strong, nonatomic) id<VEAudioProcessingDelegate> delegate;
+@property (nonatomic) dispatch_queue_t dispatchQueue;
 
 @end
 
@@ -74,6 +75,9 @@
     mvgDropHalfRefresh = YES;
     
     self.delegate = delegate;
+    
+    self.dispatchQueue = (dispatch_queue_create("com.vaavud.processTickQueue", DISPATCH_QUEUE_SERIAL));
+    dispatch_set_target_queue(self.dispatchQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
     return self;
 }
 
@@ -95,15 +99,25 @@
     mvgDropHalfRefresh = YES;
 }
 
+- (void)checkAndProcess:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames {
+    dispatch_async(self.dispatchQueue, ^(void){
+        [self processBuffer:circBuffer withDefaultBufferLengthInFrames:bufferLengthInFrames];
+        if (circBuffer->fillCount > bufferLengthInFrames*sizeof(SInt16)) {
+            [self checkAndProcess:circBuffer withDefaultBufferLengthInFrames:bufferLengthInFrames];
+        }
+    });
+}
+
+
 - (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames {
     
     NSDate *methodStart = [NSDate date];
     // keep for now to comsume bytes
     int32_t availableBytes;
     SInt16 *circBufferTail = VECircularBufferTail(circBuffer, &availableBytes);
+    UInt32 sampleSize = sizeof(SInt16);
     
-    if (circBufferTail != NULL && circBuffer->fillCount > bufferLengthInFrames) {
-        UInt32 sampleSize = sizeof(SInt16);
+    if (circBufferTail != NULL && circBuffer->fillCount >= bufferLengthInFrames*sampleSize) {
         UInt32 size = MIN(bufferLengthInFrames*sampleSize, availableBytes);
         UInt32 frames = size/sampleSize;
         
@@ -116,19 +130,17 @@
         [self newSoundData:data bufferLength:frames];
         free(data);
         
-        if( circBuffer->fillCount != 2048) {
+        VECircularBufferConsume(circBuffer, size);
+        if( circBuffer->fillCount > 0) {
             NSLog(@"circBuffer fillCount %i", circBuffer->fillCount);
         }
-        
-        VECircularBufferConsume(circBuffer, size);
-//        NSLog(@"fillCount: %i", circBuffer->fillCount);
     } else {
-        NSLog(@"buffer is Null or not filled");
+        NSLog(@"buffer is Null or not filled. Nsamples: %lu", availableBytes/sampleSize);
     }
     
     NSDate *methodFinish = [NSDate date];
     NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
-    if (executionTime*1000 > 10) {
+    if (executionTime*1000 > 1) {
         NSLog(@"executionTime = %f ms", executionTime*1000);
     }
 }

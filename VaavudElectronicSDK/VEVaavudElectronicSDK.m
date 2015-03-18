@@ -231,7 +231,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 }
 
 - (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames {
-    [self.rawProcessor processBuffer:circBuffer withDefaultBufferLengthInFrames:bufferLengthInFrames];
+    [self.rawProcessor checkAndProcess:circBuffer withDefaultBufferLengthInFrames:bufferLengthInFrames];
 }
 
 - (void)processFloatBuffer:(float *)buffer withBufferLengthInFrames:(UInt32)bufferLengthInFrames {

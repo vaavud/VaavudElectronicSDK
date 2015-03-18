@@ -49,7 +49,6 @@
 @property (atomic) BOOL askedToMeasure;
 @property (atomic) BOOL recordingActive;
 @property (atomic) BOOL algorithmActive;
-@property (nonatomic) dispatch_queue_t dispatchQueue;
 
 // from detection
 @property (atomic) BOOL deviceConnected;
@@ -62,11 +61,6 @@
 {
     self = [super init];
     if (self) {
-
-        //from audio Manger
-        self.dispatchQueue = (dispatch_queue_create("com.vaavud.processTickQueue", DISPATCH_QUEUE_SERIAL));
-        dispatch_set_target_queue(self.dispatchQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
-       
         self.audioBuffersInitialized = NO;
         self.askedToMeasure = NO;
         self.algorithmActive = NO;
@@ -106,14 +100,11 @@ static OSStatus recordingCallback(void *inRefCon,
     if (!status) {
         // copy incoming audio data to the audio buffer
         VECircularBufferProduceBytes(&audioProcessor->cirbuffer, bufferList.mBuffers[0].mData, bufferList.mBuffers[0].mDataByteSize);
-        dispatch_async(audioProcessor.dispatchQueue, ^(void){
-            [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
-        });
+        [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
         
         if (audioProcessor.recordingActive) {
             [audioProcessor.recorder appendDataFromBufferList:&bufferList withBufferSize:inNumberFrames];
         }
-        
         
         if (audioProcessor.microphoneOutputDeletage) {
             VEFloatConverterToFloat(audioProcessor->converter,

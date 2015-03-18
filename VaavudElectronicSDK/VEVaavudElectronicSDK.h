@@ -17,13 +17,11 @@
 - (void)newSpeed:(NSNumber *)speed;
 
 /**
- 
  @param windDirection is the direction where the wind is comming from measured in degrees from 0 to 359.
  */
 - (void)newWindDirection:(NSNumber *)windDirection;
 
 /**
- 
  @param wind angle is the wind direction where the wind is comming from relative to the phone in degrees
  from 0 to 359. The 0 reference direction is when the direction perpendicular to the screen, comming from the backside
  towards the front.
@@ -31,11 +29,9 @@
 - (void)newWindAngleLocal:(NSNumber *)angle;
 
 /**
- 
  @param heading is the direction the the phone is pointing as defined by iOS when the phone is upside down 180 degrees is added.
  */
 - (void)newHeading:(NSNumber *)heading;
-
 
 /**
  @param available is true if the Sliepnir wind meter is available to start measureing.
@@ -52,7 +48,6 @@
  Is called when the algorithm stops measureing. ie. if device is removed.
  */
 - (void)sleipnirStoppedMeasuring;
-
 
 /**
  Called during the calibration process to provided user feedback
