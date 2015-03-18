@@ -19,7 +19,6 @@
 @interface VEAudioProcessingRaw : NSObject
 
 - (void)checkAndProcess:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames;
-- (void)newSoundData:(int *)data bufferLength:(UInt32) bufferLength;
 - (id)initWithDelegate:(id<VEAudioProcessingDelegate>)delegate;
 
 @property (weak, nonatomic) VEAudioProcessingTick *processorTick;

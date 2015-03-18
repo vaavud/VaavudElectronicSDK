@@ -10,6 +10,7 @@
 #import "VEAudioProcessingTick.h"
 
 #define CALIBRATE_AUDIO_EVERY_X_BUFFER 20
+#define EXECUTION_METRIX_EVERY 100
 
 @interface VEAudioProcessingRaw() {
     int mvgAvg[3];
@@ -29,6 +30,9 @@
     bool mvgDropHalfRefresh, longTick;
     
     int calibrationCounter;
+    
+    float executionTimes[EXECUTION_METRIX_EVERY];
+    int calculationCounter;
 }
 
 @property (strong, nonatomic) id<VEAudioProcessingDelegate> delegate;
@@ -111,7 +115,11 @@
 
 - (void)processBuffer:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames {
     
-    NSDate *methodStart = [NSDate date];
+    NSDate *methodStart;
+    if (LOG_PERFORMANCE) {
+        methodStart = [NSDate date];
+    }
+
     // keep for now to comsume bytes
     int32_t availableBytes;
     SInt16 *circBufferTail = VECircularBufferTail(circBuffer, &availableBytes);
@@ -121,14 +129,7 @@
         UInt32 size = MIN(bufferLengthInFrames*sampleSize, availableBytes);
         UInt32 frames = size/sampleSize;
         
-        int *data = malloc(sizeof(int)*frames); // should change implementation later dont alocate more memory
-        
-        // iterate over incoming stream an copy to output stream
-        for (int i=0; i < frames; i++) {
-            data[i] = (int) circBufferTail[i] / 32.767 ; // scale to 1000
-        }
-        [self newSoundData:data bufferLength:frames];
-        free(data);
+        [self newSoundData:circBufferTail bufferLength:frames];
         
         VECircularBufferConsume(circBuffer, size);
         if( circBuffer->fillCount > 0) {
@@ -138,22 +139,35 @@
         NSLog(@"buffer is Null or not filled. Nsamples: %lu", availableBytes/sampleSize);
     }
     
-    NSDate *methodFinish = [NSDate date];
-    NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
-    if (executionTime*1000 > 1) {
-        NSLog(@"executionTime = %f ms", executionTime*1000);
+    if (LOG_PERFORMANCE) {
+        NSDate *methodFinish = [NSDate date];
+        NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart]*1000; //ms
+        if (executionTime > 10) {
+            NSLog(@"executionTime = %f ms", executionTime);
+        }
+        
+        executionTimes[calculationCounter] = executionTime;
+        calculationCounter++;
+        if (calculationCounter == EXECUTION_METRIX_EVERY) {
+            float sum = 0;
+            for (int i = 0; i < EXECUTION_METRIX_EVERY; i++) {
+                sum += executionTimes[i];
+            }
+            NSLog(@"Average executionTime: %f ms", sum/(float)EXECUTION_METRIX_EVERY);
+            calculationCounter = 0;
+        }
     }
 }
 
 
-- (void)newSoundData:(int *)data bufferLength:(UInt32)bufferLength {
+- (void)newSoundData:(SInt16 *)data bufferLength:(UInt32)bufferLength {
     // used for stats & volume calibration
     int lDiffMax = 0;
-    int lDiffMin = 10000;
+    int lDiffMin = 6*INT16_MAX;
     long lDiffSum = 0;
     
-    int avgMax = -10000;
-    int avgMin = 10000;
+    int avgMax = INT16_MIN;
+    int avgMin = INT16_MAX;
     
     for (int i = 0; i < bufferLength; i++) {
         // Moving Avg subtract
@@ -188,7 +202,7 @@
             mvgMax = 0;
             mvgMin = 0;
             diffMax = 0;
-            diffMin = 1000;
+            diffMin = 6*INT16_MAX;
             
             mvgState = 0;
             diffState = 0;
@@ -226,14 +240,14 @@
 }
 
 -(void)adjustVolumeDiffMax:(int)ldiffMax diffMin:(int)ldiffMin avgDiff:(int)avgDiff avgMax:(int)avgMax avgMin:(int)avgMin {
-    BOOL rotating = avgMax > 2000 && avgMin < -2000;
-    BOOL stationary = avgMax < 4 && avgMin > -4;
+    BOOL rotating = avgMax > 66000 && avgMin < -66000;
+    BOOL stationary = avgMax < 130 && avgMin > -130;
     
-    if ((stationary && avgDiff < 20) || (rotating && ldiffMax < 2000)) {
+    if ((stationary && avgDiff < 660) || (rotating && ldiffMax < 66000)) {
         [self.delegate adjustVolume:0.01];
         if (LOG_VOLUME) NSLog(@"[VESDK] Volume +: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", 0.01, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
-    else if (ldiffMax > 3800 || (rotating && ldiffMin > 50)) { // ldiffMax > 2700
+    else if (ldiffMax > 125000 || (rotating && ldiffMin > 1650)) { // ldiffMax > 2700
         [self.delegate adjustVolume:-0.01];
         if (LOG_VOLUME) NSLog(@"[VESDK] Volume -: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", 0.01, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
     }
@@ -252,7 +266,7 @@
             break;
         case 1:
             if (sampleSinceTick < 90) {
-                if (mvgAvgSum < 0.5*lastMvgMin && mvgAvgSum < -1200) {
+                if (mvgAvgSum < 0.5*lastMvgMin && mvgAvgSum < -40000) {
                     return true;
                 }
             } else {
