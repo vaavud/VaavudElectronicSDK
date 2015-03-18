@@ -209,7 +209,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     }
     
     // update results
-    if (CACurrentMediaTime() > nextRefreshTime) {
+    if (CACurrentMediaTime() > nextRefreshTime && exponentialFilterInitialzed) {
         [self updateUI];
         [self updateNextRefreshTime];
         if (calibrationMode) {
