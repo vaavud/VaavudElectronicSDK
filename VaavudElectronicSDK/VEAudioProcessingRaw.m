@@ -133,17 +133,17 @@
         
         VECircularBufferConsume(circBuffer, size);
         if( circBuffer->fillCount > 0) {
-            NSLog(@"circBuffer fillCount %i", circBuffer->fillCount);
+            if (LOG_PERFORMANCE) NSLog(@"[VESDK] circBuffer fillCount %i", circBuffer->fillCount);
         }
     } else {
-        NSLog(@"buffer is Null or not filled. Nsamples: %lu", availableBytes/sampleSize);
+        if (LOG_PERFORMANCE) NSLog(@"[VESDK] Buffer is Null or not filled. Nsamples: %lu", availableBytes/sampleSize);
     }
     
     if (LOG_PERFORMANCE) {
         NSDate *methodFinish = [NSDate date];
         NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart]*1000; //ms
         if (executionTime > 10) {
-            NSLog(@"executionTime = %f ms", executionTime);
+            NSLog(@"[VESDK] ExecutionTime = %f ms", executionTime);
         }
         
         executionTimes[calculationCounter] = executionTime;
@@ -153,7 +153,7 @@
             for (int i = 0; i < EXECUTION_METRIX_EVERY; i++) {
                 sum += executionTimes[i];
             }
-            NSLog(@"Average executionTime: %f ms", sum/(float)EXECUTION_METRIX_EVERY);
+            NSLog(@"[VESDK] Average executionTime: %f ms", sum/(float)EXECUTION_METRIX_EVERY);
             calculationCounter = 0;
         }
     }
