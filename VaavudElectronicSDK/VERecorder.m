@@ -76,27 +76,28 @@
 +(AudioStreamBasicDescription)recorderFormatForFileType:(VERecorderFileType)fileType
                                        withSourceFormat:(AudioStreamBasicDescription)sourceFormat
 {
-    AudioStreamBasicDescription asbd;
-    switch ( fileType )
-    {
-        case VERecorderFileTypeAIFF:
-            asbd = [EZAudio AIFFFormatWithNumberOfChannels:sourceFormat.mChannelsPerFrame
-                                                sampleRate:sourceFormat.mSampleRate];
-            break;
-        case VERecorderFileTypeM4A:
-            asbd = [EZAudio M4AFormatWithNumberOfChannels:sourceFormat.mChannelsPerFrame
-                                               sampleRate:sourceFormat.mSampleRate];
-            break;
-            
-        case VERecorderFileTypeWAV:
-            asbd = [EZAudio stereoFloatInterleavedFormatWithSampleRate:sourceFormat.mSampleRate];
-            break;
-            
-        default:
-            asbd = [EZAudio stereoCanonicalNonInterleavedFormatWithSampleRate:sourceFormat.mSampleRate];
-            break;
-    }
-    return asbd;
+//    AudioStreamBasicDescription asbd;
+//    switch ( fileType )
+//    {
+//        case VERecorderFileTypeAIFF:
+//            asbd = [EZAudio AIFFFormatWithNumberOfChannels:sourceFormat.mChannelsPerFrame
+//                                                sampleRate:sourceFormat.mSampleRate];
+//            break;
+//        case VERecorderFileTypeM4A:
+//            asbd = [EZAudio M4AFormatWithNumberOfChannels:sourceFormat.mChannelsPerFrame
+//                                               sampleRate:sourceFormat.mSampleRate];
+//            break;
+//            
+//        case VERecorderFileTypeWAV:
+//            asbd = [self stereoFloatInterleavedFormatWithSampleRate:sourceFormat.mSampleRate];
+//            break;
+//            
+//        default:
+//            asbd = [EZAudio stereoCanonicalNonInterleavedFormatWithSampleRate:sourceFormat.mSampleRate];
+//            break;
+//    }
+//    return asbd;
+    return [VERecorder stereoFloatInterleavedFormatWithSampleRate:sourceFormat.mSampleRate];
 }
 
 +(AudioFileTypeID)recorderFileTypeIdForFileType:(VERecorderFileType)fileType
@@ -128,7 +129,7 @@
 {
     // Finish filling out the destination format description
     UInt32 propSize = sizeof(_destinationFormat);
-    [EZAudio checkResult:AudioFormatGetProperty(kAudioFormatProperty_FormatInfo,
+    [self checkResult:AudioFormatGetProperty(kAudioFormatProperty_FormatInfo,
                                                 0,
                                                 NULL,
                                                 &propSize,
@@ -136,7 +137,7 @@
                operation:"Failed to fill out rest of destination format"];
     
     // Create the audio file
-    [EZAudio checkResult:ExtAudioFileCreateWithURL(_destinationFileURL,
+    [self checkResult:ExtAudioFileCreateWithURL(_destinationFileURL,
                                                    _destinationFileTypeID,
                                                    &_destinationFormat,
                                                    NULL,
@@ -145,7 +146,7 @@
                operation:"Failed to create audio file"];
     
     // Set the client format (which should be equal to the source format)
-    [EZAudio checkResult:ExtAudioFileSetProperty(_destinationFile,
+    [self checkResult:ExtAudioFileSetProperty(_destinationFile,
                                                  kExtAudioFileProperty_ClientDataFormat,
                                                  sizeof(_sourceFormat),
                                                  &_sourceFormat)
@@ -159,7 +160,7 @@
 {
     if( _destinationFile )
     {
-        [EZAudio checkResult:ExtAudioFileWriteAsync(_destinationFile,
+        [self checkResult:ExtAudioFileWriteAsync(_destinationFile,
                                                     bufferSize,
                                                     bufferList)
                    operation:"Failed to write audio data to recorded audio file"];
@@ -171,7 +172,7 @@
     if( _destinationFile )
     {
         // Dispose of the audio file reference
-        [EZAudio checkResult:ExtAudioFileDispose(_destinationFile)
+        [self checkResult:ExtAudioFileDispose(_destinationFile)
                    operation:"Failed to close audio file"];
         
         // Null out the file reference
@@ -188,6 +189,40 @@
 -(void)dealloc
 {
     [self closeAudioFile];
+}
+
+/// ADDED BY ANDREAS OKHOLM FROM EZAUDIO.h
+#pragma mark - OSStatus Utility
+-(void)checkResult:(OSStatus)result
+         operation:(const char *)operation {
+    if (result == noErr) return;
+    char errorString[20];
+    // see if it appears to be a 4-char-code
+    *(UInt32 *)(errorString + 1) = CFSwapInt32HostToBig(result);
+    if (isprint(errorString[1]) && isprint(errorString[2]) && isprint(errorString[3]) && isprint(errorString[4])) {
+        errorString[0] = errorString[5] = '\'';
+        errorString[6] = '\0';
+    } else
+        // no, format it as an integer
+        sprintf(errorString, "%d", (int)result);
+    fprintf(stderr, "Error: %s (%s)\n", operation, errorString);
+    exit(1);
+}
+
+/// ADDED BY ANDREAS OKHOLM FROM EZAUDIO.h
++(AudioStreamBasicDescription)stereoFloatInterleavedFormatWithSampleRate:(float)sampleRate
+{
+    AudioStreamBasicDescription asbd;
+    UInt32 floatByteSize   = sizeof(float);
+    asbd.mChannelsPerFrame = 2;
+    asbd.mBitsPerChannel   = 8 * floatByteSize;
+    asbd.mBytesPerFrame    = asbd.mChannelsPerFrame * floatByteSize;
+    asbd.mBytesPerPacket   = asbd.mChannelsPerFrame * floatByteSize;
+    asbd.mFormatFlags      = kAudioFormatFlagIsPacked|kAudioFormatFlagIsFloat;
+    asbd.mFormatID         = kAudioFormatLinearPCM;
+    asbd.mFramesPerPacket  = 1;
+    asbd.mSampleRate       = sampleRate;
+    return asbd;
 }
 
 @end

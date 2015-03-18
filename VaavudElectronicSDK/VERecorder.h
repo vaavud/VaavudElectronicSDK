@@ -120,4 +120,13 @@ typedef NS_ENUM(NSInteger, VERecorderFileType)
  */
 -(void)closeAudioFile;
 
+//ADDED
+/**
+ 
+ @param sampleRate The desired sample rate
+ @return A new AudioStreamBasicDescription with the specified format.
+ */
++(AudioStreamBasicDescription)stereoFloatInterleavedFormatWithSampleRate:(float)sampleRate;
+
+
 @end
