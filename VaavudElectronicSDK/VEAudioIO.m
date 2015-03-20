@@ -99,8 +99,14 @@ static OSStatus recordingCallback(void *inRefCon,
     
     if (!status) {
         // copy incoming audio data to the audio buffer
-        VECircularBufferProduceBytes(&audioProcessor->cirbuffer, bufferList.mBuffers[0].mData, bufferList.mBuffers[0].mDataByteSize);
-        [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
+        BOOL produce = VECircularBufferProduceBytes(&audioProcessor->cirbuffer, bufferList.mBuffers[0].mData, bufferList.mBuffers[0].mDataByteSize);
+        
+        if (produce) {
+            [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
+        }
+        else {
+            if (LOG_PERFORMANCE) NSLog(@"Sound buffer is full.");
+        }
         
         if (audioProcessor.recordingActive) {
             [audioProcessor.recorder appendDataFromBufferList:&bufferList withBufferSize:inNumberFrames];
@@ -357,7 +363,8 @@ static OSStatus playbackCallback(void *inRefCon,
         [self prepareOutputBuffersWithBufferSize:bufferLengthInFrames andMaxBufferSize:bufferFrameSizeMax];
         [self configureFloatConverterWithFrameSize:bufferLengthInFrames andStreamFormat:audioFormat];
         
-        VECircularBufferInit(&cirbuffer, bufferLengthInFrames*40);
+        // one second
+        VECircularBufferInit(&cirbuffer, SAMPLE_RATE*1*sizeof(SInt16));
         self.audioBuffersInitialized = YES;
     }
     
@@ -402,7 +409,7 @@ static OSStatus playbackCallback(void *inRefCon,
     float signalOffAngle = M_PI/4;
     
     for(int i=0; i<baseSignalLength; i++){
-        baseSignal[i] = (SInt16) (32767*sin(i / (float) baseSignalLength * M_PI*2 + signalOffAngle));
+        baseSignal[i] = (SInt16) (INT16_MAX*sin(i / (float) baseSignalLength * M_PI*2 + signalOffAngle));
         NSLog(@"baseSignal[%i] = %i", i, baseSignal[i]);
     }
     

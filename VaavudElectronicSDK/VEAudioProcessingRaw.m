@@ -10,7 +10,7 @@
 #import "VEAudioProcessingTick.h"
 
 #define CALIBRATE_AUDIO_EVERY_X_BUFFER 20
-#define EXECUTION_METRIX_EVERY 200
+#define EXECUTION_METRIX_EVERY 1000
 
 @interface VEAudioProcessingRaw() {
     int mvgAvg[3];
@@ -104,12 +104,9 @@
 }
 
 - (void)checkAndProcess:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames {
-    dispatch_async(self.dispatchQueue, ^(void){
-        [self processBuffer:circBuffer withDefaultBufferLengthInFrames:bufferLengthInFrames];
-        if (circBuffer->fillCount > bufferLengthInFrames*sizeof(SInt16)) {
-            [self checkAndProcess:circBuffer withDefaultBufferLengthInFrames:bufferLengthInFrames];
-        }
-    });
+        dispatch_async(self.dispatchQueue, ^(void){
+            [self processBuffer:circBuffer withDefaultBufferLengthInFrames:bufferLengthInFrames];
+        });
 }
 
 
@@ -132,7 +129,7 @@
         [self newSoundData:circBufferTail bufferLength:frames];
         
         VECircularBufferConsume(circBuffer, size);
-        if( circBuffer->fillCount > 0) {
+        if( circBuffer->fillCount > bufferLengthInFrames*10) {
             if (LOG_PERFORMANCE) NSLog(@"[VESDK] circBuffer fillCount %i", circBuffer->fillCount);
         }
     } else {
@@ -142,7 +139,7 @@
     if (LOG_PERFORMANCE) {
         NSDate *methodFinish = [NSDate date];
         NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart]*1000; //ms
-        if (executionTime > 10) {
+        if (executionTime > 30) {
             NSLog(@"[VESDK] ExecutionTime = %f ms", executionTime);
         }
         
