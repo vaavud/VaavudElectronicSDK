@@ -624,13 +624,13 @@ static OSStatus playbackCallback(void *inRefCon,
 
 - (void)checkDeviceAvailability {
     
-    [self initializeAudioWithOutput:YES];
+    [self initializeAudioWithOutput:NO];
     // start the audio unit. You should hear something, hopefully :)
     OSStatus status = AudioOutputUnitStart(audioUnit);
     [self hasError:status andFile:__FILE__ andLine:__LINE__];
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        BOOL available = ([self isHeadphoneOutAvailable] && [self isHeadphoneMicAvailable]);
+        BOOL available = ([self isHeadphoneMicAvailable]);
         // stop the audio unit
         OSStatus status = AudioOutputUnitStop(audioUnit);
         [self hasError:status andFile:__FILE__ andLine:__LINE__];
