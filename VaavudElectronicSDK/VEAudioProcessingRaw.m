@@ -69,9 +69,9 @@
     diffMax = 0;
     diffMin = 0;
     
-    lastMvgMax = 500;
-    lastMvgMin = -500;
-    lastDiffMax = 1000;
+    lastMvgMax = 16350;
+    lastMvgMin = -16350;
+    lastDiffMax = 32700;
     lastDiffMin = 0;
     lastMvgGapMax = 0;
     
@@ -95,9 +95,9 @@
     diffMax = 0;
     diffMin = 0;
     
-    lastMvgMax = 500;
-    lastMvgMin = -500;
-    lastDiffMax = 1000;
+    lastMvgMax = 16350;
+    lastMvgMin = -16350;
+    lastDiffMax = 32700;
     lastDiffMin = 0;
     lastMvgGapMax = 0;
     mvgDropHalfRefresh = YES;
@@ -133,7 +133,7 @@
             if (LOG_PERFORMANCE) NSLog(@"[VESDK] circBuffer fillCount %i", circBuffer->fillCount);
         }
     } else {
-        if (LOG_PERFORMANCE) NSLog(@"[VESDK] Buffer is Null or not filled. Nsamples: %lu", availableBytes/sampleSize);
+        if (LOG_PERFORMANCE) NSLog(@"[VESDK] Buffer is Null or not filled. Nsamples: %lu",(unsigned long) availableBytes/sampleSize);
     }
     
     if (LOG_PERFORMANCE) {
