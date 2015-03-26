@@ -80,6 +80,13 @@
                                                      name:AVAudioSessionInterruptionNotification
                                                    object:session];
         
+        AVAudioSession *mySession = [AVAudioSession sharedInstance];
+        NSError *audioSessionError = nil;
+        [mySession setCategory: AVAudioSessionCategoryPlayAndRecord error: &audioSessionError];
+        if (audioSessionError) {
+            NSLog(@"%@", audioSessionError.localizedDescription);
+        }
+        
         [self checkDeviceAvailability];
     }
     return self;
@@ -429,7 +436,6 @@ static OSStatus playbackCallback(void *inRefCon,
 
 - (void)start {
     self.askedToMeasure = YES;
-    [self isHeadphoneOutAvailable];
     [self checkStartStop];
 }
 
@@ -457,17 +463,17 @@ static OSStatus playbackCallback(void *inRefCon,
         self.algorithmActive = YES;
         [self initializeAudioWithOutput:YES];
         
-        // Check the microphone input format
-        if (LOG_AUDIO){
-            NSLog(@"[VESDK] input");
-            [VEAudioIO printASBD: [self inputAudioStreamBasicDescription]];
-        }
-        
-        // Check the microphone input format
-        if (LOG_AUDIO){
-            NSLog(@"[VESDK] output");
-            [VEAudioIO printASBD: [self outputAudioStreamBasicDescription]];
-        }
+//        // Check the microphone input format
+//        if (LOG_AUDIO){
+//            NSLog(@"[VESDK] input");
+//            [VEAudioIO printASBD: [self inputAudioStreamBasicDescription]];
+//        }
+//        
+//        // Check the microphone input format
+//        if (LOG_AUDIO){
+//            NSLog(@"[VESDK] output");
+//            [VEAudioIO printASBD: [self outputAudioStreamBasicDescription]];
+//        }
         
         OSStatus status = AudioOutputUnitStart(audioUnit);  // start the audio unit. You should hear something, hopefully :)
         if (LOG_AUDIO && !status) NSLog(@"[VESDK] AudioUnit Measureing Started");
@@ -636,7 +642,7 @@ static OSStatus playbackCallback(void *inRefCon,
 
 - (void)checkDeviceAvailability {
     
-    [self initializeAudioWithOutput:YES];
+    [self initializeAudioWithOutput:NO];
     // start the audio unit. You should hear something, hopefully :)
     OSStatus status = AudioOutputUnitStart(audioUnit);
     if (LOG_AUDIO && !status) NSLog(@"[VESDK] AudioUnit Checking for microphone, Started");
@@ -648,6 +654,7 @@ static OSStatus playbackCallback(void *inRefCon,
         // stop the audio unit
         OSStatus status = AudioOutputUnitStop(audioUnit);
         if (LOG_AUDIO && !status) NSLog(@"[VESDK] AudioUnit Checking for microphone, Stoped");
+        status = AudioUnitUninitialize(audioUnit);
         [self hasError:status andFile:__FILE__ andLine:__LINE__];
         
         [self sleipnirIsAvaliable:available];
@@ -672,7 +679,8 @@ static OSStatus playbackCallback(void *inRefCon,
             break;
         }
         default: {
-            //NSLog(@"default audio stuff");
+//            NSLog(@"default audio stuff, reason: %li", (long)routeChangeReason);
+//            NSLog(@"audio Category: %@", [AVAudioSession sharedInstance].category);
         }
     }
 }
@@ -700,17 +708,17 @@ static OSStatus playbackCallback(void *inRefCon,
 
 }
 
-- (BOOL) isHeadphoneOutAvailable {
-    //   Microphone should be on before running script
-    AVAudioSessionRouteDescription *audioRoute = [[AVAudioSession sharedInstance] currentRoute];
-    for (AVAudioSessionPortDescription* desc in [audioRoute outputs]) {
-        if ([[desc portType] isEqualToString:AVAudioSessionPortHeadphones]) {
-            return YES;
-        }
-    }
-    if (LOG_AUDIO) NSLog(@"[VESDK] headphoneOut not Available");
-    return NO;
-}
+//- (BOOL) isHeadphoneOutAvailable {
+//    //   Microphone should be on before running script
+//    AVAudioSessionRouteDescription *audioRoute = [[AVAudioSession sharedInstance] currentRoute];
+//    for (AVAudioSessionPortDescription* desc in [audioRoute outputs]) {
+//        if ([[desc portType] isEqualToString:AVAudioSessionPortHeadphones]) {
+//            return YES;
+//        }
+//    }
+//    if (LOG_AUDIO) NSLog(@"[VESDK] headphoneOut not Available");
+//    return NO;
+//}
 
 
 - (BOOL) isHeadphoneMicAvailable {
