@@ -363,8 +363,8 @@ static OSStatus playbackCallback(void *inRefCon,
         [self prepareOutputBuffersWithBufferSize:bufferLengthInFrames andMaxBufferSize:bufferFrameSizeMax];
         [self configureFloatConverterWithFrameSize:bufferLengthInFrames andStreamFormat:audioFormat];
         
-        // one second
-        VECircularBufferInit(&cirbuffer, SAMPLE_RATE*1*sizeof(SInt16));
+        // half second
+        VECircularBufferInit(&cirbuffer, SAMPLE_RATE*0.5*sizeof(SInt16));
         self.audioBuffersInitialized = YES;
     }
     
@@ -692,21 +692,31 @@ static OSStatus playbackCallback(void *inRefCon,
 }
 
 - (void)adjustVolumeLevelAmount:(float) adjustment {
-    currentVolume += adjustment;
+    if ([MPMusicPlayerController applicationMusicPlayer].volume == currentVolume) {
+        currentVolume += adjustment; // don't turn up volume
     
-    if (currentVolume < 0) {
-        currentVolume = 0;
+        if (currentVolume > 1.0) {
+            currentVolume = 1.0;
+            if (LOG_AUDIO) NSLog(@"trying to increase volume above 1");
+        }
+        
+        if (currentVolume < 0.7) {
+            currentVolume = 1.0;
+            if (LOG_AUDIO) NSLog(@"reset volume");
+        }
+        
+        [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
+        if (LOG_AUDIO) NSLog(@"[VESDK] new volume %f", currentVolume);
+    } else {
+        [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
+        if (LOG_AUDIO) NSLog(@"audio was out of sync");
     }
-    if (currentVolume > 1) {
-        currentVolume = 1;
-    }
-    [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
-    if (LOG_AUDIO) NSLog(@"[VESDK] new volume %f", currentVolume);
 }
 
 - (void)setVolumeAtSavedLevel {
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"VOLUME"];
     currentVolume = [[NSUserDefaults standardUserDefaults] floatForKey:@"VOLUME"];
-    if (currentVolume == 0) {
+    if (currentVolume == 0) { // fist time
         currentVolume = 1.0;
     }
     // check if volume is at maximum.

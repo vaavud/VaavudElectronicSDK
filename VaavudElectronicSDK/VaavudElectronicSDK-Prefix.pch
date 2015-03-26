@@ -13,7 +13,7 @@
 #define LOG_AUDIO YES
 #define LOG_VOLUME YES
 #define LOG_TICK_DETECTION YES
-#define LOG_PERFORMANCE YES
+#define LOG_PERFORMANCE NO
 #define LOG NO
 
 #define sampleFrequency 44100
