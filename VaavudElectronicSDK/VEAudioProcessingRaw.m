@@ -212,52 +212,58 @@
         
         counter++;
         
-        if (diffMax > 125000 && calibrateCounterThreshold > 10) {
-            float adjustment = -0.01;
-            [self.delegate adjustVolume:adjustment];
-            if (LOG_VOLUME) NSLog(@"[VESDK] Adjustment: %f", adjustment);
-            calibrateCounterThreshold = 0;
-        }
-        
-        // stats
-        if (calibrationCounter == calibrateCounterThreshold) {
-            lDiffMax = MAX(lDiffMax, mvgDiffSum);
 
-            if (mvgAvgSum < 0) {
-                lDiffMin = MIN(lDiffMin, mvgDiffSum);
-            }
-            
-            avgMax = MAX(avgMax, mvgAvgSum);
-            avgMin = MIN(avgMin, mvgAvgSum);
-            
-            lDiffSum += mvgDiffSum;
-        }
+        
+//        // stats
+//        if (calibrationCounter == calibrateCounterThreshold) {
+//            lDiffMax = MAX(lDiffMax, mvgDiffSum);
+//
+//            if (mvgAvgSum < 0) {
+//                lDiffMin = MIN(lDiffMin, mvgDiffSum);
+//            }
+//            
+//            avgMax = MAX(avgMax, mvgAvgSum);
+//            avgMin = MIN(avgMin, mvgAvgSum);
+//            
+//            lDiffSum += mvgDiffSum;
+//        }
+    }
+    if (diffMax > 3.8*INT16_MAX && calibrationCounter > 10) {
+        float adjustment = -0.01;
+        if (LOG_VOLUME) NSLog(@"[VESDK] diffMax Adjustment: %f", adjustment);
+        [self.delegate adjustVolume:adjustment];
+        calibrationCounter = 0;
     }
     
-    if (calibrationCounter == calibrateCounterThreshold && bufferLength > 0) {
-//        [self adjustVolumeDiffMax:lDiffMax diffMin:lDiffMin avgDiff:(int)(lDiffSum/bufferLength) avgMax:avgMax avgMin:avgMin];
-        calibrationCounter= 0;
-        // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.delegate newMaxAmplitude: [NSNumber numberWithInt:lDiffMax]];
-        });
+    if ((mvgMin < -2.4*INT16_MAX && diffMax > 1*INT16_MAX) && calibrationCounter > 10) {
+        float adjustment = -0.01;
+        if (LOG_VOLUME) NSLog(@"[VESDK] mvgMin Adjustment: %f", adjustment);
+        [self.delegate adjustVolume:adjustment];
+        calibrationCounter = 0;
     }
+    
+//    if (calibrationCounter == calibrateCounterThreshold && bufferLength > 0) {
+////        [self adjustVolumeDiffMax:lDiffMax diffMin:lDiffMin avgDiff:(int)(lDiffSum/bufferLength) avgMax:avgMax avgMin:avgMin];
+//        calibrationCounter= 0;
+//        // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
+//
+//    }
     calibrationCounter++;
 }
 
--(void)adjustVolumeDiffMax:(int)ldiffMax diffMin:(int)ldiffMin avgDiff:(int)avgDiff avgMax:(int)avgMax avgMin:(int)avgMin {
-    
-    BOOL rotating = avgMax > 20000 && avgMin < -20000;
-    BOOL stationary = avgMax < 130 && avgMin > -130;
-    
+//-(void)adjustVolumeDiffMax:(int)ldiffMax diffMin:(int)ldiffMin avgDiff:(int)avgDiff avgMax:(int)avgMax avgMin:(int)avgMin {
+//    
+//    BOOL rotating = avgMax > 20000 && avgMin < -20000;
+//    BOOL stationary = avgMax < 130 && avgMin > -130;
+//    
 //    if ((stationary && avgDiff < 660) || (rotating && ldiffMax < 66000)) {
 //        [self.delegate adjustVolume:0.30];
 //        if (LOG_VOLUME) NSLog(@"[VESDK] Volume +: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", 0.01, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
 //    }
 //    else
-    
-    NSLog(@"[VESDK] max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
-    
+//    
+//    NSLog(@"[VESDK] max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
+//    
 //    if (rotating && ldiffMin > 1650) {
 //        float adjustment = -0.05;
 //        [self.delegate adjustVolume:adjustment];
@@ -269,19 +275,19 @@
 //        if (LOG_VOLUME) NSLog(@"[VESDK] Adjustment: %f", adjustment);
 //    }
 //    else
-    if ((ldiffMax > 125000 && ldiffMin > 100000) || (rotating && ldiffMin > 1650)) { // ldiffMax > 2700
-        float adjustment = -0.01;
-        [self.delegate adjustVolume:adjustment];
-        if (LOG_VOLUME) NSLog(@"[VESDK] Adjustment: %f", adjustment);
-    }
-    else {
+//    if ((ldiffMax > 125000 && ldiffMin > 100000) || (rotating && ldiffMin > 1650)) { // ldiffMax > 2700
+//        float adjustment = -0.01;
+//        [self.delegate adjustVolume:adjustment];
+//        if (LOG_VOLUME) NSLog(@"[VESDK] Adjustment: %f", adjustment);
+//    }
+//    else {
 //        float adjustment = +0.005;
 //        [self.delegate adjustVolume:adjustment];
 //        calibrateCounterThreshold = 100;
 //        if (LOG_VOLUME) NSLog(@"[VESDK] Adjustment: %0.000f", adjustment);
-    }
-    
-}
+//    }
+//
+//}
 
 - (BOOL)detectTick:(int)sampleSinceTick {
     switch (mvgState) {
@@ -386,6 +392,7 @@
     }
     
     if (sampleSinceTick == 6000) {
+        lastTick = counter; // reset tick counter
         [self resetStateMachine];
     }
     

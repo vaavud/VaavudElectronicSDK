@@ -478,6 +478,6 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     }
     [compensationString appendString: [NSString stringWithFormat:@"%f]", compensation[TEETH_PR_REV-1]]];
     
-    if (LOG_TICK_DETECTION) NSLog(@"MeanFilter: %@", compensationString);
+    if (LOG_TICK_DETECTION) NSLog(@"[VESDK] MeanFilter: %@", compensationString);
 }
 @end

@@ -139,7 +139,8 @@ static OSStatus recordingCallback(void *inRefCon,
 
     }
     else {
-        if (LOG_AUDIO) NSLog(@"Error Code responded %d in file %s on line %d\n",(int)status , __FILE__, __LINE__);
+        [audioProcessor hasError:status andFile:__FILE__ andLine:__LINE__];
+//        if (LOG_AUDIO) NSLog(@"Error Code responded %d in file %s on line %d\n",(int)status , __FILE__, __LINE__);
     }
     return status; //    return noErr;
 }
@@ -179,7 +180,7 @@ static OSStatus playbackCallback(void *inRefCon,
 
 -(void)initializeAudioWithOutput:(BOOL)outputFlag
 {
-    NSLog(@"Initialized with output: %i", outputFlag);
+    NSLog(@"[VESDK] Initialized audio system with output: %i", outputFlag);
     
     OSStatus status;
     
@@ -334,15 +335,15 @@ static OSStatus playbackCallback(void *inRefCon,
                                   kOutputBus,
                                   &bufferFrameSizeMax,
                                   &propSize);
-    NSLog(@"framesizeMax:%i", (unsigned int)bufferFrameSizeMax);
+//    NSLog(@"[VESDK] framesizeMax:%i", (unsigned int)bufferFrameSizeMax);
     
     
     NSError *audioSessionError = nil;
     [[AVAudioSession sharedInstance] setPreferredSampleRate:SAMPLE_RATE error:&audioSessionError];
     if (audioSessionError) {
-        NSLog(@"Error setting preferredIOBufferDuration for audio session: %@", audioSessionError.description);
+        NSLog(@"[VESDK] Error setting preferredIOBufferDuration for audio session: %@", audioSessionError.description);
     }
-    NSLog(@"sampleRate: %f", [AVAudioSession sharedInstance].sampleRate );
+//    NSLog(@"sampleRate: %f", [AVAudioSession sharedInstance].sampleRate );
     
     if (!self.audioBuffersInitialized) {
         
@@ -350,13 +351,13 @@ static OSStatus playbackCallback(void *inRefCon,
         
         [[AVAudioSession sharedInstance] setPreferredIOBufferDuration:preferedSampleSize/SAMPLE_RATE error:&audioSessionError];
         if (audioSessionError) {
-            NSLog(@"Error setting preferredIOBufferDuration for audio session: %@", audioSessionError.description);
+            if (LOG_AUDIO) NSLog(@"[VESDK] Error setting preferredIOBufferDuration for audio session: %@", audioSessionError.description);
         }
-        NSLog(@"bufferDuration! Will be wrong having just changed value: %f", [AVAudioSession sharedInstance].IOBufferDuration );
+//        NSLog(@"bufferDuration! Will be wrong having just changed value: %f", [AVAudioSession sharedInstance].IOBufferDuration );
         
         UInt32 bufferLengthInFrames = preferedSampleSize; //round([AVAudioSession sharedInstance].sampleRate * [AVAudioSession sharedInstance].IOBufferDuration) IOBufferDuration is not updated instantly and will be wrong changing setting;
         
-        NSLog(@"framesize:%u", (unsigned int)bufferLengthInFrames);
+//        NSLog(@"framesize:%u", (unsigned int)bufferLengthInFrames);
         
         
         [self prepareIntputBufferWithBufferSize:bufferLengthInFrames];
@@ -371,9 +372,6 @@ static OSStatus playbackCallback(void *inRefCon,
     // Initialize the Audio Unit and cross fingers =)
     status = AudioUnitInitialize(audioUnit);
     [self hasError:status andFile:__FILE__ andLine:__LINE__];
-    
-    NSLog(@"initialized");
-    
 }
 
 
@@ -410,7 +408,7 @@ static OSStatus playbackCallback(void *inRefCon,
     
     for(int i=0; i<baseSignalLength; i++){
         baseSignal[i] = (SInt16) (INT16_MAX*sin(i / (float) baseSignalLength * M_PI*2 + signalOffAngle));
-        NSLog(@"baseSignal[%i] = %i", i, baseSignal[i]);
+//        NSLog(@"baseSignal[%i] = %i", i, baseSignal[i]);
     }
     
     for(int i=0; i<bufferLength; i++){
@@ -419,9 +417,9 @@ static OSStatus playbackCallback(void *inRefCon,
         bufferRight[i] = -baseSignal[phaseIndex];
     }
     
-    for (int i=0; i < 7; i++) {
-        NSLog(@"buffer[%i]: %i", i, bufferLeft[i]);
-    }
+//    for (int i=0; i < 7; i++) {
+//        NSLog(@"buffer[%i]: %i", i, bufferLeft[i]);
+//    }
     
     free(baseSignal);
 }
@@ -446,7 +444,7 @@ static OSStatus playbackCallback(void *inRefCon,
         
         OSStatus status = AudioOutputUnitStop(audioUnit); // stop the audio unit
         [self hasError:status andFile:__FILE__ andLine:__LINE__];
-        if (LOG_AUDIO) NSLog(@"Stoped AudioUnit");
+        if (LOG_AUDIO && !status) NSLog(@"[VESDK] AudioUnit Stoped");
         [self.delegate algorithmAudioActive:NO];
         [self setVolumeToInitialState];
     }
@@ -457,19 +455,19 @@ static OSStatus playbackCallback(void *inRefCon,
         
         // Check the microphone input format
         if (LOG_AUDIO){
-            NSLog(@"[VESDK] input");
-            [VEAudioIO printASBD: [self inputAudioStreamBasicDescription]];
+//            NSLog(@"[VESDK] input");
+//            [VEAudioIO printASBD: [self inputAudioStreamBasicDescription]];
         }
         
         // Check the microphone input format
         if (LOG_AUDIO){
-            NSLog(@"[VESDK] output");
-            [VEAudioIO printASBD: [self outputAudioStreamBasicDescription]];
+//            NSLog(@"[VESDK] output");
+//            [VEAudioIO printASBD: [self outputAudioStreamBasicDescription]];
         }
         
         OSStatus status = AudioOutputUnitStart(audioUnit);  // start the audio unit. You should hear something, hopefully :)
+        if (LOG_AUDIO && !status) NSLog(@"[VESDK] AudioUnit Measureing Started");
         [self hasError:status andFile:__FILE__ andLine:__LINE__];
-        if (LOG_AUDIO) NSLog(@"Started AudioUnit");
         [self.delegate algorithmAudioActive:YES];
         [self setVolumeAtSavedLevel];
     }
@@ -557,8 +555,14 @@ static OSStatus playbackCallback(void *inRefCon,
 
 -(void)hasError:(int)statusCode andFile:(char*)file andLine:(int)line {
     if (statusCode) {
-        printf("Error Code responded %d in file %s on line %d\n", statusCode, file, line);
-        exit(-1);
+        printf("[VESDK] Audio ERROR! Code responded %d in file %s on line %d\n", statusCode, file, line);
+        // try to recover
+        OSStatus status = AudioOutputUnitStop(audioUnit);
+        if (status) {
+            NSLog(@"Failed to stop audioUnit: code: %i, continueing recover", status);
+        }
+        [self checkStartStop];
+//        exit(-1);
     }
 }
 
@@ -627,12 +631,15 @@ static OSStatus playbackCallback(void *inRefCon,
     [self initializeAudioWithOutput:NO];
     // start the audio unit. You should hear something, hopefully :)
     OSStatus status = AudioOutputUnitStart(audioUnit);
+    if (LOG_AUDIO && !status) NSLog(@"[VESDK] AudioUnit Checking for microphone, Started");
     [self hasError:status andFile:__FILE__ andLine:__LINE__];
+    
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         BOOL available = ([self isHeadphoneMicAvailable]);
         // stop the audio unit
         OSStatus status = AudioOutputUnitStop(audioUnit);
+        if (LOG_AUDIO && !status) NSLog(@"[VESDK] AudioUnit Checking for microphone, Stoped");
         [self hasError:status andFile:__FILE__ andLine:__LINE__];
         
         [self sleipnirIsAvaliable:available];
@@ -692,7 +699,7 @@ static OSStatus playbackCallback(void *inRefCon,
 }
 
 - (void)adjustVolumeLevelAmount:(float) adjustment {
-    if ([MPMusicPlayerController applicationMusicPlayer].volume == currentVolume) {
+    if (ABS([MPMusicPlayerController applicationMusicPlayer].volume - currentVolume) < 0.001) {
         currentVolume += adjustment; // don't turn up volume
     
         if (currentVolume > 1.0) {
@@ -706,7 +713,7 @@ static OSStatus playbackCallback(void *inRefCon,
         }
         
         [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
-        if (LOG_AUDIO) NSLog(@"[VESDK] new volume %f", currentVolume);
+        if (LOG_AUDIO) NSLog(@"[VESDK] New Volume %f, adjustment %f", currentVolume, adjustment);
     } else {
         [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
         if (LOG_AUDIO) NSLog(@"audio was out of sync");
@@ -714,11 +721,16 @@ static OSStatus playbackCallback(void *inRefCon,
 }
 
 - (void)setVolumeAtSavedLevel {
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"VOLUME"];
-    currentVolume = [[NSUserDefaults standardUserDefaults] floatForKey:@"VOLUME"];
+//    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"VOLUME"];
+    currentVolume = [[NSUserDefaults standardUserDefaults] floatForKey:@"AUDIO_VOLUME"];
     if (currentVolume == 0) { // fist time
         currentVolume = 1.0;
     }
+    
+    // allways add one % at startup
+    currentVolume += 0.01;
+    currentVolume = currentVolume > 1.0 ? 1.0 : currentVolume;
+    
     // check if volume is at maximum.
     MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
     originalVolume = musicPlayer.volume;
@@ -727,7 +739,7 @@ static OSStatus playbackCallback(void *inRefCon,
 }
 
 - (void)setVolumeToInitialState {
-    [[NSUserDefaults standardUserDefaults] setFloat:currentVolume forKey:@"VOLUME"];
+    [[NSUserDefaults standardUserDefaults] setFloat:currentVolume forKey:@"AUDIO_VOLUME"];
     if (LOG_AUDIO) NSLog(@"[VESDK] Saved volume: %f to user defaults", currentVolume);
     
     MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
