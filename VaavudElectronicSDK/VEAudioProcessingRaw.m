@@ -9,8 +9,8 @@
 #import "VEAudioProcessingRaw.h"
 #import "VEAudioProcessingTick.h"
 
-#define CALIBRATE_AUDIO_EVERY_X_BUFFER 20
-#define EXECUTION_METRIX_EVERY 1000
+static const int EXECUTE_METRICS_EVERY = 1000;
+static const int VOLUME_ADJUST_THRESHOLD = 10;
 
 @interface VEAudioProcessingRaw() {
     int mvgAvg[3];
@@ -29,9 +29,8 @@
     int mvgMax, mvgMin, lastMvgMax, lastMvgMin, diffMax, diffMin, lastDiffMax, lastDiffMin, diffGap, mvgGapMax, lastMvgGapMax, mvgDropHalf, diffRiseThreshold1;
     bool mvgDropHalfRefresh, longTick;
     
-    int calibrationCounter, calibrateCounterThreshold, diffMaxGlobal;
-    
-    float executionTimes[EXECUTION_METRIX_EVERY];
+    int volumeAdjustCounter;
+    float executionTimes[EXECUTE_METRICS_EVERY];
     int calculationCounter;
 }
 
@@ -41,7 +40,6 @@
 @end
 
 @implementation VEAudioProcessingRaw
-
 
 #pragma mark - Initialization
 - (id)init {
@@ -53,7 +51,6 @@
 
 - (id)initWithDelegate:(id<VEAudioProcessingDelegate, DirectionDetectionDelegate>)delegate {
     self = [super init];
-    
     counter = 0;
     bufferIndex = 0;
     bufferIndexLast = 2;
@@ -82,8 +79,6 @@
     
     self.dispatchQueue = (dispatch_queue_create("com.vaavud.processTickQueue", DISPATCH_QUEUE_SERIAL));
     dispatch_set_target_queue(self.dispatchQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
-    
-    calibrateCounterThreshold = CALIBRATE_AUDIO_EVERY_X_BUFFER;
     return self;
 }
 
@@ -147,12 +142,12 @@
         
         executionTimes[calculationCounter] = executionTime;
         calculationCounter++;
-        if (calculationCounter == EXECUTION_METRIX_EVERY) {
+        if (calculationCounter == EXECUTE_METRICS_EVERY) {
             float sum = 0;
-            for (int i = 0; i < EXECUTION_METRIX_EVERY; i++) {
+            for (int i = 0; i < EXECUTE_METRICS_EVERY; i++) {
                 sum += executionTimes[i];
             }
-            NSLog(@"[VESDK] Average executionTime: %f ms", sum/(float)EXECUTION_METRIX_EVERY);
+            NSLog(@"[VESDK] Average executionTime: %f ms", sum/(float) EXECUTE_METRICS_EVERY);
             calculationCounter = 0;
         }
     }
@@ -161,13 +156,6 @@
 
 - (void)newSoundData:(SInt16 *)data bufferLength:(UInt32)bufferLength {
     // used for stats & volume calibration
-    int lDiffMax = 0;
-    int lDiffMin = 6*INT16_MAX;
-    long lDiffSum = 0;
-    
-    int avgMax = INT16_MIN;
-    int avgMin = INT16_MAX;
-    
     for (int i = 0; i < bufferLength; i++) {
         // Moving Avg subtract
         mvgAvgSum -= mvgAvg[bufferIndex];
@@ -209,85 +197,23 @@
             longTick = [self.processorTick newTick:(int)(counter - lastTick)];
             lastTick = counter;
         }
-        
         counter++;
-        
-
-        
-//        // stats
-//        if (calibrationCounter == calibrateCounterThreshold) {
-//            lDiffMax = MAX(lDiffMax, mvgDiffSum);
-//
-//            if (mvgAvgSum < 0) {
-//                lDiffMin = MIN(lDiffMin, mvgDiffSum);
-//            }
-//            
-//            avgMax = MAX(avgMax, mvgAvgSum);
-//            avgMin = MIN(avgMin, mvgAvgSum);
-//            
-//            lDiffSum += mvgDiffSum;
-//        }
     }
-    if (diffMax > 3.8*INT16_MAX && calibrationCounter > 10) {
+    if (diffMax > 3.8*INT16_MAX && volumeAdjustCounter > VOLUME_ADJUST_THRESHOLD) {
         float adjustment = -0.01;
         if (LOG_VOLUME) NSLog(@"[VESDK] diffMax Adjustment: %f", adjustment);
         [self.delegate adjustVolume:adjustment];
-        calibrationCounter = 0;
+        volumeAdjustCounter = 0;
     }
     
-    if ((mvgMin < -2.4*INT16_MAX && diffMax > 1*INT16_MAX) && calibrationCounter > 10) {
+    if ((mvgMin < -2.4*INT16_MAX && diffMax > 1*INT16_MAX) && volumeAdjustCounter > VOLUME_ADJUST_THRESHOLD) {
         float adjustment = -0.01;
         if (LOG_VOLUME) NSLog(@"[VESDK] mvgMin Adjustment: %f", adjustment);
         [self.delegate adjustVolume:adjustment];
-        calibrationCounter = 0;
+        volumeAdjustCounter = 0;
     }
-    
-//    if (calibrationCounter == calibrateCounterThreshold && bufferLength > 0) {
-////        [self adjustVolumeDiffMax:lDiffMax diffMin:lDiffMin avgDiff:(int)(lDiffSum/bufferLength) avgMax:avgMax avgMin:avgMin];
-//        calibrationCounter= 0;
-//        // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
-//
-//    }
-    calibrationCounter++;
+    volumeAdjustCounter++;
 }
-
-//-(void)adjustVolumeDiffMax:(int)ldiffMax diffMin:(int)ldiffMin avgDiff:(int)avgDiff avgMax:(int)avgMax avgMin:(int)avgMin {
-//    
-//    BOOL rotating = avgMax > 20000 && avgMin < -20000;
-//    BOOL stationary = avgMax < 130 && avgMin > -130;
-//    
-//    if ((stationary && avgDiff < 660) || (rotating && ldiffMax < 66000)) {
-//        [self.delegate adjustVolume:0.30];
-//        if (LOG_VOLUME) NSLog(@"[VESDK] Volume +: %f, max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", 0.01, ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
-//    }
-//    else
-//    
-//    NSLog(@"[VESDK] max: %i, min: %i, avg: %i, avgMax: %i, avgMin: %i", ldiffMax, ldiffMin, avgDiff, avgMax, avgMin);
-//    
-//    if (rotating && ldiffMin > 1650) {
-//        float adjustment = -0.05;
-//        [self.delegate adjustVolume:adjustment];
-//        if (LOG_VOLUME) NSLog(@"[VESDK] Adjustment: %f", adjustment);
-//    }
-//    else if ((ldiffMax > 128000 && ldiffMin > 120000) || (rotating && ldiffMin > 1650)) { // ldiffMax > 2700
-//        float adjustment = -0.05;
-//        [self.delegate adjustVolume:adjustment];
-//        if (LOG_VOLUME) NSLog(@"[VESDK] Adjustment: %f", adjustment);
-//    }
-//    else
-//    if ((ldiffMax > 125000 && ldiffMin > 100000) || (rotating && ldiffMin > 1650)) { // ldiffMax > 2700
-//        float adjustment = -0.01;
-//        [self.delegate adjustVolume:adjustment];
-//        if (LOG_VOLUME) NSLog(@"[VESDK] Adjustment: %f", adjustment);
-//    }
-//    else {
-//        float adjustment = +0.005;
-//        [self.delegate adjustVolume:adjustment];
-//        calibrateCounterThreshold = 100;
-//        if (LOG_VOLUME) NSLog(@"[VESDK] Adjustment: %0.000f", adjustment);
-//    }
-//
-//}
 
 - (BOOL)detectTick:(int)sampleSinceTick {
     switch (mvgState) {

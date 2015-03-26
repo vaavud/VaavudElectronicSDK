@@ -569,11 +569,11 @@ static OSStatus playbackCallback(void *inRefCon,
         // try to recover
         OSStatus status = AudioOutputUnitStop(audioUnit);
         if (status) {
-            NSLog(@"Failed to stop audioUnit: code: %i, continueing recover", status);
+            NSLog(@"Failed to stop audioUnit: code: %i, continueing recover", (int)status);
         }
         status = AudioUnitUninitialize(audioUnit);
         if (status) {
-            NSLog(@"Failed to uninitialize the audioUnit: code: %i, continueing recover", status);
+            NSLog(@"Failed to uninitialize the audioUnit: code: %i, continueing recover", (int)status);
         }
         [self checkStartStop];
 //        exit(-1);
@@ -680,7 +680,6 @@ static OSStatus playbackCallback(void *inRefCon,
         }
         default: {
 //            NSLog(@"default audio stuff, reason: %li", (long)routeChangeReason);
-//            NSLog(@"audio Category: %@", [AVAudioSession sharedInstance].category);
         }
     }
 }
@@ -708,20 +707,7 @@ static OSStatus playbackCallback(void *inRefCon,
 
 }
 
-//- (BOOL) isHeadphoneOutAvailable {
-//    //   Microphone should be on before running script
-//    AVAudioSessionRouteDescription *audioRoute = [[AVAudioSession sharedInstance] currentRoute];
-//    for (AVAudioSessionPortDescription* desc in [audioRoute outputs]) {
-//        if ([[desc portType] isEqualToString:AVAudioSessionPortHeadphones]) {
-//            return YES;
-//        }
-//    }
-//    if (LOG_AUDIO) NSLog(@"[VESDK] headphoneOut not Available");
-//    return NO;
-//}
-
-
-- (BOOL) isHeadphoneMicAvailable {
+- (BOOL)isHeadphoneMicAvailable {
     
     // For some reason Microphone needs to be active to determine audio route properly.
     // It works fine the first time the app is started without....
