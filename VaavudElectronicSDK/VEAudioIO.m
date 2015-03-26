@@ -73,6 +73,13 @@
                                                      name:AVAudioSessionRouteChangeNotification
                                                    object:nil];
         
+        AVAudioSession *session = [AVAudioSession sharedInstance];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(audioInteruptCallback:)
+                                                     name:AVAudioSessionInterruptionNotification
+                                                   object:session];
+        
         [self checkDeviceAvailability];
     }
     return self;
@@ -95,7 +102,6 @@ static OSStatus recordingCallback(void *inRefCon,
     
     // render input and check for error
     status = AudioUnitRender(audioProcessor->audioUnit, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, &bufferList);
-//    [audioProcessor hasError:status andFile:__FILE__ andLine:__LINE__]; // concider ignoring errors, Errors might happen when changing volume
     
     if (!status) {
         // copy incoming audio data to the audio buffer
@@ -337,7 +343,6 @@ static OSStatus playbackCallback(void *inRefCon,
                                   &propSize);
 //    NSLog(@"[VESDK] framesizeMax:%i", (unsigned int)bufferFrameSizeMax);
     
-    
     NSError *audioSessionError = nil;
     [[AVAudioSession sharedInstance] setPreferredSampleRate:SAMPLE_RATE error:&audioSessionError];
     if (audioSessionError) {
@@ -346,7 +351,6 @@ static OSStatus playbackCallback(void *inRefCon,
 //    NSLog(@"sampleRate: %f", [AVAudioSession sharedInstance].sampleRate );
     
     if (!self.audioBuffersInitialized) {
-        
         UInt32 preferedSampleSize = 1024;
         
         [[AVAudioSession sharedInstance] setPreferredIOBufferDuration:preferedSampleSize/SAMPLE_RATE error:&audioSessionError];
@@ -354,11 +358,8 @@ static OSStatus playbackCallback(void *inRefCon,
             if (LOG_AUDIO) NSLog(@"[VESDK] Error setting preferredIOBufferDuration for audio session: %@", audioSessionError.description);
         }
 //        NSLog(@"bufferDuration! Will be wrong having just changed value: %f", [AVAudioSession sharedInstance].IOBufferDuration );
-        
         UInt32 bufferLengthInFrames = preferedSampleSize; //round([AVAudioSession sharedInstance].sampleRate * [AVAudioSession sharedInstance].IOBufferDuration) IOBufferDuration is not updated instantly and will be wrong changing setting;
-        
 //        NSLog(@"framesize:%u", (unsigned int)bufferLengthInFrames);
-        
         
         [self prepareIntputBufferWithBufferSize:bufferLengthInFrames];
         [self prepareOutputBuffersWithBufferSize:bufferLengthInFrames andMaxBufferSize:bufferFrameSizeMax];
@@ -428,6 +429,7 @@ static OSStatus playbackCallback(void *inRefCon,
 
 - (void)start {
     self.askedToMeasure = YES;
+    [self isHeadphoneOutAvailable];
     [self checkStartStop];
 }
 
@@ -445,6 +447,8 @@ static OSStatus playbackCallback(void *inRefCon,
         OSStatus status = AudioOutputUnitStop(audioUnit); // stop the audio unit
         [self hasError:status andFile:__FILE__ andLine:__LINE__];
         if (LOG_AUDIO && !status) NSLog(@"[VESDK] AudioUnit Stoped");
+        status = AudioUnitUninitialize(audioUnit);
+        if (LOG_AUDIO && !status) NSLog(@"[VESDK] AudioUnit Uninitialized");
         [self.delegate algorithmAudioActive:NO];
         [self setVolumeToInitialState];
     }
@@ -455,14 +459,14 @@ static OSStatus playbackCallback(void *inRefCon,
         
         // Check the microphone input format
         if (LOG_AUDIO){
-//            NSLog(@"[VESDK] input");
-//            [VEAudioIO printASBD: [self inputAudioStreamBasicDescription]];
+            NSLog(@"[VESDK] input");
+            [VEAudioIO printASBD: [self inputAudioStreamBasicDescription]];
         }
         
         // Check the microphone input format
         if (LOG_AUDIO){
-//            NSLog(@"[VESDK] output");
-//            [VEAudioIO printASBD: [self outputAudioStreamBasicDescription]];
+            NSLog(@"[VESDK] output");
+            [VEAudioIO printASBD: [self outputAudioStreamBasicDescription]];
         }
         
         OSStatus status = AudioOutputUnitStart(audioUnit);  // start the audio unit. You should hear something, hopefully :)
@@ -555,11 +559,15 @@ static OSStatus playbackCallback(void *inRefCon,
 
 -(void)hasError:(int)statusCode andFile:(char*)file andLine:(int)line {
     if (statusCode) {
-        printf("[VESDK] Audio ERROR! Code responded %d in file %s on line %d\n", statusCode, file, line);
+        NSLog(@"[VESDK] Audio ERROR! Code responded %d in file %s on line %d\n", statusCode, file, line);
         // try to recover
         OSStatus status = AudioOutputUnitStop(audioUnit);
         if (status) {
             NSLog(@"Failed to stop audioUnit: code: %i, continueing recover", status);
+        }
+        status = AudioUnitUninitialize(audioUnit);
+        if (status) {
+            NSLog(@"Failed to uninitialize the audioUnit: code: %i, continueing recover", status);
         }
         [self checkStartStop];
 //        exit(-1);
@@ -628,14 +636,14 @@ static OSStatus playbackCallback(void *inRefCon,
 
 - (void)checkDeviceAvailability {
     
-    [self initializeAudioWithOutput:NO];
+    [self initializeAudioWithOutput:YES];
     // start the audio unit. You should hear something, hopefully :)
     OSStatus status = AudioOutputUnitStart(audioUnit);
     if (LOG_AUDIO && !status) NSLog(@"[VESDK] AudioUnit Checking for microphone, Started");
     [self hasError:status andFile:__FILE__ andLine:__LINE__];
     
     
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         BOOL available = ([self isHeadphoneMicAvailable]);
         // stop the audio unit
         OSStatus status = AudioOutputUnitStop(audioUnit);
@@ -667,6 +675,29 @@ static OSStatus playbackCallback(void *inRefCon,
             //NSLog(@"default audio stuff");
         }
     }
+}
+
+- (void)audioInteruptCallback:(NSNotification*)notification {
+    NSDictionary *interuptionDict = notification.userInfo;
+    NSInteger interuptionType = [[interuptionDict valueForKey:AVAudioSessionInterruptionTypeKey] integerValue];
+    switch (interuptionType) {
+        case AVAudioSessionInterruptionTypeBegan: {
+            NSLog(@"[VESDK] AVAudioSessionInterruptionTypeBegan");
+            [self sleipnirIsAvaliable:NO];
+            break;
+        }
+        case AVAudioSessionInterruptionTypeEnded: {
+            NSLog(@"[VESDK] AVAudioSessionInterruptionTypeEnded");
+            if (!self.sleipnirAvailable) {
+                [self checkDeviceAvailability];
+            }
+            break;
+        }
+        default: {
+            //NSLog(@"default audio stuff");
+        }
+    }
+
 }
 
 - (BOOL) isHeadphoneOutAvailable {
