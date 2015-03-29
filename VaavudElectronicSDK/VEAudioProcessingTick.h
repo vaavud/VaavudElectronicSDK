@@ -22,6 +22,7 @@
 @interface VEAudioProcessingTick : NSObject
 
 - (BOOL) newTick:(int)tickLength; // return true if next tick is long
+- (void) newTickReset; // when the raw processing measures zero
 - (id) initWithDelegate:(id<DirectionDetectionDelegate>)delegate;
 
 + (float *) getFitCurve;

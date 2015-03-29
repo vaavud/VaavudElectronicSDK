@@ -320,6 +320,7 @@ static const int VOLUME_ADJUST_THRESHOLD = 10;
     if (sampleSinceTick == 6000) {
         lastTick = counter; // reset tick counter
         [self resetStateMachine];
+        [self.processorTick newTickReset];
     }
     
     return false;

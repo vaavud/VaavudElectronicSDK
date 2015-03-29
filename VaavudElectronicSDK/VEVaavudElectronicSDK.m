@@ -221,7 +221,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 }
 
 - (NSNumber *)frequencyToWindspeed:(NSNumber *)frequency {
-    return @(frequency.floatValue*0.325 + 0.2);
+    return (frequency.floatValue > 0.0) ? @(frequency.floatValue*0.325 + 0.2): @(0.0);
 }
 
 // start calibration mode

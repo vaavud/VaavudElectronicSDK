@@ -139,6 +139,21 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     
 }
 
+- (void)newTickReset {
+    // update results
+    if (CACurrentMediaTime() > nextRefreshTime) {
+        [self updateNextRefreshTime];
+        // See the Thread Safety warning above, but in a nutshell these callbacks happen on a separate audio thread. We wrap any UI updating in a GCD block on the main thread to avoid blocking that audio flow.
+        dispatch_async(dispatch_get_main_queue(),^{
+            //        [self.dirDelegate newWindAngleLocal:[NSNumber numberWithFloat:angleCompensated]];
+            //        [self.dirDelegate newAngularVelocities: angularVelocities];
+            [self.dirDelegate newSpeed: [NSNumber numberWithFloat:0.0]];
+            //        [self.dirDelegate newVelocityProfileError:[NSNumber numberWithFloat:velocityProfileError]];
+        });
+    }
+}
+
+
 - (void)resetDetectionAlgorithm {
     // reset buffers
     for (int i = 0; i < TEETH_PR_REV; i++) {
