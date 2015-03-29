@@ -1,6 +1,5 @@
 //
 //  VERecorder.h // RENAME TO AVOID NAMING NAMING CONFLICT IF USING EZAUDIO AS EXTERNAL LIBRARY
-//  EZAudio
 //
 //  Created by Syed Haris Ali on 12/1/13.
 //  Copyright (c) 2013 Syed Haris Ali. All rights reserved.

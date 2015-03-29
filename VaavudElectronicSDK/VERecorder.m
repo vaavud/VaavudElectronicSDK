@@ -1,6 +1,5 @@
 //
 //  VERecorder.m
-//  EZAudio
 //
 //  Created by Syed Haris Ali on 12/1/13.
 //  Copyright (c) 2013 Syed Haris Ali. All rights reserved.
@@ -24,8 +23,6 @@
 //  THE SOFTWARE.
 
 #import "VERecorder.h"
-
-#import "EZAudio.h"
 
 @interface VERecorder (){
     ExtAudioFileRef             _destinationFile;

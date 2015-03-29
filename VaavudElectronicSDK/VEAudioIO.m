@@ -624,7 +624,7 @@ static OSStatus playbackCallback(void *inRefCon,
 }
 
 /**
- EZaudio File Utility functions
+File Utility functions - for recording
  */
 
 - (NSString *)applicationDocumentsDirectory {
