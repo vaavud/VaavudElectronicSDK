@@ -22,6 +22,7 @@
 @property (strong, nonatomic) VEAudioProcessingTick *tickProcessor;
 @property (strong, nonatomic) VESummeryGenerator *summeryGenerator;
 @property (strong, atomic) NSNumber *currentHeading;
+@property (nonatomic) BOOL isClipFacingScreen;
 
 @property (strong, nonatomic) CLLocationManager *locationManager;
 @property (nonatomic) UIInterfaceOrientation orientation;
@@ -115,6 +116,11 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 }
 
 - (void)newWindAngleLocal:(NSNumber *)angle {
+    
+    if (self.isClipFacingScreen) {
+        angle = @((angle.integerValue + 180)%360);
+    }
+    
     for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(newWindAngleLocal:)]) {
             [delegate newWindAngleLocal:angle];
@@ -290,5 +296,8 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 
 }
 
+- (void)isClipFacingScreen:(BOOL)isFacingScreen {
+    self.isClipFacingScreen = isFacingScreen;
+}
 
 @end

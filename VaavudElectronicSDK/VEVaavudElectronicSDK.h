@@ -86,4 +86,6 @@
 // resets the calibration coefficients
 - (void)resetCalibration;
 
+// set clip potision
+- (void)isClipFacingScreen:(BOOL)isFacingScreen; // default NO
 @end

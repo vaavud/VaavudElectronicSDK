@@ -168,6 +168,17 @@
 			name = External;
 			sourceTree = "<group>";
 		};
+		D78975C21AC8AABD0033A070 /* Analysis */ = {
+			isa = PBXGroup;
+			children = (
+				D70629C519B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h */,
+				D70629C619B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m */,
+				D7D999A619B3AF450099FB8F /* VESummeryGenerator.h */,
+				D7D999A719B3AF450099FB8F /* VESummeryGenerator.m */,
+			);
+			name = Analysis;
+			sourceTree = "<group>";
+		};
 		D7D9996019B3AD3B0099FB8F = {
 			isa = PBXGroup;
 			children = (
@@ -204,14 +215,11 @@
 		D7D9996E19B3AD3B0099FB8F /* VaavudElectronicSDK */ = {
 			isa = PBXGroup;
 			children = (
+				D78975C21AC8AABD0033A070 /* Analysis */,
 				D72343271A9F8888007A937B /* AudioProcessing */,
-				D7D999A619B3AF450099FB8F /* VESummeryGenerator.h */,
-				D7D999A719B3AF450099FB8F /* VESummeryGenerator.m */,
 				D7D9997119B3AD3B0099FB8F /* VEVaavudElectronicSDK.h */,
 				D7D9997319B3AD3B0099FB8F /* VEVaavudElectronicSDK.m */,
 				D7D9996F19B3AD3B0099FB8F /* Supporting Files */,
-				D70629C519B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h */,
-				D70629C619B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m */,
 			);
 			path = VaavudElectronicSDK;
 			sourceTree = "<group>";
