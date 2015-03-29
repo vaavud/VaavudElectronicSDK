@@ -50,8 +50,6 @@
 		D7D999A319B3AF350099FB8F /* VEAudioProcessingRaw.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999A119B3AF350099FB8F /* VEAudioProcessingRaw.m */; };
 		D7D999AE19B3AF450099FB8F /* VESummeryGenerator.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D999A619B3AF450099FB8F /* VESummeryGenerator.h */; };
 		D7D999AF19B3AF450099FB8F /* VESummeryGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999A719B3AF450099FB8F /* VESummeryGenerator.m */; };
-		D7D999B019B3AF450099FB8F /* VELocationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = D7D999A819B3AF450099FB8F /* VELocationManager.h */; };
-		D7D999B119B3AF450099FB8F /* VELocationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D7D999A919B3AF450099FB8F /* VELocationManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -116,8 +114,6 @@
 		D7D999A119B3AF350099FB8F /* VEAudioProcessingRaw.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VEAudioProcessingRaw.m; sourceTree = "<group>"; };
 		D7D999A619B3AF450099FB8F /* VESummeryGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VESummeryGenerator.h; sourceTree = "<group>"; };
 		D7D999A719B3AF450099FB8F /* VESummeryGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VESummeryGenerator.m; sourceTree = "<group>"; };
-		D7D999A819B3AF450099FB8F /* VELocationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VELocationManager.h; sourceTree = "<group>"; };
-		D7D999A919B3AF450099FB8F /* VELocationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VELocationManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -211,8 +207,6 @@
 				D72343271A9F8888007A937B /* AudioProcessing */,
 				D7D999A619B3AF450099FB8F /* VESummeryGenerator.h */,
 				D7D999A719B3AF450099FB8F /* VESummeryGenerator.m */,
-				D7D999A819B3AF450099FB8F /* VELocationManager.h */,
-				D7D999A919B3AF450099FB8F /* VELocationManager.m */,
 				D7D9997119B3AD3B0099FB8F /* VEVaavudElectronicSDK.h */,
 				D7D9997319B3AD3B0099FB8F /* VEVaavudElectronicSDK.m */,
 				D7D9996F19B3AD3B0099FB8F /* Supporting Files */,
@@ -259,7 +253,6 @@
 				D70629C719B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h in Headers */,
 				D7D999AE19B3AF450099FB8F /* VESummeryGenerator.h in Headers */,
 				D7C7D1061A9E801A0004A89C /* VEAudioIO.h in Headers */,
-				D7D999B019B3AF450099FB8F /* VELocationManager.h in Headers */,
 				D7D9999319B3AD8A0099FB8F /* VEVaavudElectronicSDK.h in Headers */,
 				D7794AB41A9FDA80003AC70B /* VEFloatConverter.h in Headers */,
 				D7C7D10B1A9E820B0004A89C /* VECircularBuffer.h in Headers */,
@@ -384,7 +377,6 @@
 				D72343261A9F8879007A937B /* VERecorder.m in Sources */,
 				D7C7D10A1A9E820B0004A89C /* VECircularBuffer.c in Sources */,
 				D7C7D1071A9E801A0004A89C /* VEAudioIO.m in Sources */,
-				D7D999B119B3AF450099FB8F /* VELocationManager.m in Sources */,
 				D7D999A319B3AF350099FB8F /* VEAudioProcessingRaw.m in Sources */,
 				D7D9999F19B3AF290099FB8F /* VEAudioProcessingTick.m in Sources */,
 				D7D999AF19B3AF450099FB8F /* VESummeryGenerator.m in Sources */,

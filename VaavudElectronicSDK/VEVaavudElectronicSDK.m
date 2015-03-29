@@ -10,9 +10,10 @@
 #import "VEAudioProcessingRaw.h"
 #import "VEAudioProcessingTick.h"
 #import "VESummeryGenerator.h"
-#import "VELocationManager.h"
+#import <CoreLocation/CoreLocation.h>
+#import <UIKit/UIKit.h>
 
-@interface VEVaavudElectronicSDK() <VEAudioProcessingDelegate, DirectionDetectionDelegate, VEAudioIODelegate, locationManagerDelegate>
+@interface VEVaavudElectronicSDK() <VEAudioProcessingDelegate, DirectionDetectionDelegate, VEAudioIODelegate, CLLocationManagerDelegate>
 
 @property (strong, atomic) NSMutableArray *VaaElecWindDelegates;
 @property (strong, atomic) NSMutableArray *VaaElecAnalysisDelegates;
@@ -20,8 +21,10 @@
 @property (strong, nonatomic) VEAudioProcessingRaw *rawProcessor;
 @property (strong, nonatomic) VEAudioProcessingTick *tickProcessor;
 @property (strong, nonatomic) VESummeryGenerator *summeryGenerator;
-@property (strong, nonatomic) VELocationManager *locationManager;
 @property (strong, atomic) NSNumber *currentHeading;
+
+@property (strong, nonatomic) CLLocationManager *locationManager;
+@property (nonatomic) UIInterfaceOrientation orientation;
 
 @property (weak, nonatomic) id<VaavudElectronicMicrophoneOutputDelegate> microphoneOutputDeletage;
 
@@ -50,7 +53,6 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     self.VaaElecWindDelegates = [[NSMutableArray alloc] initWithCapacity:3];
     self.VaaElecAnalysisDelegates = [[NSMutableArray alloc] initWithCapacity:3];
     self.summeryGenerator = [[VESummeryGenerator alloc] init];
-    self.locationManager = [[VELocationManager alloc] initWithDelegate:self];
     self.rawProcessor = [[VEAudioProcessingRaw alloc] initWithDelegate:self];
     self.tickProcessor = [[VEAudioProcessingTick alloc] initWithDelegate:self];
     
@@ -108,16 +110,6 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
         if ([delegate respondsToSelector:@selector(newWindDirection:)]) {
             [delegate newWindDirection:speed];
-        }
-    }
-}
-
-- (void)newHeading:(NSNumber *)heading {
-    self.currentHeading = heading;
-    
-    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
-        if ([delegate respondsToSelector:@selector(newHeading:)]) {
-            [delegate newHeading:heading];
         }
     }
 }
@@ -193,18 +185,34 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 - (void)start {
     [self.audioIO start];
     
-    if ([self.locationManager isHeadingAvailable]) {
-        [self.locationManager start];
-    } else {
-        // Do nothing - heading will not be updated
+    // determine upside down
+    self.orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+    
+    // Register for device orientation change notifications.
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(interfaceOrientationChanged)
+                                                 name:UIDeviceOrientationDidChangeNotification object:nil];
+    
+    
+    // start heading updates
+    if ([CLLocationManager headingAvailable])
+    {
+        self.locationManager = [[CLLocationManager alloc] init];
+        self.locationManager.delegate = self;
+        self.locationManager.headingFilter = 1;
+        [self.locationManager startUpdatingHeading];
+    } else
+    {
         if (LOG) NSLog(@"There is no heading avaliable");
+//        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:@"Trying to start heading. Heading is not available" userInfo:nil];
     }
 }
 
 /* start the audio input/output and starts sending data */
 - (void)stop {
     [self.audioIO stop];
-    [self.locationManager stop];
+    [self.locationManager stopUpdatingHeading];
 }
 
 //
@@ -255,5 +263,32 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 
     }
 }
+
+- (void) interfaceOrientationChanged {
+    self.orientation = [[UIApplication sharedApplication] statusBarOrientation];
+}
+
+- (void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading
+{
+    
+    float heading = newHeading.trueHeading;
+    
+    if (self.orientation == UIInterfaceOrientationPortraitUpsideDown) {
+        heading = heading + 180;
+        if (heading > 360) {
+            heading = heading - 360;
+        }
+    }
+    
+    self.currentHeading = [NSNumber numberWithDouble: heading];
+    
+    for (id<VaavudElectronicWindDelegate>delegate in self.VaaElecWindDelegates) {
+        if ([delegate respondsToSelector:@selector(newHeading:)]) {
+            [delegate newHeading:self.currentHeading];
+        }
+    }
+
+}
+
 
 @end

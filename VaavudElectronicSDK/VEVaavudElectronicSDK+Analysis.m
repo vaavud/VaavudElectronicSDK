@@ -87,7 +87,7 @@
 }
 
 - (NSNumber*) getHeading {
-    return [self.locationManager getHeading];
+    return self.currentHeading;
 }
 
 - (NSString*) soundOutputDescription {
