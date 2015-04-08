@@ -8,9 +8,9 @@
 
 #import "VEAudioProcessingTick.h"
 #import <QuartzCore/QuartzCore.h>
+#include <math.h>
 
 #define TEETH_PR_REV 15
-#define SAMPLE_BUFFER_SIZE 40
 #define UPDATE_INTERVAL 0.2 // 5 times a second
 #define ANGLE_CORRRECTION_COEFFICIENT 100 // originally 400 (but since actual velocity difference is about double...
 #define ANGLE_DIFF 1
@@ -213,6 +213,10 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
                     [self.dirDelegate calibrationPercentageComplete: @(1)];
                 });
             }
+            
+            if (CACurrentMediaTime() > nextRefreshTime && calibrationTickCounter >= TEETH_PR_REV) {
+                [self updateUI];
+            }
         }
     }
     else {
@@ -223,17 +227,9 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         
         if (tickCounterSinceStart > TEETH_PR_REV) {
             [self updateExponentialFilter];
-        }
-    }
-    
-    // update results
-    if (CACurrentMediaTime() > nextRefreshTime && tickCounterSinceStart > TEETH_PR_REV) {
-        [self updateUI];
-        [self updateNextRefreshTime];
-        if (calibrationMode) {
-            dispatch_async(dispatch_get_main_queue(),^{
-                [self.dirDelegate calibrationPercentageComplete: [NSNumber numberWithFloat: calibrationTickCounter / (float) REQUIRED_CALIBRATION_TICKS]];
-            });
+            if (CACurrentMediaTime() > nextRefreshTime) {
+                [self updateUI];
+            }
         }
     }
     
@@ -307,6 +303,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
 
 
 - (void) updateUI {
+    [self updateNextRefreshTime];
     
     float tickLengthRelativePrTeethCompensated[TEETH_PR_REV];
     
@@ -314,7 +311,8 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     NSMutableArray *angularVelocities = [[NSMutableArray alloc] initWithCapacity:TEETH_PR_REV];
     
     for (int i = 0; i < TEETH_PR_REV; i++) {
-        float tickLengthRelativePrTeeth = calibrationMode ? tickLengthRelativePrTeethSum[i]/(float)tickLengthRelativePrTeethCounter[i] : expTickLengthRelativePrTeeth[i];
+        
+        float tickLengthRelativePrTeeth = calibrationMode ? tickLengthRelativePrTeethSum[i]/(float)tickLengthRelativePrTeethCounter[i] :expTickLengthRelativePrTeeth[i];
         tickLengthRelativePrTeethCompensated[i] = (tickLengthRelativePrTeeth*compensation[i] -1) * (-100);
         [angularVelocities addObject: [NSNumber numberWithFloat: tickLengthRelativePrTeethCompensated[i]]];
     }
@@ -341,6 +339,12 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         [self.dirDelegate newSpeed: [NSNumber numberWithFloat:rotationSpeed]];
         [self.dirDelegate newVelocityProfileError:[NSNumber numberWithFloat:velocityProfileError]];
     });
+    
+    if (calibrationMode) {
+        dispatch_async(dispatch_get_main_queue(),^{
+            [self.dirDelegate calibrationPercentageComplete: [NSNumber numberWithFloat: calibrationTickCounter / (float) REQUIRED_CALIBRATION_TICKS]];
+        });
+    }
 }
 
 - (void) iterateAngle: (float *) mvgRelativeSpeedPercent {

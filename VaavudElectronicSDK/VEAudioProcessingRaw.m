@@ -9,7 +9,7 @@
 #import "VEAudioProcessingRaw.h"
 #import "VEAudioProcessingTick.h"
 
-static const int EXECUTE_METRICS_EVERY = 1000;
+static const int EXECUTE_METRICS_EVERY = 200;
 static const int VOLUME_ADJUST_THRESHOLD = 10;
 
 @interface VEAudioProcessingRaw() {
@@ -126,9 +126,9 @@ static const int VOLUME_ADJUST_THRESHOLD = 10;
         [self newSoundData:circBufferTail bufferLength:frames];
         
         VECircularBufferConsume(circBuffer, size);
-        if( circBuffer->fillCount > bufferLengthInFrames*10) {
-            if (LOG_PERFORMANCE) NSLog(@"[VESDK] circBuffer fillCount %i", circBuffer->fillCount);
-        }
+//        if( circBuffer->fillCount > bufferLengthInFrames*10) {
+//            if (LOG_PERFORMANCE) NSLog(@"[VESDK] circBuffer fillCount %i", circBuffer->fillCount);
+//        }
     } else {
         if (LOG_PERFORMANCE) NSLog(@"[VESDK] Buffer is Null or not filled. Nsamples: %lu",(unsigned long) availableBytes/sampleSize);
     }
@@ -136,7 +136,7 @@ static const int VOLUME_ADJUST_THRESHOLD = 10;
     if (LOG_PERFORMANCE) {
         NSDate *methodFinish = [NSDate date];
         NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart]*1000; //ms
-        if (executionTime > 30) {
+        if (executionTime > 100) {
             NSLog(@"[VESDK] ExecutionTime = %f ms", executionTime);
         }
         
@@ -149,6 +149,7 @@ static const int VOLUME_ADJUST_THRESHOLD = 10;
             }
             NSLog(@"[VESDK] Average executionTime: %f ms", sum/(float) EXECUTE_METRICS_EVERY);
             calculationCounter = 0;
+            if (LOG_PERFORMANCE) NSLog(@"[VESDK] CircBuffer fillCount %i", circBuffer->fillCount);
         }
     }
 }
@@ -317,7 +318,7 @@ static const int VOLUME_ADJUST_THRESHOLD = 10;
         diffMin = mvgDiffSum;
     }
     
-    if (sampleSinceTick == 6000) {
+    if (sampleSinceTick == 8800) {
         lastTick = counter; // reset tick counter
         [self resetStateMachine];
         [self.processorTick newTickReset];

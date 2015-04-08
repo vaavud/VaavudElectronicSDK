@@ -49,6 +49,7 @@
 @property (atomic) BOOL askedToMeasure;
 @property (atomic) BOOL recordingActive;
 @property (atomic) BOOL algorithmActive;
+@property (atomic) BOOL audioUnitisRunning;
 
 // from detection
 @property (atomic) BOOL deviceConnected;
@@ -111,14 +112,17 @@ static OSStatus recordingCallback(void *inRefCon,
     status = AudioUnitRender(audioProcessor->audioUnit, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, &bufferList);
     
     if (!status) {
-        // copy incoming audio data to the audio buffer
-        BOOL produce = VECircularBufferProduceBytes(&audioProcessor->cirbuffer, bufferList.mBuffers[0].mData, bufferList.mBuffers[0].mDataByteSize);
         
-        if (produce) {
-            [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
-        }
-        else {
-            if (LOG_PERFORMANCE) NSLog(@"Sound buffer is full.");
+        if (audioProcessor.algorithmActive) {
+            // copy incoming audio data to the audio buffer
+            BOOL produce = VECircularBufferProduceBytes(&audioProcessor->cirbuffer, bufferList.mBuffers[0].mData, bufferList.mBuffers[0].mDataByteSize);
+            
+            if (produce) {
+                [audioProcessor.delegate processBuffer:&audioProcessor->cirbuffer withDefaultBufferLengthInFrames:inNumberFrames];
+            }
+            else {
+                if (LOG_PERFORMANCE) NSLog(@"Sound buffer is full.");
+            }
         }
         
         if (audioProcessor.recordingActive) {
@@ -451,6 +455,7 @@ static OSStatus playbackCallback(void *inRefCon,
         self.algorithmActive = NO;
         
         OSStatus status = AudioOutputUnitStop(audioUnit); // stop the audio unit
+        self.audioUnitisRunning = NO;
         [self hasError:status andFile:__FILE__ andLine:__LINE__];
         if (LOG_AUDIO && !status) NSLog(@"[VESDK] AudioUnit Stoped");
         status = AudioUnitUninitialize(audioUnit);
@@ -463,18 +468,7 @@ static OSStatus playbackCallback(void *inRefCon,
         self.algorithmActive = YES;
         [self initializeAudioWithOutput:YES];
         
-//        // Check the microphone input format
-//        if (LOG_AUDIO){
-//            NSLog(@"[VESDK] input");
-//            [VEAudioIO printASBD: [self inputAudioStreamBasicDescription]];
-//        }
-//        
-//        // Check the microphone input format
-//        if (LOG_AUDIO){
-//            NSLog(@"[VESDK] output");
-//            [VEAudioIO printASBD: [self outputAudioStreamBasicDescription]];
-//        }
-        
+        self.audioUnitisRunning = YES;
         OSStatus status = AudioOutputUnitStart(audioUnit);  // start the audio unit. You should hear something, hopefully :)
         if (LOG_AUDIO && !status) NSLog(@"[VESDK] AudioUnit Measureing Started");
         [self hasError:status andFile:__FILE__ andLine:__LINE__];
@@ -568,6 +562,7 @@ static OSStatus playbackCallback(void *inRefCon,
         NSLog(@"[VESDK] Audio ERROR! Code responded %d in file %s on line %d\n", statusCode, file, line);
         // try to recover
         OSStatus status = AudioOutputUnitStop(audioUnit);
+        self.audioUnitisRunning = NO;
         if (status) {
             NSLog(@"Failed to stop audioUnit: code: %i, continueing recover", (int)status);
         }
@@ -626,7 +621,6 @@ static OSStatus playbackCallback(void *inRefCon,
 /**
 File Utility functions - for recording
  */
-
 - (NSString *)applicationDocumentsDirectory {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
@@ -639,26 +633,27 @@ File Utility functions - for recording
                                    kAudioFilePath]];
 }
 
-
 - (void)checkDeviceAvailability {
-    
-    [self initializeAudioWithOutput:NO];
-    // start the audio unit. You should hear something, hopefully :)
-    OSStatus status = AudioOutputUnitStart(audioUnit);
-    if (LOG_AUDIO && !status) NSLog(@"[VESDK] AudioUnit Checking for microphone, Started");
-    [self hasError:status andFile:__FILE__ andLine:__LINE__];
-    
-    
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        BOOL available = ([self isHeadphoneMicAvailable]);
-        // stop the audio unit
-        OSStatus status = AudioOutputUnitStop(audioUnit);
-        if (LOG_AUDIO && !status) NSLog(@"[VESDK] AudioUnit Checking for microphone, Stoped");
-        status = AudioUnitUninitialize(audioUnit);
+    if (!self.audioUnitisRunning){
+        [self initializeAudioWithOutput:NO];
+        // start the audio unit. You should hear something, hopefully :)
+        self.audioUnitisRunning = YES;
+        OSStatus status = AudioOutputUnitStart(audioUnit);
+        if (LOG_AUDIO && !status) NSLog(@"[VESDK] AudioUnit Checking for microphone, Started");
         [self hasError:status andFile:__FILE__ andLine:__LINE__];
         
-        [self sleipnirIsAvaliable:available];
-    });
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            BOOL available = ([self isHeadphoneMicAvailable]);
+            // stop the audio unit
+            OSStatus status = AudioOutputUnitStop(audioUnit);
+            self.audioUnitisRunning = NO;
+            if (LOG_AUDIO && !status) NSLog(@"[VESDK] AudioUnit Checking for microphone, Stoped");
+            status = AudioUnitUninitialize(audioUnit);
+            [self hasError:status andFile:__FILE__ andLine:__LINE__];
+            
+            [self sleipnirIsAvaliable:available];
+        });
+    }
 }
 
 - (void)audioRouteChangeListenerCallback:(NSNotification*)notification {
