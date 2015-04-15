@@ -485,6 +485,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     
     [self saveCompensation];
     [self printCompensationString];
+    [self printRelativeCompensationString];
 }
 
 - (void)resetCalibration {
@@ -509,4 +510,15 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     
     if (LOG_TICK_DETECTION) NSLog(@"[VESDK] MeanFilter: %@", compensationString);
 }
+
+- (void)printRelativeCompensationString {
+    NSMutableString *compensationString = [NSMutableString stringWithString:@"["];
+    for (int i = 0; i < TEETH_PR_REV -1 ; i++) {
+        [compensationString appendString: [NSString stringWithFormat:@"%f,", (compensation[i]-compensationOriginal[i])/compensationOriginal[i]*100]];
+    }
+    [compensationString appendString: [NSString stringWithFormat:@"%f]", compensation[TEETH_PR_REV-1]]];
+    
+    if (LOG_TICK_DETECTION) NSLog(@"[VESDK] MeanFilterPercent: %@", compensationString);
+}
+
 @end
