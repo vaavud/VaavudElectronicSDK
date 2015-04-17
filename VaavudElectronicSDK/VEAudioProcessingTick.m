@@ -58,7 +58,7 @@
     
 }
 
-@property (strong, nonatomic) id<DirectionDetectionDelegate> dirDelegate;
+@property (strong, nonatomic) id<VEAudioProcessingTickDelegate> dirDelegate;
 
 @end
 
@@ -81,7 +81,7 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     return nil;
 }
 
-- (id)initWithDelegate:(id<DirectionDetectionDelegate>)delegate {
+- (id)initWithDelegate:(id<VEAudioProcessingTickDelegate>)delegate {
     self = [super init];
     self.dirDelegate = delegate;
     nextRefreshTime = CACurrentMediaTime();

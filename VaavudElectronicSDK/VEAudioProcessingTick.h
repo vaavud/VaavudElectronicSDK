@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 
 
-@protocol DirectionDetectionDelegate
+@protocol VEAudioProcessingTickDelegate
 - (void) newSpeed: (NSNumber*) speed;
 - (void) newAngularVelocities: (NSArray*) angularVelocities;
 - (void) newWindAngleLocal:(NSNumber*) angle;
@@ -23,7 +23,7 @@
 
 - (BOOL) newTick:(int)tickLength; // return true if next tick is long
 - (void) newTickReset; // when the raw processing measures zero
-- (id) initWithDelegate:(id<DirectionDetectionDelegate>)delegate;
+- (id) initWithDelegate:(id<VEAudioProcessingTickDelegate>)delegate;
 
 + (float *) getFitCurve;
 - (int *) getEdgeAngles;

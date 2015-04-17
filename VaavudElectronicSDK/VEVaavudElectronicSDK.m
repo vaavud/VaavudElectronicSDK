@@ -13,7 +13,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import <UIKit/UIKit.h>
 
-@interface VEVaavudElectronicSDK() <VEAudioProcessingDelegate, DirectionDetectionDelegate, VEAudioIODelegate, CLLocationManagerDelegate>
+@interface VEVaavudElectronicSDK() <VEAudioProcessingRawDelegate, VEAudioProcessingTickDelegate, VEAudioIODelegate, CLLocationManagerDelegate>
 
 @property (strong, atomic) NSMutableArray *VaaElecWindDelegates;
 @property (strong, atomic) NSMutableArray *VaaElecAnalysisDelegates;

@@ -34,7 +34,7 @@ static const int VOLUME_ADJUST_THRESHOLD = 10;
     int calculationCounter;
 }
 
-@property (strong, nonatomic) id<VEAudioProcessingDelegate> delegate;
+@property (strong, nonatomic) id<VEAudioProcessingRawDelegate> delegate;
 @property (nonatomic) dispatch_queue_t dispatchQueue;
 
 @end
@@ -49,7 +49,7 @@ static const int VOLUME_ADJUST_THRESHOLD = 10;
     return nil;
 }
 
-- (id)initWithDelegate:(id<VEAudioProcessingDelegate, DirectionDetectionDelegate>)delegate {
+- (id)initWithDelegate:(id<VEAudioProcessingRawDelegate>)delegate {
     self = [super init];
     counter = 0;
     bufferIndex = 0;
