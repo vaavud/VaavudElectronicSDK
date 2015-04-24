@@ -71,8 +71,10 @@
 - (void)removeListener:(id<VaavudElectronicWindDelegate>)delegate;
 
 /* start the audio input/output (and location,heading) and starts sending data */
-// If Vaavud Electronic is not inserted nothing will happen.
 - (void)start;
+
+/* start the audio input/output (and location,heading) and starts sending data */
+- (void)startWithClipFacingScreen:(BOOL)isFacingScreen;
 
 /* stop the audio input/output (and location, heading) and stop sending data */
 - (void)stop;
@@ -85,7 +87,4 @@
 
 // resets the calibration coefficients
 - (void)resetCalibration;
-
-// set clip potision
-- (void)isClipFacingScreen:(BOOL)isFacingScreen; // default NO
 @end

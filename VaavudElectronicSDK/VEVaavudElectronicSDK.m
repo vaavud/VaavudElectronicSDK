@@ -189,6 +189,12 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 
 /* start the audio input/output and starts sending data */
 - (void)start {
+    [self startWithClipFacingScreen:NO];
+}
+
+- (void)startWithClipFacingScreen:(BOOL)isFacingScreen {
+    self.isClipFacingScreen = isFacingScreen;
+    
     [self.audioIO start];
     
     // determine upside down
@@ -203,17 +209,18 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     
     // start heading updates
     if ([CLLocationManager headingAvailable])
-    {
+        {
         self.locationManager = [[CLLocationManager alloc] init];
         self.locationManager.delegate = self;
         self.locationManager.headingFilter = 1;
         [self.locationManager startUpdatingHeading];
-    } else
-    {
-        if (LOG) NSLog(@"There is no heading avaliable");
-//        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:@"Trying to start heading. Heading is not available" userInfo:nil];
-    }
+        } else
+            {
+            if (LOG) NSLog(@"There is no heading avaliable");
+            //        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:@"Trying to start heading. Heading is not available" userInfo:nil];
+            }
 }
+
 
 /* start the audio input/output and starts sending data */
 - (void)stop {
@@ -294,10 +301,6 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
         }
     }
 
-}
-
-- (void)isClipFacingScreen:(BOOL)isFacingScreen {
-    self.isClipFacingScreen = isFacingScreen;
 }
 
 @end
