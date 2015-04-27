@@ -225,6 +225,7 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
 /* start the audio input/output and starts sending data */
 - (void)stop {
     [self.audioIO stop];
+    [self.tickProcessor endCalibration]; // always make sure to start in standard mode.
     [self.locationManager stopUpdatingHeading];
 }
 

@@ -267,8 +267,6 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     expTickLengthRelativePrTeeth[teethProcessIndex] = a_smoothingFactor * tickLengthRelative + (1 - a_smoothingFactor) * expTickLengthRelativePrTeeth[teethProcessIndex];
 }
 
-
-
 - (void) locateStart:(int)samples{
 //    NSLog(@"Trying to locate start: Ratio: %f, StartCounter: %d", samples / ((float) lastTickLength), startCounter);
     if (samples > 1.2 * lastTickLength && samples < 1.4 * lastTickLength) {
@@ -285,7 +283,6 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         if (startCounter % TEETH_PR_REV != 0) {
             startCounter = 0;
         }
-        
     }
     
     if (startCounter > 2 * TEETH_PR_REV) {

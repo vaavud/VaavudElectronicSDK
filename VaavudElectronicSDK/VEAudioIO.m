@@ -634,6 +634,14 @@ File Utility functions - for recording
 }
 
 - (void)checkDeviceAvailability {
+    [self checkDeviceAvailabilityRetryCount:0];
+}
+
+- (void)checkDeviceAvailabilityRetryCount:(int)retry {
+    if (retry < 0) {
+        return;
+    }
+    
     if (!self.audioUnitisRunning){
         [self initializeAudioWithOutput:NO];
         // start the audio unit. You should hear something, hopefully :)
@@ -652,6 +660,9 @@ File Utility functions - for recording
             [self hasError:status andFile:__FILE__ andLine:__LINE__];
             
             [self sleipnirIsAvaliable:available];
+            if (!available) {
+                [self checkDeviceAvailabilityRetryCount:retry-1];
+            }
         });
     }
 }
@@ -669,7 +680,7 @@ File Utility functions - for recording
         case AVAudioSessionRouteChangeReasonNewDeviceAvailable: {
             NSLog(@"[VESDK] AVAudioSessionRouteChangeReasonNewDeviceAvailable");
             if (!self.sleipnirAvailable) {
-                [self checkDeviceAvailability];
+                [self checkDeviceAvailabilityRetryCount:3];
             }
             break;
         }
