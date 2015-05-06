@@ -10,29 +10,29 @@
 
 
 @protocol VEAudioProcessingTickDelegate
-- (void) newSpeed: (NSNumber*) speed;
-- (void) newAngularVelocities: (NSArray*) angularVelocities;
-- (void) newWindAngleLocal:(NSNumber*) angle;
-- (void) calibrationPercentageComplete: (NSNumber*) percentage;
-- (void) newTickDetectionErrorCount: (NSNumber *) tickDetectionErrorCount;
-- (void) newVelocityProfileError: (NSNumber *) profileError;
+- (void)newSpeed: (NSNumber*) speed;
+- (void)newAngularVelocities: (NSArray*) angularVelocities;
+- (void)newWindAngleLocal:(NSNumber*) angle;
+- (void)calibrationPercentageComplete: (NSNumber*) percentage;
+- (void)newTickDetectionErrorCount: (NSNumber *) tickDetectionErrorCount;
+- (void)newVelocityProfileError: (NSNumber *) profileError;
 @end
 
 
 @interface VEAudioProcessingTick : NSObject
+- (BOOL)newTick:(int)tickLength; // return true if next tick is long
+- (void)newTickReset; // when the raw processing measures zero
+- (id)initWithDelegate:(id<VEAudioProcessingTickDelegate>)delegate;
 
-- (BOOL) newTick:(int)tickLength; // return true if next tick is long
-- (void) newTickReset; // when the raw processing measures zero
-- (id) initWithDelegate:(id<VEAudioProcessingTickDelegate>)delegate;
-
-+ (float *) getFitCurve;
-- (int *) getEdgeAngles;
+- (NSArray *)getEncoderCoefficients;
++ (float *)getFitCurve;
+- (int *)getEdgeAngles;
 
 // start calibration mode
--(void) startCalibration;
+- (void)startCalibration;
 
 // end calibbration mode
--(void) endCalibration;
+- (void)endCalibration;
 
 // reset calibration
 - (void)resetCalibration;

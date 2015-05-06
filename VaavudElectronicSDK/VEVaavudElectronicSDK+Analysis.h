@@ -60,6 +60,12 @@
 // returns the EdgeAngles for the samples
 - (int *)getEdgeAngles;
 
+// array of length 15
+- (NSArray *)getEncoderCoefficients;
+
+// sound output volume
+- (float)getVolume;
+
 // return the current heading of device (if avilale)
 - (NSNumber *)getHeading;
 

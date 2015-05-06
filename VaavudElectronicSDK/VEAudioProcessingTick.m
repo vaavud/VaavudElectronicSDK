@@ -445,6 +445,14 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
     return tickEdgeAngle;
 }
 
+- (NSArray *)getEncoderCoefficients{
+    NSMutableArray *encoderCoefficients = [[NSMutableArray alloc] initWithCapacity:TEETH_PR_REV];
+    for (int i=0; i < TEETH_PR_REV; i++) {
+        encoderCoefficients[i] = @((compensationOriginal[i]/compensation[i]-1)*100);
+    }
+    return encoderCoefficients;
+}
+
 // start calibration mode
 -(void) startCalibration {
     [self resetCalibration];

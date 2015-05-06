@@ -82,6 +82,14 @@
     return [self.tickProcessor getEdgeAngles];
 }
 
+- (NSArray *) getEncoderCoefficients {
+    return [self.tickProcessor getEncoderCoefficients];
+}
+
+- (float) getVolume {
+    return [[NSUserDefaults standardUserDefaults] floatForKey:@"AUDIO_VOLUME"];
+}
+
 - (void) generateSummaryFile {
     [self.summeryGenerator generateFile];
 }
