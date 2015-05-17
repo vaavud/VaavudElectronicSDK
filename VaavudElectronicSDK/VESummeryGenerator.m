@@ -14,8 +14,7 @@
 @property (nonatomic, strong) NSNumber *heading;
 @property (nonatomic, strong) NSArray *anglularVelocties;
 @property (nonatomic, weak) VEVaavudElectronicSDK *vaavudElectronic;
-
-
+@property (atomic) NSMutableArray *volumeReponses;
 @end
 
 @implementation VESummeryGenerator
@@ -52,6 +51,9 @@
     return [self recordingAngularVelocitiesFilePathURL];
 }
 
+- (NSURL*) summaryVolumePath{
+    return [self recordingVolumeFilePathURL];
+}
 
 
 // Starts the recieving updates
@@ -59,6 +61,8 @@
     if (!self.vaavudElectronic) {
         self.vaavudElectronic = [VEVaavudElectronicSDK sharedVaavudElectronic];
     }
+    
+    self.volumeReponses = [[NSMutableArray alloc] initWithCapacity:1000];
     
     [self.vaavudElectronic addListener:self];
     [self.vaavudElectronic addAnalysisListener:self];
@@ -77,12 +81,21 @@
     
     [self.vaavudElectronic removeListener:self];
     [self.vaavudElectronic removeAnalysisListener:self];
+    
+    NSLog(@"[VESDK] Summary Volume: %@", self.volumeReponses.description);
+}
+
+- (void) volumeResponse:(VEVolumeReponse *) response {
+    if (self.volumeReponses) {
+        [self.volumeReponses addObject:response];
+    }
 }
 
 // generated the file
 - (void) generateFile {
     [self generateStandardSummeryFile];
     [self generateAngularVelocitySummeryFile];
+    [self generateVolumeSummeryFile];
 }
 
 
@@ -177,6 +190,60 @@
                    error:nil];
 }
 
+- (void) generateVolumeSummeryFile {
+    
+    NSMutableArray *rowsStrings = [[NSMutableArray alloc] initWithCapacity:self.volumeReponses.count];
+    NSMutableArray *headerrow = [[NSMutableArray alloc] initWithCapacity:16];
+    
+    [headerrow addObject: @"volume"];
+    [headerrow addObject: @"diffMax"];
+    [headerrow addObject: @"diffMin"];
+    [headerrow addObject: @"diffAvg"];
+    [headerrow addObject: @"mvgMax"];
+    [headerrow addObject: @"mvgMin"];
+    [headerrow addObject: @"mvgAvg"];
+    [headerrow addObject: @"diff10"];
+    [headerrow addObject: @"diff20"];
+    [headerrow addObject: @"diff30"];
+    [headerrow addObject: @"diff40"];
+    [headerrow addObject: @"diff50"];
+    [headerrow addObject: @"diff60"];
+    [headerrow addObject: @"diff70"];
+    [headerrow addObject: @"diff80"];
+    [headerrow addObject: @"diff90"];
+    [rowsStrings addObject: [headerrow componentsJoinedByString:@","]];
+    
+    for (VEVolumeReponse *volRespons in self.volumeReponses.copy) {
+        NSMutableArray *row = [[NSMutableArray alloc] initWithCapacity:16];
+        [row addObject: [NSString stringWithFormat:@"%f", volRespons.volume]];
+        [row addObject: [NSString stringWithFormat:@"%i", volRespons.diffMax]];
+        [row addObject: [NSString stringWithFormat:@"%i", volRespons.diffMin]];
+        [row addObject: [NSString stringWithFormat:@"%i", volRespons.diffAvg]];
+        [row addObject: [NSString stringWithFormat:@"%i", volRespons.mvgMax]];
+        [row addObject: [NSString stringWithFormat:@"%i", volRespons.mvgMin]];
+        [row addObject: [NSString stringWithFormat:@"%i", volRespons.mvgAvg]];
+        [row addObject: [NSString stringWithFormat:@"%i", volRespons.diff10]];
+        [row addObject: [NSString stringWithFormat:@"%i", volRespons.diff20]];
+        [row addObject: [NSString stringWithFormat:@"%i", volRespons.diff30]];
+        [row addObject: [NSString stringWithFormat:@"%i", volRespons.diff40]];
+        [row addObject: [NSString stringWithFormat:@"%i", volRespons.diff50]];
+        [row addObject: [NSString stringWithFormat:@"%i", volRespons.diff60]];
+        [row addObject: [NSString stringWithFormat:@"%i", volRespons.diff70]];
+        [row addObject: [NSString stringWithFormat:@"%i", volRespons.diff80]];
+        [row addObject: [NSString stringWithFormat:@"%i", volRespons.diff90]];
+        [rowsStrings addObject: [row componentsJoinedByString:@","]];
+        
+    }
+    
+    NSString *content = [rowsStrings componentsJoinedByString: @"\n"];
+    //save content to the documents directory
+    [content writeToFile:[[self recordingVolumeFilePathURL] relativePath]
+              atomically:NO
+                encoding:NSStringEncodingConversionAllowLossy
+                   error:nil];
+}
+
+
 
 -(NSString*)applicationDocumentsDirectory
 {
@@ -197,6 +264,10 @@
                                    @"summeryAngularVelocitiesTextFile.txt"]];
 }
 
-
+-(NSURL*)recordingVolumeFilePathURL {
+    return [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%@",
+                                   [self applicationDocumentsDirectory],
+                                   @"summeryVolumeTextFile.txt"]];
+}
 
 @end

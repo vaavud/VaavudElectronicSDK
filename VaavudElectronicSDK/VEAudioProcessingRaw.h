@@ -10,9 +10,11 @@
 #import <MediaPlayer/MediaPlayer.h>
 #import "VEAudioProcessingTick.h"
 #import "VEAudioIO.h"
+#import "VESummeryGenerator.h"
 
 @protocol VEAudioProcessingRawDelegate <NSObject>
 - (void)newMaxAmplitude:(NSNumber*) amplitude; // Analysis
+- (void)volumeResponse:(VEVolumeReponse *)volumeResponse;
 - (void)adjustVolume:(float) adjustment;
 @end
 

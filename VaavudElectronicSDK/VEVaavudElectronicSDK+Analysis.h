@@ -51,6 +51,9 @@
 // returns the local path of the recording
 - (NSURL *)summeryAngularVelocitiesPath;
 
+// returns the local path of the recording
+- (NSURL *)summaryVolumePath;
+
 // generate summaryFile
 - (void)generateSummaryFile;
 

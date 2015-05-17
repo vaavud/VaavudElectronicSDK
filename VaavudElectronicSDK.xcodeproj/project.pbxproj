@@ -31,6 +31,8 @@
 		D77285B619D3126F00636CDA /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D77285B519D3126F00636CDA /* Accelerate.framework */; };
 		D7794AB41A9FDA80003AC70B /* VEFloatConverter.h in Headers */ = {isa = PBXBuildFile; fileRef = D7794AB21A9FDA80003AC70B /* VEFloatConverter.h */; };
 		D7794AB51A9FDA80003AC70B /* VEFloatConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = D7794AB31A9FDA80003AC70B /* VEFloatConverter.m */; };
+		D7B3879D1B07FE32008763E1 /* VEVolumeReponse.h in Headers */ = {isa = PBXBuildFile; fileRef = D7B3879B1B07FE32008763E1 /* VEVolumeReponse.h */; };
+		D7B3879E1B07FE32008763E1 /* VEVolumeReponse.m in Sources */ = {isa = PBXBuildFile; fileRef = D7B3879C1B07FE32008763E1 /* VEVolumeReponse.m */; };
 		D7C7D1061A9E801A0004A89C /* VEAudioIO.h in Headers */ = {isa = PBXBuildFile; fileRef = D7C7D1041A9E801A0004A89C /* VEAudioIO.h */; };
 		D7C7D1071A9E801A0004A89C /* VEAudioIO.m in Sources */ = {isa = PBXBuildFile; fileRef = D7C7D1051A9E801A0004A89C /* VEAudioIO.m */; };
 		D7C7D10A1A9E820B0004A89C /* VECircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = D7C7D1081A9E820B0004A89C /* VECircularBuffer.c */; };
@@ -94,6 +96,8 @@
 		D77285B519D3126F00636CDA /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		D7794AB21A9FDA80003AC70B /* VEFloatConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VEFloatConverter.h; sourceTree = "<group>"; };
 		D7794AB31A9FDA80003AC70B /* VEFloatConverter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VEFloatConverter.m; sourceTree = "<group>"; };
+		D7B3879B1B07FE32008763E1 /* VEVolumeReponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VEVolumeReponse.h; sourceTree = "<group>"; };
+		D7B3879C1B07FE32008763E1 /* VEVolumeReponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VEVolumeReponse.m; sourceTree = "<group>"; };
 		D7C7D1041A9E801A0004A89C /* VEAudioIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VEAudioIO.h; sourceTree = "<group>"; };
 		D7C7D1051A9E801A0004A89C /* VEAudioIO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VEAudioIO.m; sourceTree = "<group>"; };
 		D7C7D1081A9E820B0004A89C /* VECircularBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VECircularBuffer.c; sourceTree = "<group>"; };
@@ -175,6 +179,8 @@
 				D70629C619B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m */,
 				D7D999A619B3AF450099FB8F /* VESummeryGenerator.h */,
 				D7D999A719B3AF450099FB8F /* VESummeryGenerator.m */,
+				D7B3879B1B07FE32008763E1 /* VEVolumeReponse.h */,
+				D7B3879C1B07FE32008763E1 /* VEVolumeReponse.m */,
 			);
 			name = Analysis;
 			sourceTree = "<group>";
@@ -257,6 +263,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D7B3879D1B07FE32008763E1 /* VEVolumeReponse.h in Headers */,
 				D7D999A219B3AF350099FB8F /* VEAudioProcessingRaw.h in Headers */,
 				D70629C719B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h in Headers */,
 				D7D999AE19B3AF450099FB8F /* VESummeryGenerator.h in Headers */,
@@ -387,6 +394,7 @@
 				D7C7D1071A9E801A0004A89C /* VEAudioIO.m in Sources */,
 				D7D999A319B3AF350099FB8F /* VEAudioProcessingRaw.m in Sources */,
 				D7D9999F19B3AF290099FB8F /* VEAudioProcessingTick.m in Sources */,
+				D7B3879E1B07FE32008763E1 /* VEVolumeReponse.m in Sources */,
 				D7D999AF19B3AF450099FB8F /* VESummeryGenerator.m in Sources */,
 				D70629C819B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m in Sources */,
 				D7794AB51A9FDA80003AC70B /* VEFloatConverter.m in Sources */,

@@ -10,7 +10,8 @@
 #import "VEAudioProcessingTick.h"
 
 static const int EXECUTE_METRICS_EVERY = 200;
-static const int VOLUME_ADJUST_THRESHOLD = 10;
+static const int VOLUME_ADJUST_THRESHOLD = 6;
+static const float alpha = 0.05;
 
 @interface VEAudioProcessingRaw() {
     int mvgAvg[3];
@@ -19,6 +20,9 @@ static const int VOLUME_ADJUST_THRESHOLD = 10;
     int bufferIndexLast;
     int mvgDiff[3];
     int mvgDiffSum;
+    int diffArray[64];
+    float diff40lowpass;
+    
     int gapBlock;
     unsigned long counter;
     unsigned long lastTick;
@@ -72,6 +76,8 @@ static const int VOLUME_ADJUST_THRESHOLD = 10;
     lastDiffMin = 0;
     lastMvgGapMax = 0;
     
+    diff40lowpass = 2000;
+    
     mvgDropHalf = 0;
     mvgDropHalfRefresh = YES;
     
@@ -97,6 +103,8 @@ static const int VOLUME_ADJUST_THRESHOLD = 10;
     lastDiffMax = 32700;
     lastDiffMin = 0;
     lastMvgGapMax = 0;
+    diff40lowpass = 2000;
+    
     mvgDropHalfRefresh = YES;
 }
 
@@ -157,6 +165,16 @@ static const int VOLUME_ADJUST_THRESHOLD = 10;
 
 - (void)newSoundData:(SInt16 *)data bufferLength:(UInt32)bufferLength {
     // used for stats & volume calibration
+    int mvgMaxVol = 0;
+    int mvgMinVol = 0;
+    int diffMaxVol = 0;
+    int diffMinVol = 6*INT16_MAX;
+    long mvgAvgVol = 0;
+    long diffAvgVol = 0;
+    
+    int diffArrayStoreEvery = bufferLength/64;
+    int diffArrayCounter = 0;
+    
     for (int i = 0; i < bufferLength; i++) {
         // Moving Avg subtract
         mvgAvgSum -= mvgAvg[bufferIndex];
@@ -198,22 +216,69 @@ static const int VOLUME_ADJUST_THRESHOLD = 10;
             longTick = [self.processorTick newTick:(int)(counter - lastTick)];
             lastTick = counter;
         }
+        
+        // update volume values
+        mvgMaxVol = MAX(mvgMaxVol, mvgAvgSum);
+        mvgMinVol = MIN(mvgMinVol, mvgAvgSum);
+        diffMaxVol = MAX(diffMaxVol, mvgDiffSum);
+        diffMinVol = MIN(diffMinVol, mvgDiffSum);
+        mvgAvgVol += mvgAvgSum;
+        diffAvgVol += mvgDiffSum;
+        if(counter%diffArrayStoreEvery == 0) {
+            diffArray[diffArrayCounter] = mvgDiffSum;
+            diffArrayCounter++;
+        }
         counter++;
     }
-    if (diffMax > 3.8*INT16_MAX && volumeAdjustCounter > VOLUME_ADJUST_THRESHOLD) {
+    
+    VEVolumeReponse *volRepsonse = [[VEVolumeReponse alloc] init];
+    volRepsonse.volume = [MPMusicPlayerController applicationMusicPlayer].volume;
+    volRepsonse.diffMax = diffMaxVol;
+    volRepsonse.diffMin = diffMinVol;
+    volRepsonse.mvgMax = mvgMaxVol;
+    volRepsonse.mvgMin = mvgMinVol;
+    volRepsonse.diffAvg = (int) diffAvgVol/bufferLength;
+    volRepsonse.mvgAvg = (int) mvgAvgVol/bufferLength;
+    
+    [self sortArray:diffArray ofSize:sizeof(diffArray) / sizeof(*diffArray)];
+    volRepsonse.diff10 = diffArray[6];
+    volRepsonse.diff20 = diffArray[12];
+    volRepsonse.diff30 = diffArray[19];
+    volRepsonse.diff40 = diffArray[25];
+    volRepsonse.diff50 = diffArray[32];
+    volRepsonse.diff60 = diffArray[38];
+    volRepsonse.diff70 = diffArray[44];
+    volRepsonse.diff80 = diffArray[51];
+    volRepsonse.diff90 = diffArray[57];
+    
+    diff40lowpass = diff40lowpass*alpha +volRepsonse.diff40*(1-alpha);
+    
+    [self.delegate volumeResponse:volRepsonse];
+    
+    
+    if (diff40lowpass > 4000 && volumeAdjustCounter > VOLUME_ADJUST_THRESHOLD) {
         float adjustment = -0.01;
-        if (LOG_VOLUME) NSLog(@"[VESDK] diffMax Adjustment: %f", adjustment);
+        if (diff40lowpass > 20000) {
+            adjustment = -0.05;
+        }
+        
+        if (LOG_VOLUME) NSLog(@"[VESDK] diff40lowpass: %f Adjustment: %f", diff40lowpass, adjustment);
         [self.delegate adjustVolume:adjustment];
         volumeAdjustCounter = 0;
     }
     
-    if ((mvgMin < -2.4*INT16_MAX && diffMax > 1*INT16_MAX) && volumeAdjustCounter > VOLUME_ADJUST_THRESHOLD) {
-        float adjustment = -0.01;
-        if (LOG_VOLUME) NSLog(@"[VESDK] mvgMin Adjustment: %f", adjustment);
+    if (diff40lowpass < 1000 && volumeAdjustCounter > VOLUME_ADJUST_THRESHOLD) {
+        float adjustment = +0.01;
+        if (LOG_VOLUME) NSLog(@"[VESDK] diff40lowpass: %f  Adjustment: %f", diff40lowpass, adjustment);
         [self.delegate adjustVolume:adjustment];
         volumeAdjustCounter = 0;
     }
     volumeAdjustCounter++;
+
+    
+    dispatch_async(dispatch_get_main_queue(),^{
+        [self.delegate newMaxAmplitude:@(diffMax)];
+    });
 }
 
 - (BOOL)detectTick:(int)sampleSinceTick {
@@ -325,6 +390,16 @@ static const int VOLUME_ADJUST_THRESHOLD = 10;
     }
     
     return false;
+}
+
+int compare(const void *first, const void *second)
+{
+    return *(const int *)first - *(const int *)second;
+}
+
+- (void)sortArray:(int *)array ofSize:(size_t)sz
+{
+    qsort(array, sz, sizeof(*array), compare);
 }
 
 @end

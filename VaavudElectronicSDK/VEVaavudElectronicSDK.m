@@ -162,6 +162,10 @@ static VEVaavudElectronicSDK *sharedInstance = nil;
     }
 }
 
+- (void)volumeResponse:(VEVolumeReponse *)volumeResponse {
+    [self.summeryGenerator volumeResponse:volumeResponse];
+}
+
 - (void)newMaxAmplitude:(NSNumber *)amplitude {
     for (id<VaavudElectronicAnalysisDelegate>delegate in self.VaaElecAnalysisDelegates) {
         if ([delegate respondsToSelector:@selector(newMaxAmplitude:)]){

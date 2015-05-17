@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "VEVolumeReponse.h"
 
 @interface VESummeryGenerator : NSObject <VaavudElectronicWindDelegate, VaavudElectronicAnalysisDelegate>
 
@@ -25,5 +26,10 @@
 
 // return the local parth of the summeryfile for the angular velocites
 - (NSURL*) summeryAngularVelocitiesPath;
+
+- (NSURL*) summaryVolumePath;
+
+// log relationship between Volume and other parameters
+- (void) volumeResponse:(VEVolumeReponse *) response;
 
 @end

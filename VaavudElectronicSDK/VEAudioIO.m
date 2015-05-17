@@ -739,8 +739,8 @@ File Utility functions - for recording
         }
         
         if (currentVolume < 0.7) {
-            currentVolume = 1.0;
-            if (LOG_AUDIO) NSLog(@"reset volume");
+            currentVolume = 0.7;
+            if (LOG_AUDIO) NSLog(@"trying to decreese volume under 0.7");
         }
         
         [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
@@ -753,14 +753,18 @@ File Utility functions - for recording
 
 - (void)setVolumeAtSavedLevel {
 //    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"VOLUME"];
-    currentVolume = [[NSUserDefaults standardUserDefaults] floatForKey:@"AUDIO_VOLUME"];
-    if (currentVolume == 0) { // fist time
-        currentVolume = 1.0;
-    }
-    
-    // allways add one % at startup
-    currentVolume += 0.01;
-    currentVolume = currentVolume > 1.0 ? 1.0 : currentVolume;
+//    currentVolume = [[NSUserDefaults standardUserDefaults] floatForKey:@"AUDIO_VOLUME"];
+    currentVolume = 0.85;
+    currentVolume = 1.0;
+
+//    ///
+//    if (currentVolume == 0) { // fist time
+//        currentVolume = 1.0;
+//    }
+//    
+//    // allways add one % at startup
+//    currentVolume += 0.01;
+//    currentVolume = currentVolume > 1.0 ? 1.0 : currentVolume;
     
     // check if volume is at maximum.
     MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];

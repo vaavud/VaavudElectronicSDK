@@ -72,6 +72,11 @@
     return [self.summeryGenerator summeryAngularVelocitiesPath];
 }
 
+- (NSURL*) summaryVolumePath {
+    return [self.summeryGenerator summaryVolumePath];
+}
+
+
 // returns the fitcurve used in the directionAlgorithm
 - (float *) getFitCurve {
     return [VEAudioProcessingTick getFitCurve];
