@@ -11,7 +11,7 @@
 
 static const int EXECUTE_METRICS_EVERY = 200;
 static const int VOLUME_ADJUST_THRESHOLD = 6;
-static const float alpha = 0.05;
+static const float alpha = 0.5;
 
 @interface VEAudioProcessingRaw() {
     int mvgAvg[3];
@@ -21,7 +21,7 @@ static const float alpha = 0.05;
     int mvgDiff[3];
     int mvgDiffSum;
     int diffArray[64];
-    float diff40lowpass;
+    float diff20lowpass;
     
     int gapBlock;
     unsigned long counter;
@@ -76,7 +76,7 @@ static const float alpha = 0.05;
     lastDiffMin = 0;
     lastMvgGapMax = 0;
     
-    diff40lowpass = 2000;
+    diff20lowpass = 1000;
     
     mvgDropHalf = 0;
     mvgDropHalfRefresh = YES;
@@ -103,7 +103,8 @@ static const float alpha = 0.05;
     lastDiffMax = 32700;
     lastDiffMin = 0;
     lastMvgGapMax = 0;
-    diff40lowpass = 2000;
+    diff20lowpass = 1000;
+
     
     mvgDropHalfRefresh = YES;
 }
@@ -132,11 +133,8 @@ static const float alpha = 0.05;
         UInt32 frames = size/sampleSize;
         
         [self newSoundData:circBufferTail bufferLength:frames];
-        
         VECircularBufferConsume(circBuffer, size);
-//        if( circBuffer->fillCount > bufferLengthInFrames*10) {
-//            if (LOG_PERFORMANCE) NSLog(@"[VESDK] circBuffer fillCount %i", circBuffer->fillCount);
-//        }
+        
     } else {
         if (LOG_PERFORMANCE) NSLog(@"[VESDK] Buffer is Null or not filled. Nsamples: %lu",(unsigned long) availableBytes/sampleSize);
     }
@@ -232,7 +230,7 @@ static const float alpha = 0.05;
     }
     
     VEVolumeReponse *volRepsonse = [[VEVolumeReponse alloc] init];
-    volRepsonse.volume = [MPMusicPlayerController applicationMusicPlayer].volume;
+    volRepsonse.volume = [[VEVaavudElectronicSDK sharedVaavudElectronic] getVolume];
     volRepsonse.diffMax = diffMaxVol;
     volRepsonse.diffMin = diffMinVol;
     volRepsonse.mvgMax = mvgMaxVol;
@@ -251,31 +249,26 @@ static const float alpha = 0.05;
     volRepsonse.diff80 = diffArray[51];
     volRepsonse.diff90 = diffArray[57];
     
-    diff40lowpass = diff40lowpass*alpha +volRepsonse.diff40*(1-alpha);
+    diff20lowpass = diff20lowpass*(1.0-alpha) + ((float) volRepsonse.diff20)*alpha;
     
     [self.delegate volumeResponse:volRepsonse];
     
+    float adjustment;
+    bool readyToAdjustVolume = volumeAdjustCounter > VOLUME_ADJUST_THRESHOLD;
     
-    if (diff40lowpass > 4000 && volumeAdjustCounter > VOLUME_ADJUST_THRESHOLD) {
-        float adjustment = -0.01;
-        if (diff40lowpass > 20000) {
-            adjustment = -0.05;
+    if (readyToAdjustVolume) {
+        if (diff20lowpass > 10000) {
+            adjustment = -0.1;
+        } else if (diff20lowpass > 1100) {
+            adjustment = -0.08/8000*(diff20lowpass-1100);
+        } else {
+            adjustment = -0.03/1000*(diff20lowpass-1100);
         }
-        
-        if (LOG_VOLUME) NSLog(@"[VESDK] diff40lowpass: %f Adjustment: %f", diff40lowpass, adjustment);
         [self.delegate adjustVolume:adjustment];
         volumeAdjustCounter = 0;
     }
-    
-    if (diff40lowpass < 1000 && volumeAdjustCounter > VOLUME_ADJUST_THRESHOLD) {
-        float adjustment = +0.01;
-        if (LOG_VOLUME) NSLog(@"[VESDK] diff40lowpass: %f  Adjustment: %f", diff40lowpass, adjustment);
-        [self.delegate adjustVolume:adjustment];
-        volumeAdjustCounter = 0;
-    }
-    volumeAdjustCounter++;
 
-    
+    volumeAdjustCounter++;
     dispatch_async(dispatch_get_main_queue(),^{
         [self.delegate newMaxAmplitude:@(diffMax)];
     });

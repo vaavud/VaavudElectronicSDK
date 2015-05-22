@@ -26,8 +26,8 @@
 #pragma mark objective-c class
 @interface VEAudioIO () {
     VECircularBuffer cirbuffer;
-    AudioBuffer outputBufferLeft;
-    AudioBuffer outputBufferRight;
+    SInt16 *bufferLeft;
+    SInt16 *bufferRight;
     AudioBufferList inputBufferList;
     int outputBufferShiftIndex;
     int outputBufferShift;
@@ -38,10 +38,9 @@
     
     // Audio unit
     AudioComponentInstance audioUnit;
-    
-    float currentVolume, originalVolume;
 }
 
+@property (nonatomic) float originalVolume;
 @property (atomic) BOOL audioBuffersInitialized;
 
 // from audioManager
@@ -180,11 +179,13 @@ static OSStatus playbackCallback(void *inRefCon,
     SInt16 *bufferLeft = (SInt16 *)ioData->mBuffers[channelLeft].mData;
     SInt16 *bufferRight = (SInt16 *)ioData->mBuffers[channelRight].mData;
     
-    UInt32 sampleSize = sizeof(SInt16);
     
-    memcpy(bufferLeft, audioProcessor->outputBufferLeft.mData + sampleSize * audioProcessor->outputBufferShiftIndex, ioData->mBuffers[channelLeft].mDataByteSize);
-    memcpy(bufferRight, audioProcessor->outputBufferRight.mData + sampleSize * audioProcessor->outputBufferShiftIndex, ioData->mBuffers[channelLeft].mDataByteSize);
+    int shift = audioProcessor->outputBufferShiftIndex;
     
+    for (int i = 0; i < inNumberFrames; i++) {
+        bufferLeft[i] = audioProcessor->bufferLeft[i+shift]*audioProcessor.volume;
+        bufferRight[i] = audioProcessor->bufferRight[i+shift]*audioProcessor.volume;
+    }
     // calculare buffer shift
     audioProcessor->outputBufferShiftIndex += audioProcessor->outputBufferShift;
     if (audioProcessor->outputBufferShiftIndex > audioProcessor->baseSignalLength) {
@@ -377,7 +378,7 @@ static OSStatus playbackCallback(void *inRefCon,
         [self configureFloatConverterWithFrameSize:bufferLengthInFrames andStreamFormat:audioFormat];
         
         // half second
-        VECircularBufferInit(&cirbuffer, SAMPLE_RATE*0.5*sizeof(SInt16));
+        VECircularBufferInit(&cirbuffer, SAMPLE_RATE*0.2*sizeof(SInt16));
         self.audioBuffersInitialized = YES;
     }
     
@@ -403,16 +404,8 @@ static OSStatus playbackCallback(void *inRefCon,
     UInt32 bytesPerSample = sizeof(SInt16);
     UInt32 bufferLength = bufferFrameSizeMax + baseSignalLength;
     
-    outputBufferLeft.mNumberChannels = 1;
-    outputBufferLeft.mDataByteSize = bufferLength * bytesPerSample;
-    outputBufferLeft.mData = malloc( outputBufferLeft.mDataByteSize );
-    
-    outputBufferRight.mNumberChannels = 1;
-    outputBufferRight.mDataByteSize = bufferLength * bytesPerSample;
-    outputBufferRight.mData = malloc( outputBufferLeft.mDataByteSize );
-    
-    SInt16 *bufferLeft = (SInt16 *)outputBufferLeft.mData;
-    SInt16 *bufferRight = (SInt16 *)outputBufferRight.mData;
+    bufferLeft = malloc(bufferLength * bytesPerSample);
+    bufferRight = malloc(bufferLength * bytesPerSample);
     
     SInt16 *baseSignal = malloc(baseSignalLength * bytesPerSample);
     
@@ -579,8 +572,8 @@ static OSStatus playbackCallback(void *inRefCon,
     // Release buffer resources
     VECircularBufferCleanup(&cirbuffer);
     
-    free(outputBufferLeft.mData);
-    free(outputBufferRight.mData);
+    free(bufferLeft);
+    free(bufferRight);
     free(inputBufferList.mBuffers[0].mData);
 }
 
@@ -730,56 +723,38 @@ File Utility functions - for recording
 }
 
 - (void)adjustVolumeLevelAmount:(float) adjustment {
-    if (ABS([MPMusicPlayerController applicationMusicPlayer].volume - currentVolume) < 0.001) {
-        currentVolume += adjustment; // don't turn up volume
     
-        if (currentVolume > 1.0) {
-            currentVolume = 1.0;
-            if (LOG_AUDIO) NSLog(@"trying to increase volume above 1");
-        }
-        
-        if (currentVolume < 0.7) {
-            currentVolume = 0.7;
-            if (LOG_AUDIO) NSLog(@"trying to decreese volume under 0.7");
-        }
-        
-        [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
-        if (LOG_AUDIO) NSLog(@"[VESDK] New Volume %f, adjustment %f", currentVolume, adjustment);
-    } else {
-        [MPMusicPlayerController applicationMusicPlayer].volume = currentVolume;
-        if (LOG_AUDIO) NSLog(@"audio was out of sync");
+    self.volume += adjustment;
+    
+    if (self.volume > 1.0) {
+        self.volume = 1.0;
     }
+    
+    if (self.volume < 0.0) {
+        self.volume = 0.0;
+    }
+    
+    if ([MPMusicPlayerController applicationMusicPlayer].volume < 0.999) {
+        [MPMusicPlayerController applicationMusicPlayer].volume = 1.0;
+        if (LOG_AUDIO) NSLog(@"[VESDK] Reset audio volume to 1.0");
+    }
+    if (LOG_AUDIO) NSLog(@"[VESDK] New Volume %f, adjustment %f", self.volume, adjustment);
 }
 
 - (void)setVolumeAtSavedLevel {
-//    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"VOLUME"];
-//    currentVolume = [[NSUserDefaults standardUserDefaults] floatForKey:@"AUDIO_VOLUME"];
-    currentVolume = 0.85;
-    currentVolume = 1.0;
-
-//    ///
-//    if (currentVolume == 0) { // fist time
-//        currentVolume = 1.0;
-//    }
-//    
-//    // allways add one % at startup
-//    currentVolume += 0.01;
-//    currentVolume = currentVolume > 1.0 ? 1.0 : currentVolume;
+    self.originalVolume = [MPMusicPlayerController applicationMusicPlayer].volume;
+    self.volume = [[NSUserDefaults standardUserDefaults] floatForKey:@"AUDIO_VOLUME"];
+    [self adjustVolumeLevelAmount:0.0];     // check if OutputVolume is at maximum and "volume" is within a resonable range.
     
-    // check if volume is at maximum.
-    MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
-    originalVolume = musicPlayer.volume;
-    musicPlayer.volume = currentVolume; // device volume will be changed to stored // commented out due to -10876 audio render error
-    if (LOG_AUDIO) NSLog(@"[VESDK] Loaded volume from user defaults and set to %f", currentVolume);
+    if (LOG_AUDIO) NSLog(@"[VESDK] Loaded volume from user defaults and set to %f", self.volume);
 }
 
 - (void)setVolumeToInitialState {
-    [[NSUserDefaults standardUserDefaults] setFloat:currentVolume forKey:@"AUDIO_VOLUME"];
-    if (LOG_AUDIO) NSLog(@"[VESDK] Saved volume: %f to user defaults", currentVolume);
+    [[NSUserDefaults standardUserDefaults] setFloat:self.volume forKey:@"AUDIO_VOLUME"];
+    if (LOG_AUDIO) NSLog(@"[VESDK] Saved volume: %f to user defaults", self.volume);
     
-    MPMusicPlayerController *musicPlayer = [MPMusicPlayerController applicationMusicPlayer];
-    musicPlayer.volume = originalVolume;
-    if (LOG_AUDIO) NSLog(@"[VESDK] Returned volume to original setting: %f", originalVolume);
+    [MPMusicPlayerController applicationMusicPlayer].volume = self.originalVolume;
+    if (LOG_AUDIO) NSLog(@"[VESDK] Returned volume to original setting: %f", self.originalVolume);
     
 }
 

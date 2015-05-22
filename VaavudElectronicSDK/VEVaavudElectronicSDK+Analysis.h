@@ -69,6 +69,9 @@
 // sound output volume
 - (float)getVolume;
 
+// set the sound output volume
+- (void)setVolume:(float)volume;
+
 // return the current heading of device (if avilale)
 - (NSNumber *)getHeading;
 

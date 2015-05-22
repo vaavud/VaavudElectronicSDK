@@ -76,7 +76,6 @@
     return [self.summeryGenerator summaryVolumePath];
 }
 
-
 // returns the fitcurve used in the directionAlgorithm
 - (float *) getFitCurve {
     return [VEAudioProcessingTick getFitCurve];
@@ -92,7 +91,11 @@
 }
 
 - (float) getVolume {
-    return [[NSUserDefaults standardUserDefaults] floatForKey:@"AUDIO_VOLUME"];
+    return self.audioIO.volume;
+}
+
+- (void)setVolume:(float)volume {
+    self.audioIO.volume = volume;
 }
 
 - (void) generateSummaryFile {

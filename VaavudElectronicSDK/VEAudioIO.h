@@ -24,6 +24,7 @@
 
 @interface VEAudioIO : NSObject
 
+@property (atomic) float volume;
 @property (atomic) BOOL sleipnirAvailable;
 @property (weak, nonatomic) id<VEAudioIODelegate> delegate;
 @property (weak, nonatomic) id<VaavudElectronicMicrophoneOutputDelegate> microphoneOutputDeletage;
