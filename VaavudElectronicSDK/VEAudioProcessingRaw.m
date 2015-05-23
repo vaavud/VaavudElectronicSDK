@@ -30,8 +30,8 @@ static const float alpha = 0.5;
     short diffState;
     int diffSumRiseThreshold;
     
-    int mvgMax, mvgMin, lastMvgMax, lastMvgMin, diffMax, diffMin, lastDiffMax, lastDiffMin, diffGap, mvgGapMax, lastMvgGapMax, mvgDropHalf, diffRiseThreshold1;
-    bool mvgDropHalfRefresh, longTick;
+    int mvgMax, mvgMin, lastMvgMax, lastMvgMin, diffMax, lastDiffMax, diffGap, mvgGapMax, lastMvgGapMax, mvgDropHalf, diffRiseThreshold1, lastDiffGap;
+    bool mvgDropHalfRefresh, longTick, diffFullOpening, mvgPositive;
     
     int volumeAdjustCounter;
     float executionTimes[EXECUTE_METRICS_EVERY];
@@ -68,18 +68,19 @@ static const float alpha = 0.5;
     mvgMax = 0;
     mvgMin = 0;
     diffMax = 0;
-    diffMin = 0;
     
     lastMvgMax = 16350;
     lastMvgMin = -16350;
     lastDiffMax = 32700;
-    lastDiffMin = 0;
     lastMvgGapMax = 0;
+    lastDiffGap = 1100;
     
-    diff20lowpass = 1000;
+    diff20lowpass = 1100;
     
     mvgDropHalf = 0;
     mvgDropHalfRefresh = YES;
+    diffFullOpening = NO;
+    mvgPositive = NO;
     
     self.delegate = delegate;
     
@@ -96,17 +97,18 @@ static const float alpha = 0.5;
     mvgMax = 0;
     mvgMin = 0;
     diffMax = 0;
-    diffMin = 0;
     
     lastMvgMax = 16350;
     lastMvgMin = -16350;
     lastDiffMax = 32700;
-    lastDiffMin = 0;
     lastMvgGapMax = 0;
-    diff20lowpass = 1000;
-
+    lastDiffGap = 1100;
     
+    diff20lowpass = 1100;
+
     mvgDropHalfRefresh = YES;
+    diffFullOpening = NO;
+    mvgPositive = NO;
 }
 
 - (void)checkAndProcess:(VECircularBuffer *)circBuffer withDefaultBufferLengthInFrames:(UInt32)bufferLengthInFrames {
@@ -199,17 +201,18 @@ static const float alpha = 0.5;
         if ([self detectTick:(int)(counter - lastTick)]) {
             lastMvgMax = mvgMax;
             lastMvgMin = mvgMin;
-            lastDiffMax = diffMax;
-            lastDiffMin = diffMin;
+            lastDiffMax = lastDiffMax*0.7 + diffMax*0.3;
             lastMvgGapMax = mvgGapMax;
             
             mvgMax = 0;
             mvgMin = 0;
             diffMax = 0;
-            diffMin = 6*INT16_MAX;
             
             mvgState = 0;
             diffState = 0;
+            
+            diffFullOpening = NO;
+            mvgPositive = NO;
             
             longTick = [self.processorTick newTick:(int)(counter - lastTick)];
             lastTick = counter;
@@ -300,25 +303,27 @@ static const float alpha = 0.5;
     
     switch (diffState) {
         case 0:
-            if (mvgMin > mvgAvgSum) {
-                mvgMin = mvgAvgSum;
-            }
             if (mvgDiffSum > 0.3*lastDiffMax) {
                 diffState = 1;
             }
+            mvgMin = MIN(mvgMin, mvgAvgSum);
             break;
             
         case 1:
-            if (mvgMin > mvgAvgSum) {
-                mvgMin = mvgAvgSum;
-            }
             if (mvgAvgSum > 0) {
-                diffState = 2;
+                mvgPositive = YES;
+            }
+            if (mvgDiffSum > 0.6*lastDiffMax) {
+                diffFullOpening = YES;
             }
             
+            if (mvgPositive && diffFullOpening) {
+                diffState = 2;
+            }
+            mvgMin = MIN(mvgMin, mvgAvgSum);
             break;
         case 2:
-            if (mvgDiffSum < 0.30*lastDiffMax) {
+            if (mvgDiffSum < 0.3*lastDiffMax) {
                 diffState = 3;
                 if (longTick) {
                     gapBlock = sampleSinceTick*2.9;
@@ -335,11 +340,10 @@ static const float alpha = 0.5;
             if (sampleSinceTick > gapBlock) {
                 diffState = 4;
                 
-                diffGap = mvgDiffSum;
-                mvgGapMax = mvgAvgSum;
-                
+                diffGap = lastDiffGap*0.7 + mvgDiffSum*0.3;
                 diffRiseThreshold1 = diffGap + 0.1 * (lastDiffMax - diffGap);
                 
+                mvgGapMax = mvgAvgSum;
                 int newMvgDropHalf = ( lastMvgGapMax - mvgMin)/2;
                 if (newMvgDropHalf  < mvgDropHalf*1.25 || mvgDropHalfRefresh) {
                     mvgDropHalf = newMvgDropHalf;
@@ -351,10 +355,7 @@ static const float alpha = 0.5;
             }
             break;
         case 4:
-            if (mvgAvgSum > mvgGapMax) {
-                mvgGapMax = mvgAvgSum;
-            }
-
+            mvgGapMax = MAX(mvgGapMax, mvgAvgSum);
             if (((mvgAvgSum < mvgGapMax - mvgDropHalf) && (mvgDiffSum > diffRiseThreshold1)) || mvgDiffSum > 0.75*lastDiffMax) {
                 return  true;
             }
@@ -364,17 +365,8 @@ static const float alpha = 0.5;
             break;
     }
     
-    if (mvgMax < mvgAvgSum) {
-        mvgMax = mvgAvgSum;
-    }
-
-    if (diffMax < mvgDiffSum) {
-        diffMax = mvgDiffSum;
-    }
-
-    if (diffMin > mvgDiffSum) {
-        diffMin = mvgDiffSum;
-    }
+    mvgMax = MAX(mvgMax,mvgAvgSum);
+    diffMax = MAX(diffMax, mvgDiffSum);
     
     if (sampleSinceTick == 8800) {
         lastTick = counter; // reset tick counter
