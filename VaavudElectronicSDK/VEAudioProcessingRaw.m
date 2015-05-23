@@ -11,7 +11,7 @@
 
 static const int EXECUTE_METRICS_EVERY = 200;
 static const int VOLUME_ADJUST_THRESHOLD = 6;
-static const float alpha = 0.5;
+static const float alpha = 0.3;
 
 @interface VEAudioProcessingRaw() {
     int mvgAvg[3];
@@ -21,7 +21,7 @@ static const float alpha = 0.5;
     int mvgDiff[3];
     int mvgDiffSum;
     int diffArray[64];
-    float diff20lowpass;
+    float diff20lowpass, ticksLowpass;
     
     int gapBlock;
     unsigned long counter;
@@ -76,6 +76,7 @@ static const float alpha = 0.5;
     lastDiffGap = 1100;
     
     diff20lowpass = 1100;
+    ticksLowpass = 0;
     
     mvgDropHalf = 0;
     mvgDropHalfRefresh = YES;
@@ -105,6 +106,7 @@ static const float alpha = 0.5;
     lastDiffGap = 1100;
     
     diff20lowpass = 1100;
+    ticksLowpass = 0;
 
     mvgDropHalfRefresh = YES;
     diffFullOpening = NO;
@@ -171,6 +173,7 @@ static const float alpha = 0.5;
     int diffMinVol = 6*INT16_MAX;
     long mvgAvgVol = 0;
     long diffAvgVol = 0;
+    int ticks = 0;
     
     int diffArrayStoreEvery = bufferLength/64;
     int diffArrayCounter = 0;
@@ -216,6 +219,7 @@ static const float alpha = 0.5;
             
             longTick = [self.processorTick newTick:(int)(counter - lastTick)];
             lastTick = counter;
+            ticks++;
         }
         
         // update volume values
@@ -240,6 +244,7 @@ static const float alpha = 0.5;
     volRepsonse.mvgMin = mvgMinVol;
     volRepsonse.diffAvg = (int) diffAvgVol/bufferLength;
     volRepsonse.mvgAvg = (int) mvgAvgVol/bufferLength;
+    volRepsonse.ticks = ticks;
     
     [self sortArray:diffArray ofSize:sizeof(diffArray) / sizeof(*diffArray)];
     volRepsonse.diff10 = diffArray[6];
@@ -253,19 +258,26 @@ static const float alpha = 0.5;
     volRepsonse.diff90 = diffArray[57];
     
     diff20lowpass = diff20lowpass*(1.0-alpha) + ((float) volRepsonse.diff20)*alpha;
-    
+    ticksLowpass = ticksLowpass*(1.0-alpha) + ((float) volRepsonse.ticks)*alpha;
     [self.delegate volumeResponse:volRepsonse];
     
-    float adjustment;
+    // only adjust volume if the diff20 value is stable
+    bool diffValueStable = YES; //(fabsf(volRepsonse.diff20/diff20lowpass-1) < 1);
     bool readyToAdjustVolume = volumeAdjustCounter > VOLUME_ADJUST_THRESHOLD;
+    bool speedInRange = volRepsonse.ticks < 40;
+
     
-    if (readyToAdjustVolume) {
+    if (readyToAdjustVolume && diffValueStable && speedInRange) {
+        float adjustment;
+        int x = ticksLowpass;
+        float diffTarget = 0.00388*x*x*x*x - 0.463*x*x*x + 14.8*x*x + 2.24*x + 849;
+        
         if (diff20lowpass > 10000) {
             adjustment = -0.1;
-        } else if (diff20lowpass > 1100) {
-            adjustment = -0.08/8000*(diff20lowpass-1100);
+        } else if (diff20lowpass > diffTarget) {
+            adjustment = 0.7*-0.08/8000*(diff20lowpass-diffTarget); // added 70 percent stability value
         } else {
-            adjustment = -0.03/1000*(diff20lowpass-1100);
+            adjustment = 0.7*-0.03/1000*(diff20lowpass-diffTarget);
         }
         [self.delegate adjustVolume:adjustment];
         volumeAdjustCounter = 0;
@@ -310,7 +322,7 @@ static const float alpha = 0.5;
             break;
             
         case 1:
-            if (mvgAvgSum > 0) {
+            if (mvgAvgSum > lastMvgMax/2) {
                 mvgPositive = YES;
             }
             if (mvgDiffSum > 0.6*lastDiffMax) {

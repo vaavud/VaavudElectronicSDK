@@ -25,4 +25,5 @@
 @property int diff70;
 @property int diff80;
 @property int diff90;
+@property int ticks;
 @end

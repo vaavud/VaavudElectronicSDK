@@ -113,9 +113,9 @@ float fitcurve[360]  = {1.93055056304272,1.92754159835895,1.92282438491601,1.916
         return NO;
     }
     
-    // check if new tick value is within 20% of expected value
+    // check if new tick value is within 30% of expected value
     float tickLengthCompensated = tickLength * compensation[teethIndex];
-    if (tickLengthCompensated > 0.8 * lastTickLengthCompensated && tickLengthCompensated < 1.2 * lastTickLengthCompensated) {
+    if (fabsf(tickLengthCompensated/lastTickLengthCompensated-1) < 0.3) {
         [self processValidTick:tickLength];
     }
     else {

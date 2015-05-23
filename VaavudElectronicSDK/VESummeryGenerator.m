@@ -211,6 +211,7 @@
     [headerrow addObject: @"diff70"];
     [headerrow addObject: @"diff80"];
     [headerrow addObject: @"diff90"];
+    [headerrow addObject: @"ticks"];
     [rowsStrings addObject: [headerrow componentsJoinedByString:@","]];
     
     for (VEVolumeReponse *volRespons in self.volumeReponses.copy) {
@@ -231,6 +232,7 @@
         [row addObject: [NSString stringWithFormat:@"%i", volRespons.diff70]];
         [row addObject: [NSString stringWithFormat:@"%i", volRespons.diff80]];
         [row addObject: [NSString stringWithFormat:@"%i", volRespons.diff90]];
+        [row addObject: [NSString stringWithFormat:@"%i", volRespons.ticks]];
         [rowsStrings addObject: [row componentsJoinedByString:@","]];
         
     }
