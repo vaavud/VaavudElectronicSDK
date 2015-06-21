@@ -24,6 +24,7 @@
 /* Begin PBXBuildFile section */
 		D70629C719B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h in Headers */ = {isa = PBXBuildFile; fileRef = D70629C519B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D70629C819B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m in Sources */ = {isa = PBXBuildFile; fileRef = D70629C619B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m */; };
+		D71159ED1B36B78700CE060E /* AudioProcessingTick.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71159EC1B36B78700CE060E /* AudioProcessingTick.swift */; };
 		D72343251A9F8879007A937B /* VERecorder.h in Headers */ = {isa = PBXBuildFile; fileRef = D72343231A9F8879007A937B /* VERecorder.h */; };
 		D72343261A9F8879007A937B /* VERecorder.m in Sources */ = {isa = PBXBuildFile; fileRef = D72343241A9F8879007A937B /* VERecorder.m */; };
 		D73D02581AA38FB500FBEA53 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D73D02571AA38FB500FBEA53 /* QuartzCore.framework */; };
@@ -89,6 +90,8 @@
 		D706293419B3BEC400E6879A /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		D70629C519B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "VEVaavudElectronicSDK+Analysis.h"; sourceTree = "<group>"; };
 		D70629C619B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "VEVaavudElectronicSDK+Analysis.m"; sourceTree = "<group>"; };
+		D71159EB1B36B78600CE060E /* VaavudElectronicSDK-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "VaavudElectronicSDK-Bridging-Header.h"; sourceTree = "<group>"; };
+		D71159EC1B36B78700CE060E /* AudioProcessingTick.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioProcessingTick.swift; sourceTree = "<group>"; };
 		D72343231A9F8879007A937B /* VERecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VERecorder.h; sourceTree = "<group>"; };
 		D72343241A9F8879007A937B /* VERecorder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VERecorder.m; sourceTree = "<group>"; };
 		D73D02571AA38FB500FBEA53 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -154,7 +157,9 @@
 				D7D999A119B3AF350099FB8F /* VEAudioProcessingRaw.m */,
 				D7D9999C19B3AF290099FB8F /* VEAudioProcessingTick.h */,
 				D7D9999D19B3AF290099FB8F /* VEAudioProcessingTick.m */,
+				D71159EC1B36B78700CE060E /* AudioProcessingTick.swift */,
 				D72343281A9F88B0007A937B /* External */,
+				D71159EB1B36B78600CE060E /* VaavudElectronicSDK-Bridging-Header.h */,
 			);
 			name = AudioProcessing;
 			sourceTree = "<group>";
@@ -390,6 +395,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D72343261A9F8879007A937B /* VERecorder.m in Sources */,
+				D71159ED1B36B78700CE060E /* AudioProcessingTick.swift in Sources */,
 				D7C7D10A1A9E820B0004A89C /* VECircularBuffer.c in Sources */,
 				D7C7D1071A9E801A0004A89C /* VEAudioIO.m in Sources */,
 				D7D999A319B3AF350099FB8F /* VEAudioProcessingRaw.m in Sources */,
@@ -510,32 +516,39 @@
 		D7D9998D19B3AD3B0099FB8F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = NO;
 				DSTROOT = /tmp/VaavudElectronicSDK.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "VaavudElectronicSDK/VaavudElectronicSDK-Prefix.pch";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PUBLIC_HEADERS_FOLDER_PATH = "$(PROJECT_NAME)Headers";
 				SKIP_INSTALL = YES;
 				STRIP_STYLE = "non-global";
+				SWIFT_OBJC_BRIDGING_HEADER = "VaavudElectronicSDK/VaavudElectronicSDK-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
 		D7D9998E19B3AD3B0099FB8F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = NO;
 				DSTROOT = /tmp/VaavudElectronicSDK.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "VaavudElectronicSDK/VaavudElectronicSDK-Prefix.pch";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PUBLIC_HEADERS_FOLDER_PATH = "$(PROJECT_NAME)Headers";
 				SKIP_INSTALL = YES;
 				STRIP_STYLE = "non-global";
+				SWIFT_OBJC_BRIDGING_HEADER = "VaavudElectronicSDK/VaavudElectronicSDK-Bridging-Header.h";
 			};
 			name = Release;
 		};
