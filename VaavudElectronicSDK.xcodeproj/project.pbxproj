@@ -24,7 +24,6 @@
 /* Begin PBXBuildFile section */
 		D70629C719B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h in Headers */ = {isa = PBXBuildFile; fileRef = D70629C519B597B500E6879A /* VEVaavudElectronicSDK+Analysis.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D70629C819B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m in Sources */ = {isa = PBXBuildFile; fileRef = D70629C619B597B500E6879A /* VEVaavudElectronicSDK+Analysis.m */; };
-		D71159ED1B36B78700CE060E /* AudioProcessingTick.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71159EC1B36B78700CE060E /* AudioProcessingTick.swift */; };
 		D72343251A9F8879007A937B /* VERecorder.h in Headers */ = {isa = PBXBuildFile; fileRef = D72343231A9F8879007A937B /* VERecorder.h */; };
 		D72343261A9F8879007A937B /* VERecorder.m in Sources */ = {isa = PBXBuildFile; fileRef = D72343241A9F8879007A937B /* VERecorder.m */; };
 		D73D02581AA38FB500FBEA53 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D73D02571AA38FB500FBEA53 /* QuartzCore.framework */; };
@@ -395,7 +394,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D72343261A9F8879007A937B /* VERecorder.m in Sources */,
-				D71159ED1B36B78700CE060E /* AudioProcessingTick.swift in Sources */,
 				D7C7D10A1A9E820B0004A89C /* VECircularBuffer.c in Sources */,
 				D7C7D1071A9E801A0004A89C /* VEAudioIO.m in Sources */,
 				D7D999A319B3AF350099FB8F /* VEAudioProcessingRaw.m in Sources */,

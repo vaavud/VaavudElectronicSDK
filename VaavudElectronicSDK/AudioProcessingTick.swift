@@ -18,114 +18,102 @@ import Foundation
 //    func newVelocityProfileError(profileError: NSNumber)
 //}
 
+let TPR = 15 // Teeth per revolution
+let SAMPLE_FREQUENCY = 44100
 
-struct StartState {
-    var located = false
+struct APState {
+    var startLocated = false
     var counter = 0
-    var tickLengthLast = 0
+    var timeLast = 0
     
-    var teethIndex = 0
-    var teethProcessIndex = 7
+    var index = 0
+    var processIndex = 7
     
-    var tickLengths = [Int](count: AudioProcessingTick.teethPrRev, repeatedValue: 0)
-    var teethTimeLowPass = [Double](count: AudioProcessingTick.teethPrRev, repeatedValue: 0.0)
-    var tickLengthOneRotation = 0
+    var times = [Int](count: TPR, repeatedValue: 0)
+    var velocityLowPasss = [Double](count: TPR, repeatedValue: 0.0)
+    var timeOneRotation = 0
     
-    var tickLengthComp = 0.0
-    var tickLengthCompLast = 0.0
+    var velocity = 0.0
+    var velocityLast = 0.0
     
-    mutating func nextTeeth() {
-        tickLengthLast = tickLengths[teethIndex]
-        tickLengthCompLast = tickLengthComp
-        teethIndex = teethIndex+1%AudioProcessingTick.teethPrRev
-        teethProcessIndex = teethProcessIndex+1%AudioProcessingTick.teethPrRev
+    mutating func newTime(time:Int) {
+        timeOneRotation -= times[index];
+        times[index] = time;
+        timeOneRotation += times[index];
+        velocity = velocity(index)
     }
     
-    mutating func newTickLength(length:Int) {
-        tickLengthOneRotation -= tickLengths[teethIndex];
-        tickLengths[teethIndex] = length;
-        tickLengthOneRotation += tickLengths[teethIndex];
-        tickLengthComp = Double(length) * AudioProcessingTick.compensationOriginal[teethIndex]
+    mutating func nextTeeth() {
+        timeLast = times[index]
+        velocityLast = velocity
+        index = index+1%TPR
+        processIndex = processIndex+1%TPR
+    }
+    
+    func velocity(i:Int) -> Double {
+        return APTick.teethSize[i]/Double(times[i])
+    }
+    
+    func velocityInRange() -> Bool {
+        return fabs(velocity/velocityLast-1) < 0.3
     }
     
     mutating func initLowPass() {
-        teethTimeLowPass = (1...14).map(x: Int -> Double in return Double(AudioProcessingTick.teethPrRev*x))
-
+        var averageVelocity = 360.0/Double(timeOneRotation)
+        velocityLowPasss = (0...TPR-1).map({i in self.velocity(i)})
     }
     
-    func tickLengthInExpectedRange() -> Bool {
-        return fabs(tickLengthComp/tickLengthCompLast-1) < 0.3
+    mutating func updateLowPass() {
+        var velocityProcess = velocity(processIndex)
+        let smoothConst = 4.0 // 4 seconds
+        var a_smooth = 3 * Double(times[processIndex]) * Double(TPR) / (smoothConst*Double(SAMPLE_FREQUENCY))
+        velocityLowPasss[processIndex] = a_smooth * velocityProcess + (1 - a_smooth) * velocityLowPasss[processIndex];
+        println(velocityLowPasss)
     }
 }
 
-//struct ProcessTickState {
-//    
-//    
-//    var direction: DirectionState
-//    
-//
-//    
-//    init() {
-//        direction = DirectionState()
-//    }
-//    
-////    var compensation:[Double]
-//}
 
-class AudioProcessingTick {
+class APTick { // AudioProcessingTick
     
-    static let teethPrRev = 15
-    
-    static let compensationOriginal = [1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,1.02127659574468,0.774193548387097];
-    
+    static let teethSize = (1...TPR).map({i in i > TPR ? 23.5 : 31})
     static let tickEdgeAngle = [0, 23.5, 47, 70.5, 94, 117.5, 141, 164.5, 188, 211.5, 235, 258.5, 282, 305.5, 336.5] // investigate if large ticks actually is in the right position
     
-    var start : StartState
-//    var state : ProcessTickState
+    var state : APState
     
     init() {
-        var start = StartState()
-//        var state = ProcessTickState()
+        state = APState()
     }
     
-    func processTick(tickLength:Int) -> Void {
-        
-        start.newTickLength(tickLength)
+    func processTick(time:Int) -> Void {
+        state.newTime(time)
        
-        if !start.located {
-            locateStart(tickLength)
+        if !state.startLocated {
+            locateStart(time)
         }
         
-        if start.tickLengthInExpectedRange() {
-            self.processValidTick(tickLength)
+        if state.velocityInRange() {
+            state.updateLowPass()
+            // update UI
         } else {
-            start = StartState()
+            state = APState()
         }
         
-        start.nextTeeth()
+        state.nextTeeth()
     }
     
-    func locateStart(tickLength:Int) -> Void {
-        start.counter++;
+    func locateStart(time:Int) -> Void {
+        state.counter++;
         
-        // check if TickLength is between 120% and 140 % of last ticklength
-        if tickLength*100 > 120 * start.tickLengthLast && tickLength*100 < 140*start.tickLengthLast {
-            if (start.counter == 2*AudioProcessingTick.teethPrRev) {
-                start.located = true
-                start.initLowPass()
+        // check if time is between 120% and 140 % of last time
+        if time*100 > 120 * state.timeLast && time*100 < 140*state.timeLast {
+            if (state.counter == 2*TPR) {
+                state.startLocated = true
+                state.initLowPass()
             }
-            else if (start.counter % AudioProcessingTick.teethPrRev != 0) {
-                start = StartState()
+            else if (state.counter % TPR != 0 || state.counter > 2*TPR) {
+                state = APState()
             }
         }
-        if start.counter > 2*AudioProcessingTick.teethPrRev {
-            start = StartState()
-        }
-    }
-    
-    
-    func processValidTick(tickLength:Int) {
-//        state.direction.
     }
     
     

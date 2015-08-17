@@ -8,9 +8,23 @@
 
 #import <Foundation/Foundation.h>
 
+@interface WindMeasurement : NSObject
+@property NSDate *time;
+@property float speed;
+@property float directionGlobal;
+@property float directionLocal;
+@property float heading;
+@end
+
+
 @protocol VaavudElectronicWindDelegate <NSObject>
 
 @optional
+/**
+ @param new measurement containing all live wind data.
+ */
+- (void)newWindMeasurement:(WindMeasurement *)measurement;
+
 /**
  @param speed is the windspeed in m/s measured.
  */

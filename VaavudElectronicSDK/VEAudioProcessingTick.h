@@ -10,8 +10,9 @@
 
 
 @protocol VEAudioProcessingTickDelegate
-- (void)newSpeed: (NSNumber*) speed;
-- (void)newAngularVelocities: (NSArray*) angularVelocities;
+- (void)newMeasurement:(WindMeasurement *) measurement;
+- (void)newSpeed:(NSNumber*) speed;
+- (void)newAngularVelocities:(NSArray*) angularVelocities;
 - (void)newWindAngleLocal:(NSNumber*) angle;
 - (void)calibrationPercentageComplete: (NSNumber*) percentage;
 - (void)newTickDetectionErrorCount: (NSNumber *) tickDetectionErrorCount;

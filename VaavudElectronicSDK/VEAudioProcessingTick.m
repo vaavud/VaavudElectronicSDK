@@ -24,7 +24,6 @@
 
 @interface VEAudioProcessingTick() {
     
-    unsigned int totalTickCounter;
     unsigned int teethIndex;
     unsigned int tickCounterSinceStart;
     unsigned int teethProcessIndex;
