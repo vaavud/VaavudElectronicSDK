@@ -11,7 +11,7 @@
 #endif
 
 #define LOG_AUDIO NO
-#define LOG_VOLUME NO
+#define LOG_VOLUME YES
 #define LOG_TICK_DETECTION NO
 #define LOG_PERFORMANCE NO
 #define LOG NO

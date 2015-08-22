@@ -270,7 +270,10 @@ static const float alpha = 0.3;
     if (readyToAdjustVolume && diffValueStable && speedInRange) {
         float adjustment;
         int x = ticksLowpass;
-        float diffTarget = 0.00388*x*x*x*x - 0.463*x*x*x + 14.8*x*x + 2.24*x + 849;
+        float diffTarget = 0.00388*x*x*x*x - 0.463*x*x*x + 14.8*x*x + 2.24*x + 1349;
+        
+        NSLog(@"diffTarget: %f", diffTarget);
+        
         
         if (diff20lowpass > 10000) {
             adjustment = -0.1;
