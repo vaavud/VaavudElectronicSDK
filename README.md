@@ -1,6 +1,8 @@
 VaavudElectronicSDK
 ===================
 
+DEPRECATED - Created new SDK in swift
+
 iOS SDK for the electronic wind meter. 
 
 
