@@ -1,10 +1,8 @@
 VaavudElectronicSDK
 ===================
 
-DEPRECATED - Created new SDK in swift
-
-iOS SDK for the electronic wind meter. 
-
+iOS SDK for the Sleipnir - It's currently in use in the iOS Sleipnir QC app. 
+We have since create an all new SWIFT SDK with updated algorithms.
 
 Project is setup according to the guide: https://github.com/jverkoey/iOS-Framework
 You should add the framework using the following steps (https://github.com/jverkoey/iOS-Framework#developing-the-framework-as-a-dependent-project)
